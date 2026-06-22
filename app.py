@@ -7,7 +7,7 @@ import json
 import urllib.parse
 from flask import Flask, request, jsonify, render_template, send_file, make_response
 from matcher import match_files, _find_company_in_path, _find_company_in_filename
-from excel_handler import normalize_item_name, export_checklist_two_sheets
+from excel_handler import normalize_item_name, export_checklist_two_sheets, build_browse_items
 from llm_matcher import llm_match
 from template_handler import read_template, generate_checklist, read_user_checklist, update_cell_status
 
@@ -75,12 +75,15 @@ def build_history_results(checklist):
         matched_types = item.get("matched_types", []) or [
             "文件夹" if os.path.isdir(p) else "文件" for p in matched_files
         ]
+        status = item.get("status", "未匹配")
+        if status == "未获取":
+            status = "未匹配"
         results.append({
             "index": i,
             "checklist_name": item.get("name", ""),
             "row_uid": item.get("row_uid", ""),
             "source_key": item.get("source_key", normalize_item_name(item.get("name", ""))),
-            "status": item.get("status", "未获取"),
+            "status": status,
             "matched_files": matched_files,
             "matched_names": matched_names,
             "matched_types": matched_types,
@@ -405,7 +408,15 @@ def export_checklist():
                     item["company_status"] = frontend_statuses[ri]
 
     try:
-        output_path = export_checklist_two_sheets(items, company_names, match_results, file_renames)
+        output_path = export_checklist_two_sheets(
+            items,
+            company_names,
+            match_results,
+            file_renames,
+            state.get("scanned_files") or [],
+            state.get("scanned_folders") or [],
+            state.get("scan_root") or "",
+        )
         return send_file(output_path, as_attachment=True, download_name="PBC需求清单.xlsx")
     except Exception as e:
         return jsonify({"error": f"导出失败: {str(e)}"}), 500
@@ -421,17 +432,27 @@ def get_matched_paths():
     return matched
 
 
-def find_path_assignment(file_path, exclude_index=None):
-    """查找某个路径当前分配到了哪一行"""
-    if not state["match_results"]:
-        return None
-    for r in state["match_results"]:
-        if exclude_index is not None and r["index"] == exclude_index:
-            continue
-        if file_path in r["matched_files"]:
-            return r["index"]
-    return None
+def build_browse_view_items():
+    """构建以扫描资料为中心的动态层级列表。"""
+    return build_browse_items(
+        state.get("scanned_files") or [],
+        state.get("scanned_folders") or [],
+        state.get("scan_root") or "",
+        state.get("match_results") or [],
+    )
 
+
+@app.route("/api/browse-view-data", methods=["GET"])
+def browse_view_data():
+    """返回所有扫描文件的资料浏览数据。"""
+    items, folder_levels = build_browse_view_items()
+    return jsonify({
+        "success": True,
+        "items": items,
+        "folder_levels": folder_levels,
+        "total": len(items),
+        "matched_count": sum(1 for item in items if item["is_matched"]),
+    })
 
 @app.route("/api/folder-tree", methods=["GET"])
 def folder_tree():
@@ -473,10 +494,7 @@ def manual_match():
     if not state["match_results"]:
         return jsonify({"error": "尚无匹配结果"}), 400
 
-    assigned_index = find_path_assignment(file_path, exclude_index=index)
-    if assigned_index is not None:
-        return jsonify({"error": f"该资料已分配给第{assigned_index}项，不能重复分配"}), 400
-
+    matched_result = None
     for r in state["match_results"]:
         if r["index"] == index:
             if file_path not in r["matched_files"]:
@@ -485,7 +503,11 @@ def manual_match():
                 r["matched_names"].append(os.path.basename(file_path))
                 r["matched_types"].append("文件夹" if os.path.isdir(file_path) else "文件")
                 r["match_count"] = len(r["matched_files"])
+            matched_result = r
             break
+
+    if matched_result is None:
+        return jsonify({"error": "未找到指定序号"}), 400
 
     matched_count = sum(1 for r in state["match_results"] if r["status"] in ("已获取", "部分获取"))
     partial_count = sum(1 for r in state["match_results"] if r["status"] == "部分获取")
@@ -494,6 +516,7 @@ def manual_match():
         "matched_count": matched_count,
         "partial_count": partial_count,
         "total": len(state["match_results"]),
+        "match_results": matched_result,
     })
 
 
@@ -711,7 +734,7 @@ def do_llm_match():
     # 收集未匹配项
     unmatched_items = []
     for r in state["match_results"]:
-        if r["status"] in ("未获取", "待匹配"):
+        if r["status"] in ("未匹配", "待匹配"):
             unmatched_items.append({"index": r["index"], "name": r["checklist_name"]})
 
     if not unmatched_items:
@@ -742,8 +765,6 @@ def do_llm_match():
             llm_map[item["index"]] = item
 
     updated_count = 0
-    used_paths = get_matched_paths()
-
     # 获取公司名列表
     company_names = []
     if state.get("checklist_template") and state["checklist_template"].get("companies"):
@@ -760,7 +781,7 @@ def do_llm_match():
                 if _os.path.basename(p) == matched_name:
                     matched_path = p
                     break
-            if matched_path and matched_path not in used_paths:
+            if matched_path:
                 # 检测公司归属
                 company_coverage = {}
                 if _os.path.isdir(matched_path):
@@ -801,7 +822,6 @@ def do_llm_match():
                 r["match_count"] = len(r["matched_files"])
                 r["llm_confidence"] = llm_item["confidence"]
                 r["company_coverage"] = company_coverage
-                used_paths.add(matched_path)
                 updated_count += 1
 
     matched_count = sum(1 for r in state["match_results"] if r["status"] in ("已获取", "部分获取"))

@@ -114,10 +114,13 @@ def read_checklist(file_path):
             key = str(uid).strip() if uid else source_key
             last_key = key
             if key not in history:
+                normalized_status = str(status).strip() if status else "未匹配"
+                if normalized_status == "未获取":
+                    normalized_status = "未匹配"
                 history[key] = {
                     "row_uid": str(uid).strip() if uid else "",
                     "source_key": source_key,
-                    "status": str(status).strip() if status else "未获取",
+                    "status": normalized_status,
                     "matched_files": [],
                     "matched_names": [],
                     "matched_types": [],
@@ -157,12 +160,12 @@ def read_checklist(file_path):
                         "matched_files": history_item["matched_files"],
                         "matched_names": history_item["matched_names"],
                         "matched_types": history_item["matched_types"],
-                        "need_match": history_item["status"] in ("未获取", "部分获取", "待匹配"),
+                        "need_match": history_item["status"] in ("未匹配", "部分获取", "待匹配"),
                     })
                     existing_items.append(item)
                 else:
                     item.update({
-                        "status": "待匹配" if history else "未获取",
+                        "status": "待匹配" if history else "未匹配",
                         "matched_files": [],
                         "matched_names": [],
                         "matched_types": [],
@@ -335,8 +338,51 @@ def export_results(results, headers, data, name_col_index, scan_root="", scanned
     return output_path
 
 
-def export_checklist_two_sheets(items, company_names, match_results, file_renames=None):
-    """导出包含矩阵视图和清单视图两个sheet的Excel文件。
+def build_browse_items(scanned_files, scanned_folders, scan_root, match_results):
+    """构建带动态文件夹层级和关联需求的资料列表。"""
+    path_requirements = {}
+    for result in match_results or []:
+        requirement = {
+            "index": result.get("index"),
+            "checklist_name": result.get("checklist_name", ""),
+        }
+        for path in result.get("matched_files", []) or []:
+            requirements = path_requirements.setdefault(path, [])
+            if requirement not in requirements:
+                requirements.append(requirement)
+
+    paths = list(dict.fromkeys((scanned_folders or []) + (scanned_files or [])))
+    if scan_root:
+        paths.sort(key=lambda path: os.path.relpath(path, scan_root).lower())
+    else:
+        paths.sort(key=str.lower)
+
+    items = []
+    folder_levels = 0
+    for path in paths:
+        relative_path = os.path.relpath(path, scan_root) if scan_root else os.path.basename(path)
+        parts = [part for part in relative_path.split(os.sep) if part not in ("", ".")]
+        if not parts or parts[0] == "..":
+            parts = [os.path.basename(path)]
+        folder_parts = parts[:-1]
+        matched_requirements = path_requirements.get(path, [])
+        folder_levels = max(folder_levels, len(folder_parts))
+        is_dir = os.path.isdir(path)
+        if is_dir:
+            continue
+        items.append({
+            "seq": len(items) + 1,
+            "folder_parts": folder_parts,
+            "filename": parts[-1],
+            "path": path,
+            "is_dir": False,
+            "is_matched": bool(matched_requirements),
+            "matched_requirements": matched_requirements,
+        })
+    return items, folder_levels
+
+def export_checklist_two_sheets(items, company_names, match_results, file_renames=None, scanned_files=None, scanned_folders=None, scan_root=""):
+    """导出包含矩阵视图、清单视图和资料浏览视图的Excel文件。
 
     Args:
         items: 清单项列表（每个PBC条目独立，含 company_status）
@@ -503,8 +549,58 @@ def export_checklist_two_sheets(items, company_names, match_results, file_rename
     ws_list.column_dimensions["E"].width = 10
     ws_list.column_dimensions["F"].width = 50
 
+    # ========== Sheet 3: 资料浏览视图 ==========
+    browse_items, folder_levels = build_browse_items(
+        scanned_files, scanned_folders, scan_root, match_results
+    )
+    ws_browse = wb.create_sheet("资料浏览视图")
+    level_names = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
+    browse_headers = [
+        f"{level_names[level - 1] if level <= len(level_names) else level}级文件夹"
+        for level in range(1, folder_levels + 1)
+    ]
+    browse_headers += ["文件名", "匹配状态", "关联需求"]
+
+    for col_idx, header in enumerate(browse_headers, 1):
+        cell = ws_browse.cell(row=1, column=col_idx, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = center_align
+        cell.border = thin_border
+
+    for row_idx, browse_item in enumerate(browse_items, 2):
+        row_fill = green_fill if browse_item["is_matched"] else red_fill
+        folder_parts = browse_item["folder_parts"]
+        requirement_text = "、".join(
+            f"第{requirement['index']}项 {requirement['checklist_name']}"
+            for requirement in browse_item["matched_requirements"]
+        )
+        values = folder_parts + [""] * (folder_levels - len(folder_parts))
+        values += [
+            browse_item["filename"],
+            "已匹配" if browse_item["is_matched"] else "未匹配",
+            requirement_text,
+        ]
+        for col_idx, value in enumerate(values, 1):
+            cell = ws_browse.cell(row=row_idx, column=col_idx, value=value)
+            cell.fill = row_fill
+            cell.border = thin_border
+            cell.alignment = Alignment(vertical="center", wrap_text=True)
+
+        filename_col = folder_levels + 1
+        filename_cell = ws_browse.cell(row=row_idx, column=filename_col)
+        filename_cell.hyperlink = "file:///" + browse_item["path"].replace("\\", "/")
+        filename_cell.font = Font(color="0563C1", underline="single")
+
+    for col_idx in range(1, folder_levels + 1):
+        ws_browse.column_dimensions[get_column_letter(col_idx)].width = 20
+    ws_browse.column_dimensions[get_column_letter(folder_levels + 1)].width = 36
+    ws_browse.column_dimensions[get_column_letter(folder_levels + 2)].width = 14
+    ws_browse.column_dimensions[get_column_letter(folder_levels + 3)].width = 50
+    ws_browse.freeze_panes = "A2"
+
     os.makedirs("exports", exist_ok=True)
-    output_path = "exports/PBC需求清单_双视图.xlsx"
+    output_path = "exports/PBC需求清单_三视图.xlsx"
     wb.save(output_path)
     wb.close()
     return output_path

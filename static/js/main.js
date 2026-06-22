@@ -10,13 +10,13 @@ const API = {
     scanFolder: "/api/scan-folder",
     match: "/api/match",
     manualMatch: "/api/manual-match",
-    folderTree: "/api/folder-tree",
     llmMatch: "/api/llm-match",
     browseDirs: "/api/browse-dirs",
     createFolder: "/api/create-folder",
     resetState: "/api/reset-state",
     assignCompany: "/api/assign-company",
     organizeFiles: "/api/organize-files",
+    browseViewData: "/api/browse-view-data",
 };
 
 // 全局状态
@@ -43,10 +43,10 @@ document.addEventListener("DOMContentLoaded", () => {
     initMatchControls();
     initPreviewStatusMenu();
     initLlmPanel();
-    initColumnResize();
+    initColumnResize('#preview-table');
+    initColumnFilters();
     initViewToggle();
     initAssignModal();
-    initBrowseDrawer();
     initListPreviewPane();
     initBrowsePreviewPane();
     updateWorkflowState();
@@ -239,8 +239,10 @@ function renderPreviewTable() {
     // 直接使用每个 PBC 条目（不合并）
     if (currentView === "matrix") {
         renderMatrixView(previewItems);
-    } else {
+    } else if (currentView === "list") {
         renderListView(previewItems);
+    } else if (currentView === "browse") {
+        renderBrowseView();
     }
     collectUnassignedItems();
     renderUnassignedButton();
@@ -282,16 +284,251 @@ function collectUnassignedItems() {
     window._unassignedItems = unassignedItems;
 }
 
+// ====== 表头列筛选 ======
+function ensureFilterDropdown() {
+    let dropdown = document.getElementById('col-filter-dropdown');
+    if (dropdown) return dropdown;
+
+    dropdown = document.createElement('div');
+    dropdown.id = 'col-filter-dropdown';
+    dropdown.className = 'col-filter-dropdown';
+    dropdown.innerHTML =
+        '<input class="col-filter-search" type="search" placeholder="搜索值">' +
+        '<div class="col-filter-actions">' +
+            '<button type="button" data-action="select-all">全选</button>' +
+            '<button type="button" data-action="clear-all">取消全选</button>' +
+        '</div>' +
+        '<div class="col-filter-list"></div>' +
+        '<div class="col-filter-empty hidden">无匹配项</div>';
+    document.body.appendChild(dropdown);
+
+    dropdown.querySelector('.col-filter-search').addEventListener('input', event => {
+        filterDropdownSearch(dropdown, event.target.value);
+    });
+    dropdown.querySelector('[data-action="select-all"]').addEventListener('click', () => {
+        setAllCheckboxes(dropdown, true);
+    });
+    dropdown.querySelector('[data-action="clear-all"]').addEventListener('click', () => {
+        setAllCheckboxes(dropdown, false);
+    });
+    dropdown.querySelector('.col-filter-list').addEventListener('change', event => {
+        if (event.target.matches('input[type="checkbox"]')) {
+            commitDropdownFilter(dropdown);
+        }
+    });
+    document.addEventListener('click', event => {
+        if (!dropdown.contains(event.target) && !event.target.closest('.col-filter-btn')) {
+            dropdown.classList.remove('show');
+            document.querySelectorAll('.col-filter-btn.open').forEach(button => {
+                button.classList.remove('open');
+            });
+        }
+    });
+    return dropdown;
+}
+
+function showFilterDropdown(th, tableId, colIndex) {
+    const dropdown = ensureFilterDropdown();
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    const wasOpen = dropdown.classList.contains('show') &&
+        dropdown.dataset.tableId === tableId &&
+        Number(dropdown.dataset.colIndex) === colIndex;
+    document.querySelectorAll('.col-filter-btn.open').forEach(button => {
+        button.classList.remove('open');
+    });
+    if (wasOpen) {
+        dropdown.classList.remove('show');
+        return;
+    }
+
+    dropdown.dataset.tableId = tableId;
+    dropdown.dataset.colIndex = String(colIndex);
+    dropdown.querySelector('.col-filter-search').value = '';
+
+    const values = buildColumnValues(table, colIndex);
+    const activeFilter = colFilters[tableId + ':' + colIndex];
+    const list = dropdown.querySelector('.col-filter-list');
+    list.innerHTML = '';
+
+    values.forEach(entry => {
+        const item = document.createElement('label');
+        item.className = 'col-filter-item';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.dataset.filterValue = entry.value;
+        checkbox.checked = !activeFilter || activeFilter.has(entry.value);
+
+        const label = document.createElement('span');
+        label.className = 'col-filter-value';
+        label.textContent = entry.value || '(空白)';
+
+        const count = document.createElement('span');
+        count.className = 'col-filter-count';
+        count.textContent = String(entry.count);
+
+        item.appendChild(checkbox);
+        item.appendChild(label);
+        item.appendChild(count);
+        list.appendChild(item);
+    });
+
+    dropdown.classList.add('show');
+    filterDropdownSearch(dropdown, '');
+    const button = th.querySelector('.col-filter-btn');
+    if (button) button.classList.add('open');
+
+    const rect = th.getBoundingClientRect();
+    const dropdownWidth = dropdown.offsetWidth;
+    const dropdownHeight = dropdown.offsetHeight;
+    const left = Math.min(
+        Math.max(8, rect.left),
+        Math.max(8, window.innerWidth - dropdownWidth - 8)
+    );
+    let top = rect.bottom + 4;
+    if (top + dropdownHeight > window.innerHeight - 8) {
+        top = Math.max(8, rect.top - dropdownHeight - 4);
+    }
+    dropdown.style.left = left + 'px';
+    dropdown.style.top = top + 'px';
+}
+
+function buildColumnValues(table, colIndex) {
+    const counts = new Map();
+    table.querySelectorAll('tbody tr').forEach(row => {
+        const cell = row.children[colIndex];
+        if (!cell) return;
+        const value = cell.textContent.trim();
+        counts.set(value, (counts.get(value) || 0) + 1);
+    });
+    return Array.from(counts, ([value, count]) => ({ value, count }))
+        .sort((left, right) => left.value.localeCompare(right.value, 'zh-CN'));
+}
+
+function applyFilters(tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    const prefix = tableId + ':';
+    const filters = Object.entries(colFilters)
+        .filter(([key]) => key.startsWith(prefix))
+        .map(([key, selected]) => ({
+            colIndex: Number(key.slice(prefix.length)),
+            selected,
+        }));
+
+    table.querySelectorAll('tbody tr').forEach(row => {
+        const matches = filters.every(filter => {
+            const cell = row.children[filter.colIndex];
+            return cell && filter.selected.has(cell.textContent.trim());
+        });
+        row.style.display = matches ? '' : 'none';
+    });
+    updateAllFilterIndicators(tableId);
+}
+
+function commitDropdownFilter(dropdown) {
+    const tableId = dropdown.dataset.tableId;
+    const colIndex = Number(dropdown.dataset.colIndex);
+    const checkboxes = Array.from(
+        dropdown.querySelectorAll('.col-filter-list input[type="checkbox"]')
+    );
+    const selected = new Set(
+        checkboxes.filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.dataset.filterValue)
+    );
+    const key = tableId + ':' + colIndex;
+    if (checkboxes.length > 0 && selected.size === checkboxes.length) {
+        delete colFilters[key];
+    } else {
+        colFilters[key] = selected;
+    }
+    applyFilters(tableId);
+}
+
+function setAllCheckboxes(dropdown, checked) {
+    dropdown.querySelectorAll('.col-filter-item:not(.hidden) input[type="checkbox"]')
+        .forEach(checkbox => {
+            checkbox.checked = checked;
+        });
+    commitDropdownFilter(dropdown);
+}
+
+function filterDropdownSearch(dropdown, query) {
+    const normalizedQuery = query.trim().toLocaleLowerCase('zh-CN');
+    let visibleCount = 0;
+    dropdown.querySelectorAll('.col-filter-item').forEach(item => {
+        const value = item.querySelector('.col-filter-value').textContent;
+        const visible = value.toLocaleLowerCase('zh-CN').includes(normalizedQuery);
+        item.classList.toggle('hidden', !visible);
+        if (visible) visibleCount++;
+    });
+    dropdown.querySelector('.col-filter-empty').classList.toggle('hidden', visibleCount > 0);
+}
+
+function updateAllFilterIndicators(tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    table.querySelectorAll('.col-filter-btn').forEach(button => {
+        const key = tableId + ':' + button.dataset.col;
+        button.classList.toggle('active', Object.prototype.hasOwnProperty.call(colFilters, key));
+    });
+}
+
+function initColumnFilters() {
+    ensureFilterDropdown();
+    document.addEventListener('click', event => {
+        const button = event.target.closest('.col-filter-btn');
+        if (!button) return;
+        event.preventDefault();
+        event.stopPropagation();
+
+        const th = button.closest('th');
+        const table = button.closest('table');
+        if (!th || !table || !table.id) return;
+        showFilterDropdown(th, table.id, Number(button.dataset.col));
+    });
+}
+
+function wrapThWithFilter(th, colIndex) {
+    const wrap = document.createElement('div');
+    wrap.className = 'th-content-wrap';
+
+    const label = document.createElement('span');
+    label.className = 'th-label';
+    label.textContent = th.textContent;
+    th.textContent = '';
+
+    const button = document.createElement('button');
+    button.className = 'col-filter-btn';
+    button.dataset.col = String(colIndex);
+    button.title = '筛选';
+    button.textContent = '▼';
+
+    wrap.appendChild(label);
+    wrap.appendChild(button);
+    th.appendChild(wrap);
+}
+
 function renderMatrixView(displayItems) {
     const thead = document.getElementById("preview-table-head");
     const tbody = document.getElementById("preview-table-body");
     document.getElementById("preview-table-wrapper").classList.remove("hidden");
     document.getElementById("list-view-wrapper").classList.add("hidden");
+    document.getElementById("list-view-container").classList.add("hidden");
+    document.getElementById("browse-view-container").classList.add("hidden");
+    document.getElementById("browse-view-wrapper").classList.add("hidden");
 
     let headHtml = "<tr>";
-    headHtml += "<th>序号</th><th>科目</th><th>所需PBC</th><th>需求资料</th>";
-    companyNames.forEach(name => {
-        headHtml += `<th class="company-col">${name}</th>`;
+    headHtml += '<th><div class="th-content-wrap"><span class="th-label">序号</span><button class="col-filter-btn" data-col="0" title="筛选">▼</button></div></th>';
+    headHtml += '<th><div class="th-content-wrap"><span class="th-label">科目</span><button class="col-filter-btn" data-col="1" title="筛选">▼</button></div></th>';
+    headHtml += '<th><div class="th-content-wrap"><span class="th-label">所需PBC</span><button class="col-filter-btn" data-col="2" title="筛选">▼</button></div></th>';
+    headHtml += '<th><div class="th-content-wrap"><span class="th-label">需求资料</span><button class="col-filter-btn" data-col="3" title="筛选">▼</button></div></th>';
+    companyNames.forEach((name, index) => {
+        const colIndex = 4 + index;
+        headHtml += '<th class="company-col"><div class="th-content-wrap"><span class="th-label">' + name + '</span><button class="col-filter-btn" data-col="' + colIndex + '" title="筛选">▼</button></div></th>';
     });
     headHtml += "</tr>";
     thead.innerHTML = headHtml;
@@ -313,15 +550,140 @@ function renderMatrixView(displayItems) {
         bodyHtml += "</tr>";
     });
     tbody.innerHTML = bodyHtml;
+    applyFilters('preview-table');
 }
 
+
+async function renderBrowseView() {
+    const wrapper = document.getElementById("browse-view-wrapper");
+    const thead = document.getElementById("browse-view-head");
+    const tbody = document.getElementById("browse-view-body");
+
+    document.getElementById("preview-table-wrapper").classList.add("hidden");
+    document.getElementById("list-view-wrapper").classList.add("hidden");
+    document.getElementById("list-view-container").classList.add("hidden");
+    document.getElementById("browse-view-container").classList.remove("hidden");
+    wrapper.classList.remove("hidden");
+    thead.innerHTML = "";
+    tbody.innerHTML = '<tr><td class="browse-view-loading">正在加载资料...</td></tr>';
+
+    try {
+        const response = await fetch(API.browseViewData);
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+        if (currentView !== "browse") return;
+
+        const headerRow = document.createElement("tr");
+        const seqHeader = document.createElement("th");
+        seqHeader.className = "browse-seq-col";
+        seqHeader.textContent = "序号";
+        headerRow.appendChild(seqHeader);
+        wrapThWithFilter(seqHeader, 0);
+        const levelNames = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+        for (let level = 1; level <= data.folder_levels; level++) {
+            const header = document.createElement("th");
+            header.className = "browse-folder-col";
+            header.textContent = `${levelNames[level - 1] || level}级文件夹`;
+            headerRow.appendChild(header);
+            wrapThWithFilter(header, level);
+        }
+        [
+            ["文件名", "browse-filename-col"],
+            ["匹配状态", "browse-status-col"],
+            ["关联需求", "browse-requirements-col"],
+        ].forEach(([text, className], index) => {
+            const header = document.createElement("th");
+            header.className = className;
+            header.textContent = text;
+            headerRow.appendChild(header);
+            wrapThWithFilter(header, data.folder_levels + index + 1);
+        });
+        thead.appendChild(headerRow);
+
+        tbody.innerHTML = "";
+        const columnCount = data.folder_levels + 4;
+        if (!data.items.length) {
+            tbody.innerHTML = `<tr><td colspan="${columnCount}" class="browse-view-loading">请先扫描目标文件夹</td></tr>`;
+            return;
+        }
+
+        data.items.forEach(item => {
+            const row = document.createElement("tr");
+            row.className = item.is_matched ? "browse-row-matched" : "browse-row-unmatched";
+
+            const seqCell = document.createElement("td");
+            seqCell.className = "browse-seq-col";
+            seqCell.textContent = item.seq;
+            row.appendChild(seqCell);
+
+            for (let level = 0; level < data.folder_levels; level++) {
+                const folderCell = document.createElement("td");
+                folderCell.textContent = item.folder_parts[level] || "";
+                folderCell.title = folderCell.textContent;
+                row.appendChild(folderCell);
+            }
+
+            const filenameCell = document.createElement("td");
+            const fileLink = document.createElement("a");
+            fileLink.href = "#";
+            fileLink.textContent = item.filename;
+            fileLink.title = item.path;
+            fileLink.addEventListener("click", event => {
+                event.preventDefault();
+                previewFile(item.path, false);
+            });
+            filenameCell.appendChild(fileLink);
+            row.appendChild(filenameCell);
+
+            const statusCell = document.createElement("td");
+            statusCell.textContent = item.is_matched ? "已匹配" : "未匹配";
+            row.appendChild(statusCell);
+
+            const requirementCell = document.createElement("td");
+            const requirementText = document.createElement("span");
+            requirementText.textContent = item.matched_requirements.length
+                ? item.matched_requirements.map(requirement =>
+                    `第${requirement.index}项 ${requirement.checklist_name}`
+                ).join("、")
+                : "暂无关联需求";
+            requirementCell.appendChild(requirementText);
+
+            const assignButton = document.createElement("button");
+            assignButton.type = "button";
+            assignButton.className = "browse-view-assign-btn";
+            assignButton.textContent = item.is_matched ? "继续分配" : "分配";
+            assignButton.addEventListener("click", () => {
+                showMatrixAssignModal(item.path, item.is_dir, item.filename);
+            });
+            requirementCell.appendChild(assignButton);
+            row.appendChild(requirementCell);
+            tbody.appendChild(row);
+        });
+        initColumnResize('#browse-view-table');
+        applyFilters('browse-view-table');
+    } catch (error) {
+        if (currentView !== "browse") return;
+        tbody.innerHTML = '<tr><td class="browse-view-loading">资料加载失败</td></tr>';
+        showToast("资料浏览视图加载失败: " + error.message, "error");
+    }
+}
 function renderListView(displayItems) {
     const thead = document.getElementById("list-view-head");
     const tbody = document.getElementById("list-view-body");
     document.getElementById("preview-table-wrapper").classList.add("hidden");
     document.getElementById("list-view-wrapper").classList.remove("hidden");
+    document.getElementById("list-view-container").classList.remove("hidden");
+    document.getElementById("browse-view-container").classList.add("hidden");
+    document.getElementById("browse-view-wrapper").classList.add("hidden");
 
-    thead.innerHTML = "<tr><th>科目</th><th>所需PBC</th><th>需求资料</th><th>公司</th><th>是否获取</th><th>文件</th></tr>";
+    thead.innerHTML = '<tr>' +
+        '<th><div class="th-content-wrap"><span class="th-label">科目</span><button class="col-filter-btn" data-col="0" title="筛选">▼</button></div></th>' +
+        '<th><div class="th-content-wrap"><span class="th-label">所需PBC</span><button class="col-filter-btn" data-col="1" title="筛选">▼</button></div></th>' +
+        '<th><div class="th-content-wrap"><span class="th-label">需求资料</span><button class="col-filter-btn" data-col="2" title="筛选">▼</button></div></th>' +
+        '<th><div class="th-content-wrap"><span class="th-label">公司</span><button class="col-filter-btn" data-col="3" title="筛选">▼</button></div></th>' +
+        '<th><div class="th-content-wrap"><span class="th-label">是否获取</span><button class="col-filter-btn" data-col="4" title="筛选">▼</button></div></th>' +
+        '<th><div class="th-content-wrap"><span class="th-label">文件</span><button class="col-filter-btn" data-col="5" title="筛选">▼</button></div></th>' +
+        '</tr>';
 
     let bodyHtml = "";
 
@@ -400,6 +762,7 @@ function renderListView(displayItems) {
     });
 
     tbody.innerHTML = bodyHtml;
+    applyFilters('list-view-table');
 }
 
 function renderUnassignedButton() {
@@ -695,7 +1058,6 @@ function scanFolder() {
             renderPreviewTable();
             document.getElementById("export-checklist-btn").classList.remove("hidden");
             document.getElementById("organize-files-btn")?.classList.remove("hidden");
-            document.getElementById("browse-files-btn")?.classList.remove("hidden");
         }
         updateWorkflowState();
         showToast(`已扫描 ${data.scanned_count} 个文件`, "success");
@@ -791,7 +1153,6 @@ async function doMatch() {
         updateStats(data.matched_count, data.total, data.partial_count);
         document.getElementById("export-checklist-btn").classList.remove("hidden");
         document.getElementById("organize-files-btn")?.classList.remove("hidden");
-        document.getElementById("browse-files-btn")?.classList.remove("hidden");
         updateWorkflowState();
 
         if (document.getElementById("llm-enabled").checked) {
@@ -842,6 +1203,7 @@ async function exportChecklist() {
         showToast("导出失败: " + err.message, "error");
     }
 }
+
 
 // ====== 文件整理 ======
 async function organizeFiles() {
@@ -1239,64 +1601,6 @@ function setWorkflowStep(id, state) {
     el.classList.add(state);
 }
 
-// ====== 资料浏览抽屉 ======
-function initBrowseDrawer() {
-    const btn = document.getElementById("browse-files-btn");
-    const drawer = document.getElementById("browse-drawer");
-    const overlay = document.getElementById("browse-drawer-overlay");
-    const closeBtn = document.getElementById("browse-drawer-close");
-    if (!btn || !drawer) return;
-
-    btn.addEventListener("click", openBrowseDrawer);
-    closeBtn.addEventListener("click", closeBrowseDrawer);
-    overlay.addEventListener("click", closeBrowseDrawer);
-}
-
-function openBrowseDrawer() {
-    const drawer = document.getElementById("browse-drawer");
-    const overlay = document.getElementById("browse-drawer-overlay");
-    if (!drawer || !overlay) return;
-
-    drawer.classList.remove("hidden");
-    overlay.classList.remove("hidden");
-
-    if (!scanRoot) {
-        document.getElementById("browse-all-files").innerHTML =
-            '<p style="color:#999;font-size:12px;text-align:center;padding:20px;">请先扫描文件夹</p>';
-        return;
-    }
-
-    // 只加载根目录第一层，子目录通过点击展开时懒加载
-    fetch(API.folderTree + "?path=" + encodeURIComponent(scanRoot))
-        .then(r => r.json())
-        .then(data => {
-            if (data.error) { showToast(data.error, "error"); return; }
-            const items = data.items || [];
-            // 所有文件混合显示，不再拆分已匹配/未匹配
-            renderBrowseTreeNodes("browse-all-files", items, true, true);
-        })
-        .catch(err => showToast("加载文件树失败: " + err.message, "error"));
-}
-
-function closeBrowseDrawer() {
-    const drawer = document.getElementById("browse-drawer");
-    const overlay = document.getElementById("browse-drawer-overlay");
-    if (drawer) drawer.classList.add("hidden");
-    if (overlay) overlay.classList.add("hidden");
-    // 关闭抽屉时重置预览面板
-    const pane = document.getElementById('browse-preview-pane');
-    const titleEl = document.getElementById('browse-preview-title');
-    const contentEl = document.getElementById('browse-preview-content');
-    if (pane) pane.classList.add('hidden');
-    if (titleEl) titleEl.textContent = '文件预览';
-    if (contentEl) {
-        contentEl.innerHTML = `<div class="preview-empty">
-            <div style="font-size:48px;color:#ccc;margin-bottom:12px;">&#128196;</div>
-            <p style="color:#999;font-size:14px;">点击文件可在此预览</p>
-        </div>`;
-    }
-}
-
 // 初始化清单视图预览面板的关闭按钮
 function initListPreviewPane() {
     const closeBtn = document.getElementById('list-preview-close');
@@ -1317,233 +1621,20 @@ function initListPreviewPane() {
     }
 }
 
-function renderBrowseTreeNodes(containerId, items, showAssign, isRoot) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    if (!items.length) {
-        container.innerHTML = '<p style="color:#999;font-size:12px;text-align:center;padding:20px;">无资料</p>';
-        return;
-    }
-
-    function buildHtml(itemList) {
-        return itemList.map(item => {
-            const icon = item.is_dir ? "📁" : "📄";
-            const escapedPath = item.path.replace(/\\/g, "\\\\");
-            let extra = "";
-            if (item.is_dir) {
-                // 文件夹节点
-                extra = `<span class="browse-matched-tag">${item.is_matched ? "已匹配" : ""}</span>`;
-                // 已有子节点数据则直接渲染，否则若 has_children 则留空占位（懒加载）
-                let childrenHtml = "";
-                if (item.children && item.children.length) {
-                    childrenHtml = `<div class="browse-tree-children collapsed" data-path="${escapedPath}" data-loaded="true">${buildHtml(item.children)}</div>`;
-                } else if (item.has_children) {
-                    childrenHtml = `<div class="browse-tree-children collapsed" data-path="${escapedPath}" data-loaded="false"></div>`;
-                }
-                const assignBtn = (!item.is_matched && showAssign)
-                    ? `<button class="browse-assign-btn" onclick="event.stopPropagation(); showMatrixAssignModal('${escapedPath}', true)">分配</button>`
-                    : "";
-                return `<div class="browse-tree-item">
-                    <div class="browse-tree-node" onclick="event.stopPropagation(); browsePreviewFile('${escapedPath}', true);" title="${item.name}">
-                        <span class="browse-node-icon">${icon}</span>
-                        <span class="browse-node-name is-dir" onclick="toggleBrowseTreeNode(this); return false;">${item.name}</span>
-                        ${extra}
-                        ${assignBtn}
-                    </div>
-                    ${childrenHtml}
-                </div>`;
-            } else {
-                // 文件节点
-                const assignBtn = (!item.is_matched && showAssign)
-                    ? `<button class="browse-assign-btn" onclick="event.stopPropagation(); showMatrixAssignModal('${escapedPath}', false)">分配</button>`
-                    : "";
-                const matchedTag = item.is_matched
-                    ? `<span class="browse-matched-tag">已匹配</span>`
-                    : "";
-                return `<div class="browse-tree-item">
-                    <div class="browse-tree-node" onclick="event.stopPropagation(); browsePreviewFile('${escapedPath}', false);" title="${item.name}">
-                        <span class="browse-node-icon">${icon}</span>
-                        <span class="browse-node-name">${item.name}</span>
-                        ${matchedTag}
-                        ${assignBtn}
-                    </div>
-                </div>`;
-            }
-        }).join("");
-    }
-
-    container.innerHTML = buildHtml(items);
-}
-
-// 切换抽屉内树节点的展开/折叠（支持懒加载）
-function toggleBrowseTreeNode(nameEl) {
-    const treeItem = nameEl.closest(".browse-tree-item");
-    const childDiv = treeItem.querySelector(".browse-tree-children");
-    if (!childDiv) return;
-
-    const isCollapsed = childDiv.classList.contains("collapsed");
-    if (!isCollapsed) {
-        // 折叠
-        childDiv.classList.add("collapsed");
-        return;
-    }
-
-    // 展开：如果尚未加载子节点，则懒加载
-    if (childDiv.dataset.loaded === "false") {
-        const path = childDiv.dataset.path;
-        childDiv.innerHTML = '<span style="color:#999;font-size:11px;padding-left:20px;">加载中...</span>';
-        childDiv.classList.remove("collapsed"); // 先展开以显示加载状态
-        fetch(API.folderTree + "?path=" + encodeURIComponent(path))
-            .then(r => r.json())
-            .then(data => {
-                if (data.error) {
-                    childDiv.innerHTML = '<span style="color:red;font-size:11px;padding-left:20px;">加载失败</span>';
-                    return;
-                }
-                const items = data.items || [];
-                if (!items.length) {
-                    childDiv.innerHTML = '<span style="color:#999;font-size:11px;padding-left:20px;">空文件夹</span>';
-                } else {
-                    // 资料浏览抽屉中所有未匹配项目都显示分配按钮
-                    childDiv.innerHTML = "";
-                    renderBrowseTreeNodesDirect(childDiv, items, true);
-                }
-                childDiv.dataset.loaded = "true";
-            })
-            .catch(() => {
-                childDiv.innerHTML = '<span style="color:red;font-size:11px;padding-left:20px;">加载失败</span>';
-            });
-    } else {
-        // 已加载，直接展开
-        childDiv.classList.remove("collapsed");
-    }
-}
-
-// 直接将树节点渲染到指定 DOM 元素中（用于懒加载子节点）
-function renderBrowseTreeNodesDirect(containerEl, items, showAssign) {
-    if (!containerEl || !items.length) return;
-
-    function buildHtml(itemList) {
-        return itemList.map(item => {
-            const icon = item.is_dir ? "📁" : "📄";
-            const escapedPath = item.path.replace(/\\/g, "\\\\");
-            if (item.is_dir) {
-                const extra = `<span class="browse-matched-tag">${item.is_matched ? "已匹配" : ""}</span>`;
-                let childrenHtml = "";
-                if (item.children && item.children.length) {
-                    childrenHtml = `<div class="browse-tree-children collapsed" data-path="${escapedPath}" data-loaded="true">${buildHtml(item.children)}</div>`;
-                } else if (item.has_children) {
-                    childrenHtml = `<div class="browse-tree-children collapsed" data-path="${escapedPath}" data-loaded="false"></div>`;
-                }
-                const assignBtn = (!item.is_matched && showAssign)
-                    ? `<button class="browse-assign-btn" onclick="event.stopPropagation(); showMatrixAssignModal('${escapedPath}', true)">分配</button>`
-                    : "";
-                return `<div class="browse-tree-item">
-                    <div class="browse-tree-node" onclick="event.stopPropagation(); browsePreviewFile('${escapedPath}', true);" title="${item.name}">
-                        <span class="browse-node-icon">${icon}</span>
-                        <span class="browse-node-name is-dir" onclick="toggleBrowseTreeNode(this); return false;">${item.name}</span>
-                        ${extra}
-                        ${assignBtn}
-                    </div>
-                    ${childrenHtml}
-                </div>`;
-            } else {
-                const assignBtn = (!item.is_matched && showAssign)
-                    ? `<button class="browse-assign-btn" onclick="event.stopPropagation(); showMatrixAssignModal('${escapedPath}', false)">分配</button>`
-                    : "";
-                const matchedTag = item.is_matched ? `<span class="browse-matched-tag">已匹配</span>` : "";
-                return `<div class="browse-tree-item">
-                    <div class="browse-tree-node" onclick="event.stopPropagation(); browsePreviewFile('${escapedPath}', false);" title="${item.name}">
-                        <span class="browse-node-icon">${icon}</span>
-                        <span class="browse-node-name">${item.name}</span>
-                        ${matchedTag}
-                        ${assignBtn}
-                    </div>
-                </div>`;
-            }
-        }).join("");
-    }
-
-    containerEl.innerHTML = buildHtml(items);
-}
-
-// 在资料浏览抽屉中预览文件
-function browsePreviewFile(filePath, isDir) {
-    const pane = document.getElementById('browse-preview-pane');
-    const titleEl = document.getElementById('browse-preview-title');
-    const contentEl = document.getElementById('browse-preview-content');
-    if (!pane || !titleEl || !contentEl) {
-        // 降级为新标签页
-        if (!isDir) window.open("/api/open?path=" + encodeURIComponent(filePath), "_blank");
-        return;
-    }
-
-    pane.classList.remove('hidden');
-
-    if (isDir) {
-        titleEl.textContent = '📁 ' + filePath.split(/[\\/]/).pop();
-        contentEl.innerHTML = '<p style="color:#999;text-align:center;margin-top:40px;">文件夹预览暂不支持，请点击「打开」浏览内容</p>';
-        return;
-    }
-
-    const displayName = filePath.split(/[\\/]/).pop();
-    const ext = filePath.split('.').pop().toLowerCase();
-    const isImage = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg'].includes(ext);
-    const isPdf = ext === 'pdf';
-    const isText = ['txt', 'csv', 'log', 'json', 'xml', 'md', 'html', 'htm', 'js', 'css', 'py', 'java', 'c', 'cpp', 'h', 'sql', 'sh', 'bat', 'yml', 'yaml', 'ini', 'conf', 'cfg'].includes(ext);
-
-    if (isImage) {
-        titleEl.textContent = '🖼️ ' + displayName;
-        contentEl.innerHTML = `<img src="/api/open?path=${encodeURIComponent(filePath)}" style="max-width:100%;max-height:calc(100vh - 200px);object-fit:contain;" />`;
-    } else if (isPdf) {
-        titleEl.textContent = '📕 ' + displayName;
-        contentEl.innerHTML = `<iframe src="/api/open?path=${encodeURIComponent(filePath)}" style="width:100%;height:calc(100vh - 200px);border:none;"></iframe>`;
-    } else if (isText) {
-        titleEl.textContent = '📄 ' + displayName;
-        contentEl.innerHTML = '<p style="color:#999;text-align:center;margin-top:40px;">加载中...</p>';
-        fetch('/api/open?path=' + encodeURIComponent(filePath))
-            .then(r => r.text())
-            .then(text => {
-                contentEl.innerHTML = `<pre style="white-space:pre-wrap;word-break:break-all;font-size:13px;line-height:1.6;color:#333;padding:16px;margin:0;">${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>`;
-            })
-            .catch(() => {
-                contentEl.innerHTML = '<p style="color:#e74c3c;text-align:center;margin-top:40px;">无法预览此文件</p>';
-            });
-    } else if (ext === 'xlsx' || ext === 'xls') {
-        titleEl.innerHTML = `📊 ${displayName} <a href="/api/open?path=${encodeURIComponent(filePath)}" target="_blank" class="preview-open-btn" title="在新窗口打开" style="font-size:12px;margin-left:8px;">打开 ↗</a>`;
-        contentEl.innerHTML = '<p style="color:#999;text-align:center;margin-top:40px;">正在解析 Excel...</p>';
-        fetch('/api/open?path=' + encodeURIComponent(filePath))
-            .then(r => r.arrayBuffer())
-            .then(buf => {
-                const wb = XLSX.read(buf, { type: 'array' });
-                setupExcelPreview(wb, contentEl);
-            })
-            .catch(() => {
-                contentEl.innerHTML = '<p style="color:#e74c3c;text-align:center;margin-top:40px;">无法解析此 Excel 文件，请点击「打开」查看</p>';
-            });
-    } else {
-        // 其他文件类型：新标签页打开
-        titleEl.textContent = '📎 ' + displayName;
-        contentEl.innerHTML = `<p style="color:#999;text-align:center;margin-top:40px;">该格式不支持在线预览</p>
-            <div style="text-align:center;margin-top:12px;"><a href="/api/open?path=${encodeURIComponent(filePath)}" target="_blank" class="btn btn-primary btn-sm">在新窗口打开</a></div>`;
-    }
-}
-
-// 初始化资料浏览抽屉预览面板关闭按钮
+// 初始化资料浏览视图预览面板的关闭按钮
 function initBrowsePreviewPane() {
     const closeBtn = document.getElementById('browse-preview-close');
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
             const pane = document.getElementById('browse-preview-pane');
-            const titleEl = document.getElementById('browse-preview-title');
-            const contentEl = document.getElementById('browse-preview-content');
+            const wrapper = document.getElementById('browse-view-wrapper');
+            const content = document.getElementById('browse-preview-content');
             if (pane) pane.classList.add('hidden');
-            if (titleEl) titleEl.textContent = '文件预览';
-            if (contentEl) {
-                contentEl.innerHTML = `<div class="preview-empty">
+            if (wrapper) wrapper.classList.remove('with-preview');
+            if (content) {
+                content.innerHTML = `<div class="preview-empty">
                     <div style="font-size:48px;color:#ccc;margin-bottom:12px;">&#128196;</div>
-                    <p style="color:#999;font-size:14px;">点击文件可在此预览</p>
+                    <p style="color:#999;font-size:14px;">点击资料中的文件可在此预览</p>
                 </div>`;
             }
         });
@@ -1722,35 +1813,40 @@ function resetPanePreview() {
 // 右侧预览窗格：显示文件内容
 function previewFile(filePath, isDir) {
     const pane = document.getElementById('preview-pane');
-    const listPane = document.getElementById('list-preview-pane');
+    const sidePrefix = currentView === 'browse' ? 'browse' : 'list';
+    const sidePane = document.getElementById(sidePrefix + '-preview-pane');
 
-    if (!pane && !listPane) {
+    if (!pane && !sidePane) {
         // 无预览窗格时降级为在新标签页中打开
         window.open("/api/open?path=" + encodeURIComponent(filePath), "_blank");
         return;
     }
 
-    const useListPane = !pane && !!listPane;
-    if (useListPane) {
-        listPane.classList.remove('hidden');
-        const wrapper = document.getElementById('list-view-wrapper');
+    const useSidePane = !pane && !!sidePane;
+    if (useSidePane) {
+        sidePane.classList.remove('hidden');
+        const wrapper = document.getElementById(
+            sidePrefix === 'browse' ? 'browse-view-wrapper' : 'list-view-wrapper'
+        );
         if (wrapper) wrapper.classList.add('with-preview');
     }
 
     // 辅助：设置预览内容
-    function setListPreview(title, bodyHtml) {
-        document.getElementById('list-preview-title').textContent = title;
-        document.getElementById('list-preview-content').innerHTML = bodyHtml;
+    function setSidePreview(title, bodyHtml) {
+        document.getElementById(sidePrefix + '-preview-title').textContent = title;
+        document.getElementById(sidePrefix + '-preview-content').innerHTML = bodyHtml;
     }
     function getContentEl() {
-        return useListPane ? document.getElementById('list-preview-content') : pane.querySelector('.preview-content');
+        return useSidePane
+            ? document.getElementById(sidePrefix + '-preview-content')
+            : pane.querySelector('.preview-content');
     }
 
     if (isDir) {
         const title = `📁 ${filePath.split(/[\\/]/).pop()}`;
         const bodyHtml = `<p style="color:#999;text-align:center;margin-top:40px;">文件夹预览暂不支持，请点击「打开」浏览内容</p>`;
-        if (useListPane) {
-            setListPreview(title, bodyHtml);
+        if (useSidePane) {
+            setSidePreview(title, bodyHtml);
         } else {
             pane.innerHTML = `
             <div class="preview-header">
@@ -1773,8 +1869,8 @@ function previewFile(filePath, isDir) {
     if (isImage) {
         const title = `🖼️ ${filePath.split(/[\\/]/).pop()}`;
         const bodyHtml = `<img src="/api/open?path=${encodeURIComponent(filePath)}" style="max-width:100%;max-height:calc(100vh - 160px);object-fit:contain;" />`;
-        if (useListPane) {
-            setListPreview(title, bodyHtml);
+        if (useSidePane) {
+            setSidePreview(title, bodyHtml);
         } else {
             pane.innerHTML = `
             <div class="preview-header">
@@ -1789,8 +1885,8 @@ function previewFile(filePath, isDir) {
     } else if (isPdf) {
         const title = `📕 ${filePath.split(/[\\/]/).pop()}`;
         const bodyHtml = `<iframe src="/api/open?path=${encodeURIComponent(filePath)}" style="width:100%;height:calc(100vh - 160px);border:none;"></iframe>`;
-        if (useListPane) {
-            setListPreview(title, bodyHtml);
+        if (useSidePane) {
+            setSidePreview(title, bodyHtml);
         } else {
             pane.innerHTML = `
             <div class="preview-header">
@@ -1808,8 +1904,8 @@ function previewFile(filePath, isDir) {
             .then(r => r.text())
             .then(text => {
                 const bodyHtml = `<pre style="white-space:pre-wrap;word-break:break-all;font-size:13px;line-height:1.6;color:#333;padding:16px;margin:0;">${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>`;
-                if (useListPane) {
-                    setListPreview(title, bodyHtml);
+                if (useSidePane) {
+                    setSidePreview(title, bodyHtml);
                 } else {
                     pane.innerHTML = `
                     <div class="preview-header">
@@ -1824,8 +1920,8 @@ function previewFile(filePath, isDir) {
             })
             .catch(() => {
                 const errHtml = `<p style="color:#e74c3c;text-align:center;margin-top:40px;">无法预览此文件</p>`;
-                if (useListPane) {
-                    setListPreview(title, errHtml);
+                if (useSidePane) {
+                    setSidePreview(title, errHtml);
                 } else {
                     pane.innerHTML = `
                     <div class="preview-header">
@@ -1839,8 +1935,8 @@ function previewFile(filePath, isDir) {
         // Excel 文件：使用 SheetJS 解析并渲染为表格预览
         const excelTitle = `📊 ${filePath.split(/[\\/]/).pop()}`;
         const loadingHtml = `<p style="color:#999;text-align:center;margin-top:40px;">正在解析 Excel...</p>`;
-        if (useListPane) {
-            setListPreview(excelTitle, loadingHtml);
+        if (useSidePane) {
+            setSidePreview(excelTitle, loadingHtml);
         } else {
             pane.innerHTML = `
             <div class="preview-header">
@@ -1867,8 +1963,8 @@ function previewFile(filePath, isDir) {
     } else {
         const title = `📎 ${filePath.split(/[\\/]/).pop()}`;
         const bodyHtml = `<p style="color:#999;text-align:center;margin-top:40px;">该文件类型不支持内嵌预览，请点击「打开」在浏览器中查看</p>`;
-        if (useListPane) {
-            setListPreview(title, bodyHtml);
+        if (useSidePane) {
+            setSidePreview(title, bodyHtml);
         } else {
             pane.innerHTML = `
             <div class="preview-header">
@@ -2383,7 +2479,11 @@ function executeMatrixAssign(filePath, isDir, overlay) {
         }
 
         syncMatchToPreview();
-        renderPreviewTable();
+        if (currentView === "browse") {
+            renderBrowseView();
+        } else {
+            renderPreviewTable();
+        }
         updateStats();
 
         if (overlay) overlay.remove();
@@ -2505,11 +2605,7 @@ async function runLlmMatch() {
         renderPreviewTable();
         updateStats(data.matched_count, data.total);
         updateWorkflowState();
-        // 刷新资料浏览抽屉（如果当前是打开状态）
-        const drawer = document.getElementById('browse-drawer');
-        if (drawer && !drawer.classList.contains('hidden')) {
-            openBrowseDrawer();
-        }
+
         showToast(`AI匹配完成: ${data.llm_matched}项新增匹配`, "success");
         return true;
     } catch (err) {
@@ -2523,26 +2619,83 @@ async function runLlmMatch() {
 }
 
 // ====== 列宽拖拽 ======
-function initColumnResize() {
-    const table = document.getElementById("preview-table");
-    let resizing = false, thElement = null, startX = 0, startWidth = 0;
+const _resizeInitialized = new Set();
+let _columnResizeState = null;
+let _globalResizeInit = false;
 
-    table.addEventListener("mousedown", e => {
-        const th = e.target.closest("th");
+function initColumnResize(tableSelector) {
+    if (_resizeInitialized.has(tableSelector)) return;
+
+    const table = document.querySelector(tableSelector);
+    if (!table) return;
+    _resizeInitialized.add(tableSelector);
+
+    table.addEventListener('mousedown', event => {
+        if (event.target.closest('.col-filter-btn')) return;
+
+        const th = event.target.closest('th');
         if (!th) return;
         const rect = th.getBoundingClientRect();
-        if (e.clientX > rect.right - 10) {
-            resizing = true; thElement = th; startX = e.clientX; startWidth = th.offsetWidth;
-            document.body.style.cursor = "col-resize";
-            e.preventDefault();
+        if (event.clientX <= rect.right - 8) return;
+
+        _columnResizeState = {
+            table,
+            th,
+            startX: event.clientX,
+            startWidth: th.offsetWidth,
+            colIndex: Array.from(th.parentElement.children).indexOf(th),
+        };
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        event.preventDefault();
+    });
+
+    table.addEventListener('mousemove', event => {
+        if (_columnResizeState) return;
+        const th = event.target.closest('th');
+        if (!th) {
+            table.style.cursor = '';
+            return;
+        }
+        const rect = th.getBoundingClientRect();
+        table.style.cursor =
+            event.clientX > rect.right - 8 && !event.target.closest('.col-filter-btn')
+                ? 'col-resize'
+                : '';
+    });
+
+    table.addEventListener('mouseleave', () => {
+        if (!_columnResizeState) table.style.cursor = '';
+    });
+
+    if (_globalResizeInit) return;
+    _globalResizeInit = true;
+
+    document.addEventListener('mousemove', event => {
+        if (!_columnResizeState) return;
+
+        const { table: activeTable, th, startX, startWidth, colIndex } = _columnResizeState;
+        const newWidth = Math.max(50, startWidth + event.clientX - startX);
+        th.style.width = newWidth + 'px';
+        th.style.minWidth = newWidth + 'px';
+
+        if (getComputedStyle(activeTable).tableLayout !== 'fixed') {
+            activeTable.querySelectorAll('tbody tr').forEach(row => {
+                const cell = row.children[colIndex];
+                if (cell) {
+                    cell.style.width = newWidth + 'px';
+                    cell.style.minWidth = newWidth + 'px';
+                }
+            });
         }
     });
-    document.addEventListener("mousemove", e => {
-        if (!resizing || !thElement) return;
-        thElement.style.width = Math.max(50, startWidth + e.clientX - startX) + "px";
-    });
-    document.addEventListener("mouseup", () => {
-        if (resizing) { resizing = false; thElement = null; document.body.style.cursor = ""; }
+
+    document.addEventListener('mouseup', () => {
+        if (!_columnResizeState) return;
+        _columnResizeState.table.style.cursor = '';
+        _columnResizeState = null;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
     });
 }
 

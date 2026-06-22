@@ -130,7 +130,7 @@
             </div>
             <div class="stat-card missing">
                 <div class="stat-value" id="stat-missing">0</div>
-                <div class="stat-label">未获取</div>
+                <div class="stat-label">未匹配</div>
             </div>
         </div>
 
@@ -151,10 +151,10 @@
                     <div class="view-toggle" id="view-toggle">
                         <button class="view-toggle-btn active" data-view="matrix">&#128203; 矩阵视图</button>
                         <button class="view-toggle-btn" data-view="list">&#128205; 清单视图</button>
+                        <button class="view-toggle-btn" data-view="browse">&#128193; 资料浏览视图</button>
                     </div>
                     <button class="btn btn-success btn-sm hidden" id="export-checklist-btn">&#128190; 导出清单</button>
                     <button class="btn btn-outline btn-sm hidden" id="organize-files-btn">&#128193; 整理文件</button>
-                    <button class="btn btn-outline btn-sm hidden" id="browse-files-btn">&#128451; 资料浏览</button>
                 </div>
             </div>
 
@@ -190,38 +190,32 @@
                 </div>
             </div>
             </div><!-- .list-view-container -->
-        </div><!-- #preview-section -->
 
-    </div>
 
-    <!-- 资料浏览抽屉 -->
-    <div class="browse-drawer-overlay hidden" id="browse-drawer-overlay"></div>
-    <div class="browse-drawer hidden" id="browse-drawer">
-        <div class="browse-drawer-header">
-            <span>&#128451; 资料浏览</span>
-            <button class="browse-drawer-close" id="browse-drawer-close">&#10005;</button>
-        </div>
-        <div class="browse-drawer-split">
-            <!-- 资料浏览预览面板（左侧） -->
-            <div class="browse-preview-pane hidden" id="browse-preview-pane">
-                <div class="browse-preview-header">
-                    <span class="browse-preview-title" id="browse-preview-title">文件预览</span>
-                    <button class="browse-preview-close" id="browse-preview-close" title="关闭预览">&#10005;</button>
+            <!-- 资料浏览视图容器（表格 + 预览并排） -->
+            <div class="browse-view-container hidden" id="browse-view-container">
+                <div class="result-table-wrapper hidden" id="browse-view-wrapper">
+                    <table class="result-table" id="browse-view-table">
+                        <thead id="browse-view-head"></thead>
+                        <tbody id="browse-view-body"></tbody>
+                    </table>
                 </div>
-                <div class="browse-preview-content" id="browse-preview-content">
-                    <div class="preview-empty">
-                        <div style="font-size:48px;color:#ccc;margin-bottom:12px;">&#128196;</div>
-                        <p style="color:#999;font-size:14px;">点击文件可在此预览</p>
+
+                <div class="browse-preview-pane hidden" id="browse-preview-pane">
+                    <div class="list-preview-header">
+                        <span class="list-preview-title" id="browse-preview-title"></span>
+                        <button class="list-preview-close" id="browse-preview-close" title="关闭预览">&#10005;</button>
+                    </div>
+                    <div class="list-preview-content" id="browse-preview-content">
+                        <div class="preview-empty">
+                            <div style="font-size:48px;color:#ccc;margin-bottom:12px;">&#128196;</div>
+                            <p style="color:#999;font-size:14px;">点击资料中的文件可在此预览</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="browse-drawer-body">
-                <div class="browse-section">
-                    <div class="browse-section-title">&#128193; 所有资料</div>
-                    <div class="browse-section-content" id="browse-all-files"></div>
-                </div>
-            </div>
-        </div>
+        </div><!-- #preview-section -->
+
     </div>
 
     <!-- 提示消息 -->
@@ -257,7 +251,7 @@
         <button type="button" data-status="Y">&#10003; 已获取</button>
         <button type="button" data-status="不完整">&#9888; 不完整</button>
         <button type="button" data-status="N/A">&#8856; 不适用</button>
-        <button type="button" data-status="N">&#10007; 未获取</button>
+        <button type="button" data-status="N">&#10007; 未匹配</button>
     </div>
 
     <!-- 分配公司弹窗 -->

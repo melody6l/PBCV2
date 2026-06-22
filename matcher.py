@@ -114,7 +114,7 @@ def match_files(checklist_items, scanned_files, scanned_folders, mode="fuzzy", p
         匹配结果列表，每项包含:
         - index: 序号
         - checklist_name: 清单中的名称
-        - status: "已获取" 或 "未获取"
+        - status: "已获取" 或 "未匹配"
         - matched_files: 匹配到的路径列表（文件或文件夹）
         - matched_names: 匹配到的名称列表
         - matched_types: 匹配到的类型列表（"文件" 或 "文件夹"）
@@ -124,12 +124,6 @@ def match_files(checklist_items, scanned_files, scanned_folders, mode="fuzzy", p
     match_func = exact_match if mode == "exact" else fuzzy_match
 
     history = _history_lookup(prev_results)
-    used_paths = set()
-    for result in history.values():
-        if result.get("status") == "已获取":
-            for path in result.get("matched_files", []) or []:
-                used_paths.add(path)
-
     for i, item in enumerate(checklist_items):
         checklist_name = _item_name(item)
         item_key = _item_key(item)
@@ -142,7 +136,6 @@ def match_files(checklist_items, scanned_files, scanned_folders, mode="fuzzy", p
             continue
 
         matched = match_func(checklist_name, scanned_files, scanned_folders)
-        matched = [path for path in matched if path not in used_paths]
 
         # 检查匹配项中的公司覆盖情况
         company_coverage = {}  # {company: {"files": [...], "folders": [...]}}
@@ -213,12 +206,11 @@ def match_files(checklist_items, scanned_files, scanned_folders, mode="fuzzy", p
                                 company_coverage[company] = {"files": [], "folders": []}
                             company_coverage[company]["files"].append(path)
 
-        status = "已获取" if matched else "未获取"
+        status = "已获取" if matched else "未匹配"
         matched_names = [os.path.basename(f) for f in matched]
         matched_types = []
         for path in matched:
             matched_types.append("文件夹" if os.path.isdir(path) else "文件")
-            used_paths.add(path)
         results.append({
             "index": i + 1,
             "checklist_name": checklist_name,
