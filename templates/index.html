@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件核对工具</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">
+                <div class="brand-mark">PBC</div>
+                <div class="brand-copy">
+                    <div class="brand-title">文件核对工具</div>
+                </div>
+            </div>
+        </div>
+        <div class="accent-line"></div>
+    </header>
+    <div class="container">
+        <!-- 主流程 -->
+        <div class="panel workflow-panel" id="workflow-panel">
+            <div class="workflow-title">
+                <div class="panel-title">
+                    <span>&#128203; 首屏主流程</span>
+                    <span class="badge" id="workflow-state-badge">待开始</span>
+                </div>
+            </div>
+            <div class="workflow-steps">
+                <!-- 步骤0：生成PBC需求清单 -->
+                <div class="panel workflow-step-card" id="workflow-step-0">
+                    <div class="panel-title">
+                        <span>步骤 0 · 生成清单</span>
+                        <span class="badge" id="template-badge">未开始</span>
+                    </div>
+                    <div class="template-section">
+                        <div class="template-gen-area" id="template-gen-area">
+                            <div class="subject-select-area" id="subject-select-area">
+                                <p class="section-hint">选择需要的科目，生成PBC需求清单</p>
+                                <div class="multi-select-wrap" id="subject-select-wrap">
+                                    <div class="multi-select-trigger" id="subject-select-trigger">请选择科目</div>
+                                    <div class="multi-select-dropdown hidden" id="subject-select-dropdown"></div>
+                                    <input type="hidden" id="subject-selected-values">
+                                </div>
+                                <div class="btn-group">
+                                    <button class="btn btn-primary btn-sm" id="gen-checklist-btn">生成PBC需求清单</button>
+                                </div>
+                            </div>
+                            <div class="upload-alternative">
+                                <span class="or-divider">或</span>
+                                <button class="btn btn-outline btn-sm" id="upload-filled-btn">上传已填写的清单</button>
+                                <input type="file" id="filled-checklist-input" accept=".xlsx" class="hidden">
+                            </div>
+                        </div>
+                        <div class="template-done hidden" id="template-done">
+                            <div class="upload-summary" id="template-summary"></div>
+                            <div class="template-actions">
+                                <button class="btn btn-outline btn-sm" id="download-template-btn">下载清单</button>
+                                <button class="btn btn-primary btn-sm" id="upload-filled-btn-2">上传已填写的清单</button>
+                                <button class="btn btn-outline btn-sm" id="re-gen-btn">重新生成</button>
+                            </div>
+                            <input type="file" id="filled-checklist-input-2" accept=".xlsx" class="hidden">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-arrow">&rarr;</div>
+
+                <!-- 步骤1：上传清单（原步骤1，改为可选或上传已填写的） -->
+                <div class="panel workflow-step-card" id="workflow-step-1">
+                    <div class="panel-title">
+                        <span>步骤 1 · 扫描文件夹</span>
+                        <span class="badge" id="folder-badge">未扫描</span>
+                    </div>
+                    <div class="folder-input-group">
+                        <input type="text" id="folder-path" placeholder="请输入文件夹路径，如: D:\客户资料\2024年度">
+                        <button class="btn btn-primary" id="scan-btn">&#128270; 扫描</button>
+                    </div>
+                </div>
+
+                <div class="step-arrow">&rarr;</div>
+
+                <!-- 步骤2：匹配 -->
+                <div class="panel workflow-step-card" id="workflow-step-2">
+                    <div class="panel-title">
+                        <span>步骤 2 · 开始匹配</span>
+                        <span class="badge" id="match-badge">待匹配</span>
+                    </div>
+                    <div class="match-options">
+                        <label class="match-option">
+                            <input type="checkbox" id="smart-match-enabled" checked disabled>
+                            <span>智能模式匹配（推荐）</span>
+                        </label>
+                        <label class="match-option">
+                            <input type="checkbox" id="llm-enabled">
+                            <span>AI辅助匹配（可选）</span>
+                        </label>
+                    </div>
+                    <div class="llm-config-summary hidden" id="llm-config-summary">
+                        <span class="llm-config-tag" id="llm-config-tag" title="点击修改配置">已配置</span>
+                    </div>
+                    <div class="mode-selector">
+                        <select id="match-mode">
+                            <option value="fuzzy">模糊匹配（关键词包含）</option>
+                            <option value="exact">精确匹配（文件名完全一致）</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-success btn-match" id="match-btn">&#9889; 开始匹配</button>
+                    <span class="llm-status hidden" id="llm-status">正在匹配中...</span>
+                    <div class="progress-bar">
+                        <div class="fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats hidden" id="stats-section">
+            <div class="stat-card total">
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">清单总数</div>
+            </div>
+            <div class="stat-card matched">
+                <div class="stat-value" id="stat-matched">0</div>
+                <div class="stat-label">已获取</div>
+            </div>
+            <div class="stat-card incomplete">
+                <div class="stat-value" id="stat-incomplete">0</div>
+                <div class="stat-label">不完整</div>
+            </div>
+            <div class="stat-card missing">
+                <div class="stat-value" id="stat-missing">0</div>
+                <div class="stat-label">未获取</div>
+            </div>
+        </div>
+
+        <div class="panel hidden" id="diff-section">
+            <div class="panel-title">
+                <span>更新对比</span>
+                <span class="badge" id="diff-badge">本次扫描</span>
+            </div>
+            <div id="diff-content"></div>
+        </div>
+
+
+        <!-- 资料预览区域 -->
+        <div class="panel hidden" id="preview-section">
+            <div class="panel-title">
+                <span>&#128203; 资料预览</span>
+                <div class="panel-actions">
+                    <div class="view-toggle" id="view-toggle">
+                        <button class="view-toggle-btn active" data-view="matrix">&#128203; 矩阵视图</button>
+                        <button class="view-toggle-btn" data-view="list">&#128205; 清单视图</button>
+                    </div>
+                    <button class="btn btn-success btn-sm hidden" id="export-checklist-btn">&#128190; 导出清单</button>
+                    <button class="btn btn-outline btn-sm hidden" id="organize-files-btn">&#128193; 整理文件</button>
+                    <button class="btn btn-outline btn-sm hidden" id="browse-files-btn">&#128451; 资料浏览</button>
+                </div>
+            </div>
+
+            <!-- 矩阵视图 -->
+            <div class="result-table-wrapper" id="preview-table-wrapper">
+                <table class="result-table" id="preview-table">
+                    <thead id="preview-table-head"></thead>
+                    <tbody id="preview-table-body"></tbody>
+                </table>
+            </div>
+
+            <!-- 清单视图容器（表格 + 预览并排） -->
+            <div class="list-view-container" id="list-view-container">
+                <!-- 清单视图表格 -->
+                <div class="result-table-wrapper hidden" id="list-view-wrapper">
+                    <table class="result-table" id="list-view-table">
+                        <thead id="list-view-head"></thead>
+                        <tbody id="list-view-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 清单视图预览面板 -->
+                <div class="list-preview-pane hidden" id="list-preview-pane">
+                    <div class="list-preview-header">
+                        <span class="list-preview-title" id="list-preview-title"></span>
+                        <button class="list-preview-close" id="list-preview-close" title="关闭预览">&#10005;</button>
+                    </div>
+                    <div class="list-preview-content" id="list-preview-content">
+                        <div class="preview-empty">
+                            <div style="font-size:48px;color:#ccc;margin-bottom:12px;">&#128196;</div>
+                            <p style="color:#999;font-size:14px;">点击清单中的文件可在此预览</p>
+                    </div>
+                </div>
+            </div>
+            </div><!-- .list-view-container -->
+        </div><!-- #preview-section -->
+
+    </div>
+
+    <!-- 资料浏览抽屉 -->
+    <div class="browse-drawer-overlay hidden" id="browse-drawer-overlay"></div>
+    <div class="browse-drawer hidden" id="browse-drawer">
+        <div class="browse-drawer-header">
+            <span>&#128451; 资料浏览</span>
+            <button class="browse-drawer-close" id="browse-drawer-close">&#10005;</button>
+        </div>
+        <div class="browse-drawer-split">
+            <!-- 资料浏览预览面板（左侧） -->
+            <div class="browse-preview-pane hidden" id="browse-preview-pane">
+                <div class="browse-preview-header">
+                    <span class="browse-preview-title" id="browse-preview-title">文件预览</span>
+                    <button class="browse-preview-close" id="browse-preview-close" title="关闭预览">&#10005;</button>
+                </div>
+                <div class="browse-preview-content" id="browse-preview-content">
+                    <div class="preview-empty">
+                        <div style="font-size:48px;color:#ccc;margin-bottom:12px;">&#128196;</div>
+                        <p style="color:#999;font-size:14px;">点击文件可在此预览</p>
+                    </div>
+                </div>
+            </div>
+            <div class="browse-drawer-body">
+                <div class="browse-section">
+                    <div class="browse-section-title">&#128193; 所有资料</div>
+                    <div class="browse-section-content" id="browse-all-files"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示消息 -->
+    <div class="llm-config-modal hidden" id="llm-config-modal">
+        <div class="llm-modal-content">
+            <h3>AI辅助匹配配置</h3>
+            <div class="llm-form-group">
+                <label>模型</label>
+                <select id="llm-provider">
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="openai-gpt4o-mini">OpenAI GPT-4o-mini</option>
+                    <option value="openai-gpt4o">OpenAI GPT-4o</option>
+                    <option value="zhipu-glm4">智谱 GLM-4</option>
+                    <option value="ollama">Ollama (本地)</option>
+                </select>
+            </div>
+            <div class="llm-form-group">
+                <label>API Key</label>
+                <input type="password" id="llm-api-key" placeholder="输入API Key（Ollama可留空）">
+            </div>
+            <div class="llm-form-group">
+                <label>Base URL</label>
+                <input type="text" id="llm-base-url" placeholder="默认自动填充">
+                <span class="hint" id="llm-base-url-hint"></span>
+            </div>
+            <div class="llm-modal-actions">
+                <button class="btn btn-outline" id="llm-cancel-btn">取消</button>
+                <button class="btn btn-primary" id="llm-save-btn">保存配置</button>
+            </div>
+        </div>
+    </div>
+    <div class="status-context-menu hidden" id="preview-status-menu">
+        <button type="button" data-status="Y">&#10003; 已获取</button>
+        <button type="button" data-status="不完整">&#9888; 不完整</button>
+        <button type="button" data-status="N/A">&#8856; 不适用</button>
+        <button type="button" data-status="N">&#10007; 未获取</button>
+    </div>
+
+    <!-- 分配公司弹窗 -->
+    <div class="assign-modal hidden" id="assign-modal">
+        <div class="assign-modal-content">
+            <h3>分配公司 - <span id="assign-modal-filename"></span></h3>
+            <div class="assign-modal-actions-top">
+                <button class="btn btn-outline btn-sm" id="assign-select-all">全选</button>
+                <button class="btn btn-outline btn-sm" id="assign-deselect-all">取消全选</button>
+            </div>
+            <div class="assign-company-list" id="assign-company-list">
+                <!-- 动态生成 -->
+            </div>
+            <div class="assign-modal-actions">
+                <button class="btn btn-outline" id="assign-cancel-btn">取消</button>
+                <button class="btn btn-primary" id="assign-confirm-btn">确认分配</button>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

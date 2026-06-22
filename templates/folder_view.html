@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>文件夹浏览</title>
+    <style>
+        body { font-family: "Microsoft YaHei", sans-serif; background: #f5f7fa; padding: 24px; }
+        h2 { color: #2c3e50; margin-bottom: 16px; }
+        .path { color: #666; font-size: 13px; margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        th { background: #4472C4; color: white; padding: 10px 16px; text-align: left; }
+        td { padding: 8px 16px; border-bottom: 1px solid #dee2e6; }
+        tr:hover td { background: rgba(52,152,219,0.04); }
+        a { color: #3498db; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .dir-icon { color: #f39c12; }
+        .file-icon { color: #3498db; }
+        .back-link { margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+    <h2>文件夹内容</h2>
+    <div class="path">{{ folder_path }}</div>
+    <div class="back-link">
+        <a href="javascript:history.back()">&#8592; 返回核对清单</a>
+    </div>
+    <table>
+        <thead>
+            <tr><th>名称</th><th>类型</th><th>大小</th><th>操作</th></tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>
+                    {% if item.is_dir %}
+                        <span class="dir-icon">&#128194;</span>
+                    {% else %}
+                        <span class="file-icon">&#128196;</span>
+                    {% endif %}
+                    {{ item.name }}
+                </td>
+                <td>{{ "文件夹" if item.is_dir else "文件" }}</td>
+                <td>
+                    {% if item.size %}
+                        {% if item.size > 1048576 %}
+                            {{ (item.size / 1048576)|round(1) }} MB
+                        {% elif item.size > 1024 %}
+                            {{ (item.size / 1024)|round(1) }} KB
+                        {% else %}
+                            {{ item.size }} B
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if item.is_dir %}
+                        <a href="/api/open?path={{ item.path|urlencode }}">浏览</a>
+                    {% else %}
+                        <a href="/api/open?path={{ item.path|urlencode }}">打开</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
