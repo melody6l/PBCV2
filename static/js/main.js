@@ -522,13 +522,15 @@ function renderMatrixView(displayItems) {
     document.getElementById("browse-view-wrapper").classList.add("hidden");
 
     let headHtml = "<tr>";
-    headHtml += '<th><div class="th-content-wrap"><span class="th-label">序号</span><button class="col-filter-btn" data-col="0" title="筛选">▼</button></div></th>';
-    headHtml += '<th><div class="th-content-wrap"><span class="th-label">科目</span><button class="col-filter-btn" data-col="1" title="筛选">▼</button></div></th>';
-    headHtml += '<th><div class="th-content-wrap"><span class="th-label">所需PBC</span><button class="col-filter-btn" data-col="2" title="筛选">▼</button></div></th>';
-    headHtml += '<th><div class="th-content-wrap"><span class="th-label">需求资料</span><button class="col-filter-btn" data-col="3" title="筛选">▼</button></div></th>';
+    headHtml += '<th style="width:50px"><div class="th-content-wrap"><span class="th-label">序号</span><button class="col-filter-btn" data-col="0" title="筛选">▼</button></div></th>';
+    headHtml += '<th style="width:90px"><div class="th-content-wrap"><span class="th-label">科目</span><button class="col-filter-btn" data-col="1" title="筛选">▼</button></div></th>';
+    headHtml += '<th style="width:110px"><div class="th-content-wrap"><span class="th-label">所需PBC</span><button class="col-filter-btn" data-col="2" title="筛选">▼</button></div></th>';
+    headHtml += '<th style="width:140px"><div class="th-content-wrap"><span class="th-label">需求资料</span><button class="col-filter-btn" data-col="3" title="筛选">▼</button></div></th>';
     companyNames.forEach((name, index) => {
         const colIndex = 4 + index;
-        headHtml += '<th class="company-col"><div class="th-content-wrap"><span class="th-label">' + name + '</span><button class="col-filter-btn" data-col="' + colIndex + '" title="筛选">▼</button></div></th>';
+        // 根据公司名称长度估算合适列宽（中文约14px/字，加内边距和筛选按钮空间）
+        var nameWidth = Math.max(80, Math.min(name.length * 14 + 40, 220));
+        headHtml += '<th class="company-col" style="width:' + nameWidth + 'px"><div class="th-content-wrap"><span class="th-label">' + name + '</span><button class="col-filter-btn" data-col="' + colIndex + '" title="筛选">▼</button></div></th>';
     });
     headHtml += "</tr>";
     thead.innerHTML = headHtml;
@@ -550,6 +552,9 @@ function renderMatrixView(displayItems) {
         bodyHtml += "</tr>";
     });
     tbody.innerHTML = bodyHtml;
+    /* 冻结左侧4列：序号、科目、所需PBC、需求资料 */
+    markFrozenColumns('#preview-table', 4);
+    updateFrozenColumnOffsets('#preview-table');
     initColumnResize('#preview-table');
     applyFilters('preview-table');
 }
@@ -560,18 +565,19 @@ async function renderBrowseView() {
     const thead = document.getElementById("browse-view-head");
     const tbody = document.getElementById("browse-view-body");
 
-    document.getElementById("preview-table-wrapper").classList.add("hidden");
-    document.getElementById("list-view-wrapper").classList.add("hidden");
-    document.getElementById("list-view-container").classList.add("hidden");
-    document.getElementById("browse-view-container").classList.remove("hidden");
-    wrapper.classList.remove("hidden");
-
-    // 保留旧内容，等数据返回后再替换，避免闪烁
+    // 先等数据返回再切换视图，避免空表格闪烁
     try {
         const response = await fetch(API.browseViewData);
         const data = await response.json();
         if (data.error) throw new Error(data.error);
         if (currentView !== "browse") return;
+
+        // 数据就绪后才隐藏其他视图、显示资料浏览视图
+        document.getElementById("preview-table-wrapper").classList.add("hidden");
+        document.getElementById("list-view-wrapper").classList.add("hidden");
+        document.getElementById("list-view-container").classList.add("hidden");
+        document.getElementById("browse-view-container").classList.remove("hidden");
+        wrapper.classList.remove("hidden");
 
         thead.innerHTML = "";
         tbody.innerHTML = "";
@@ -666,6 +672,13 @@ async function renderBrowseView() {
         applyFilters('browse-view-table');
     } catch (error) {
         if (currentView !== "browse") return;
+        // 请求失败时也要显示容器，否则错误信息不可见
+        document.getElementById("preview-table-wrapper").classList.add("hidden");
+        document.getElementById("list-view-wrapper").classList.add("hidden");
+        document.getElementById("list-view-container").classList.add("hidden");
+        document.getElementById("browse-view-container").classList.remove("hidden");
+        wrapper.classList.remove("hidden");
+        thead.innerHTML = "";
         tbody.innerHTML = '<tr><td class="browse-view-loading">资料加载失败</td></tr>';
         showToast("资料浏览视图加载失败: " + error.message, "error");
     }
@@ -2725,6 +2738,9 @@ function initColumnResize(tableSelector) {
     document.addEventListener('mouseup', function() {
         if (!_columnResizeState) return;
 
+        // 保存 table ID（在 _columnResizeState 置 null 之前），用于更新冻结列偏移
+        var tableId = _columnResizeState.table.id;
+
         // 移除辅助线
         const guide = ensureResizeGuide();
         guide.classList.remove('visible');
@@ -2735,6 +2751,11 @@ function initColumnResize(tableSelector) {
 
         document.body.classList.remove('col-resizing');
         _columnResizeState = null;
+
+        // 列宽变化后更新冻结列偏移
+        if (tableId === 'preview-table') {
+            updateFrozenColumnOffsets('#preview-table');
+        }
     });
 
     // 双击列右边框自动调整列宽
@@ -2768,6 +2789,83 @@ function injectResizeHandles(table) {
         th.appendChild(handle);
     });
 }
+
+/**
+ * 为表格的前 freezeCount 列标记为冻结列（添加 frozen-col / frozen-col-last class）。
+ * @param {string} tableSelector - 表格 CSS 选择器，如 '#preview-table'
+ * @param {number} freezeCount - 需要冻结的列数
+ */
+function markFrozenColumns(tableSelector, freezeCount) {
+    var table = document.querySelector(tableSelector);
+    if (!table) return;
+
+    var headerRow = table.querySelector('thead tr');
+    if (!headerRow) return;
+
+    var ths = headerRow.children;
+    for (var i = 0; i < Math.min(freezeCount, ths.length); i++) {
+        ths[i].classList.add('frozen-col');
+        if (i === freezeCount - 1) {
+            ths[i].classList.add('frozen-col-last');
+        }
+    }
+
+    var tbodyRows = table.querySelectorAll('tbody tr');
+    tbodyRows.forEach(function(row) {
+        var cells = row.children;
+        for (var i = 0; i < Math.min(freezeCount, cells.length); i++) {
+            cells[i].classList.add('frozen-col');
+            if (i === freezeCount - 1) {
+                cells[i].classList.add('frozen-col-last');
+            }
+        }
+    });
+}
+
+/**
+ * 更新冻结列的 left 偏移量。
+ * 当列宽发生变化时（拖拽、自适应、窗口缩放），需要重新计算。
+ * @param {string} tableSelector - 表格 CSS 选择器，如 '#preview-table'
+ */
+function updateFrozenColumnOffsets(tableSelector) {
+    var table = document.querySelector(tableSelector);
+    if (!table) return;
+
+    var headerRow = table.querySelector('thead tr');
+    if (!headerRow) return;
+
+    var frozenThs = headerRow.querySelectorAll('th.frozen-col');
+    if (frozenThs.length === 0) return;
+
+    var tbodyRows = table.querySelectorAll('tbody tr');
+    var cumulativeLeft = 0;
+
+    frozenThs.forEach(function(th) {
+        th.style.left = cumulativeLeft + 'px';
+
+        var colIndex = Array.prototype.indexOf.call(headerRow.children, th);
+
+        tbodyRows.forEach(function(row) {
+            var cell = row.children[colIndex];
+            if (cell && cell.classList.contains('frozen-col')) {
+                cell.style.left = cumulativeLeft + 'px';
+            }
+        });
+
+        cumulativeLeft += th.offsetWidth;
+    });
+}
+
+/* 窗口大小变化时重新计算冻结列偏移（debounce 150ms） */
+(function() {
+    var _frozenResizeTimer = null;
+    window.addEventListener('resize', function() {
+        if (_frozenResizeTimer) clearTimeout(_frozenResizeTimer);
+        _frozenResizeTimer = setTimeout(function() {
+            updateFrozenColumnOffsets('#preview-table');
+        }, 150);
+    });
+})();
 
 /**
  * 双击自动调整列宽：根据该列所有单元格的内容宽度设置列宽。
@@ -2811,6 +2909,11 @@ function autoFitColumn(table, colIndex, th) {
                 cell.style.minWidth = newWidth + 'px';
             }
         }
+    }
+
+    // 双击自适应列宽后更新冻结列偏移
+    if (table.id === 'preview-table') {
+        updateFrozenColumnOffsets('#preview-table');
     }
 }
 
