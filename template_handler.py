@@ -71,7 +71,7 @@ def generate_checklist(selected_subjects, company_full_name="", company_short_na
     # 创建输出工作簿
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "资料预览"
+    ws.title = "核对工作台"
 
     # 样式定义
     header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
@@ -164,10 +164,10 @@ def read_user_checklist(file_path):
                     "short_name": str(row[1]).strip() if row[1] else "",
                 })
 
-    # 读取资料预览
+    # 读取核对工作台
     ws = None
     for sname in wb.sheetnames:
-        if sname in ("资料预览", "示例"):
+        if sname in ("资料预览", "核对工作台", "示例"):
             ws = wb[sname]
             break
     if ws is None:
@@ -229,7 +229,7 @@ def update_cell_status(file_path, row_index, company_name, status):
     wb = openpyxl.load_workbook(file_path)
     ws = None
     for sname in wb.sheetnames:
-        if sname in ("资料预览", "示例"):
+        if sname in ("资料预览", "核对工作台", "示例"):
             ws = wb[sname]
             break
     if ws is None:

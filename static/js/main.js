@@ -550,6 +550,7 @@ function renderMatrixView(displayItems) {
         bodyHtml += "</tr>";
     });
     tbody.innerHTML = bodyHtml;
+    initColumnResize('#preview-table');
     applyFilters('preview-table');
 }
 
@@ -564,14 +565,16 @@ async function renderBrowseView() {
     document.getElementById("list-view-container").classList.add("hidden");
     document.getElementById("browse-view-container").classList.remove("hidden");
     wrapper.classList.remove("hidden");
-    thead.innerHTML = "";
-    tbody.innerHTML = '<tr><td class="browse-view-loading">正在加载资料...</td></tr>';
 
+    // 保留旧内容，等数据返回后再替换，避免闪烁
     try {
         const response = await fetch(API.browseViewData);
         const data = await response.json();
         if (data.error) throw new Error(data.error);
         if (currentView !== "browse") return;
+
+        thead.innerHTML = "";
+        tbody.innerHTML = "";
 
         const headerRow = document.createElement("tr");
         const seqHeader = document.createElement("th");
@@ -762,6 +765,7 @@ function renderListView(displayItems) {
     });
 
     tbody.innerHTML = bodyHtml;
+    initColumnResize('#list-view-table');
     applyFilters('list-view-table');
 }
 
@@ -2618,85 +2622,196 @@ async function runLlmMatch() {
     }
 }
 
-// ====== 列宽拖拽 ======
+// ====== 列宽拖拽（Excel 风格） ======
 const _resizeInitialized = new Set();
 let _columnResizeState = null;
 let _globalResizeInit = false;
+let _resizeGuideEl = null;
 
+/** 获取或创建拖拽辅助线元素 */
+function ensureResizeGuide() {
+    if (!_resizeGuideEl) {
+        _resizeGuideEl = document.createElement('div');
+        _resizeGuideEl.className = 'col-resize-guide';
+        document.body.appendChild(_resizeGuideEl);
+    }
+    return _resizeGuideEl;
+}
+
+/**
+ * 为指定表格初始化 Excel 风格列宽拖拽。
+ * 支持：矩阵视图、清单视图、资料浏览视图。
+ * @param {string} tableSelector - 表格 CSS 选择器，如 '#preview-table'
+ */
 function initColumnResize(tableSelector) {
-    if (_resizeInitialized.has(tableSelector)) return;
-
     const table = document.querySelector(tableSelector);
     if (!table) return;
+
+    // 每次调用都重新注入拖拽把手（因为表格重新渲染时 th 会被替换）
+    injectResizeHandles(table);
+
+    // 事件绑定只做一次
+    if (_resizeInitialized.has(tableSelector)) return;
     _resizeInitialized.add(tableSelector);
 
-    table.addEventListener('mousedown', event => {
+    // 使用事件委托在 thead 上捕获 mousedown
+    const thead = table.querySelector('thead');
+    if (!thead) return;
+
+    thead.addEventListener('mousedown', function(event) {
+        // 如果点击的是筛选按钮，不触发拖拽
         if (event.target.closest('.col-filter-btn')) return;
 
-        const th = event.target.closest('th');
-        if (!th) return;
-        const rect = th.getBoundingClientRect();
-        if (event.clientX <= rect.right - 8) return;
+        const handle = event.target.closest('.col-resize-handle');
+        if (!handle) return;
 
+        const th = handle.closest('th');
+        if (!th) return;
+
+        const rect = th.getBoundingClientRect();
         _columnResizeState = {
             table,
             th,
             startX: event.clientX,
-            startWidth: th.offsetWidth,
+            startWidth: rect.width,
             colIndex: Array.from(th.parentElement.children).indexOf(th),
         };
-        document.body.style.cursor = 'col-resize';
-        document.body.style.userSelect = 'none';
+
+        // 显示辅助线
+        const guide = ensureResizeGuide();
+        guide.style.left = rect.right + 'px';
+        guide.style.height = table.getBoundingClientRect().height + 'px';
+        guide.style.top = table.getBoundingClientRect().top + 'px';
+        guide.classList.add('visible');
+
+        // 标记拖拽把手
+        handle.classList.add('active');
+        document.body.classList.add('col-resizing');
         event.preventDefault();
     });
 
-    table.addEventListener('mousemove', event => {
-        if (_columnResizeState) return;
-        const th = event.target.closest('th');
-        if (!th) {
-            table.style.cursor = '';
-            return;
-        }
-        const rect = th.getBoundingClientRect();
-        table.style.cursor =
-            event.clientX > rect.right - 8 && !event.target.closest('.col-filter-btn')
-                ? 'col-resize'
-                : '';
-    });
-
-    table.addEventListener('mouseleave', () => {
-        if (!_columnResizeState) table.style.cursor = '';
-    });
-
+    // 全局事件（只初始化一次）
     if (_globalResizeInit) return;
     _globalResizeInit = true;
 
-    document.addEventListener('mousemove', event => {
+    document.addEventListener('mousemove', function(event) {
         if (!_columnResizeState) return;
 
         const { table: activeTable, th, startX, startWidth, colIndex } = _columnResizeState;
-        const newWidth = Math.max(50, startWidth + event.clientX - startX);
+        const deltaX = event.clientX - startX;
+        const newWidth = Math.max(50, startWidth + deltaX);
+
+        // 更新表头宽度
         th.style.width = newWidth + 'px';
         th.style.minWidth = newWidth + 'px';
 
+        // 对于非 fixed 布局的表，同步更新所有行的对应单元格
         if (getComputedStyle(activeTable).tableLayout !== 'fixed') {
-            activeTable.querySelectorAll('tbody tr').forEach(row => {
-                const cell = row.children[colIndex];
+            const rows = activeTable.querySelectorAll('tbody tr');
+            for (let i = 0; i < rows.length; i++) {
+                const cell = rows[i].children[colIndex];
                 if (cell) {
                     cell.style.width = newWidth + 'px';
                     cell.style.minWidth = newWidth + 'px';
                 }
-            });
+            }
         }
+
+        // 移动辅助线
+        const guide = ensureResizeGuide();
+        guide.style.left = (th.getBoundingClientRect().right) + 'px';
     });
 
-    document.addEventListener('mouseup', () => {
+    document.addEventListener('mouseup', function() {
         if (!_columnResizeState) return;
-        _columnResizeState.table.style.cursor = '';
+
+        // 移除辅助线
+        const guide = ensureResizeGuide();
+        guide.classList.remove('visible');
+
+        // 移除拖拽把手的 active 状态
+        const activeHandle = _columnResizeState.th.querySelector('.col-resize-handle');
+        if (activeHandle) activeHandle.classList.remove('active');
+
+        document.body.classList.remove('col-resizing');
         _columnResizeState = null;
-        document.body.style.cursor = '';
-        document.body.style.userSelect = '';
     });
+
+    // 双击列右边框自动调整列宽
+    thead.addEventListener('dblclick', function(event) {
+        const handle = event.target.closest('.col-resize-handle');
+        if (!handle) return;
+
+        const th = handle.closest('th');
+        if (!th) return;
+
+        const colIndex = Array.from(th.parentElement.children).indexOf(th);
+        autoFitColumn(table, colIndex, th);
+    });
+}
+
+/** 为表格的所有表头 th 注入拖拽把手元素 */
+function injectResizeHandles(table) {
+    const ths = table.querySelectorAll('thead th');
+    ths.forEach(function(th) {
+        // 避免重复注入
+        if (th.querySelector('.col-resize-handle')) return;
+
+        // 确保 th 为 relative 定位（把手需要 absolute 定位）
+        const computed = getComputedStyle(th);
+        if (computed.position === 'static') {
+            th.style.position = 'relative';
+        }
+
+        const handle = document.createElement('div');
+        handle.className = 'col-resize-handle';
+        th.appendChild(handle);
+    });
+}
+
+/**
+ * 双击自动调整列宽：根据该列所有单元格的内容宽度设置列宽。
+ */
+function autoFitColumn(table, colIndex, th) {
+    let maxWidth = 0;
+    const measureEl = document.createElement('span');
+    measureEl.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-size:12px;font-family:inherit;';
+    document.body.appendChild(measureEl);
+
+    // 测量表头
+    const thText = th.querySelector('.th-label');
+    if (thText) {
+        measureEl.textContent = thText.textContent.trim();
+        maxWidth = Math.max(maxWidth, measureEl.offsetWidth);
+    }
+
+    // 测量该列所有单元格
+    const rows = table.querySelectorAll('tbody tr');
+    for (let i = 0; i < rows.length; i++) {
+        const cell = rows[i].children[colIndex];
+        if (cell) {
+            measureEl.textContent = cell.textContent.trim();
+            maxWidth = Math.max(maxWidth, measureEl.offsetWidth);
+        }
+    }
+
+    document.body.removeChild(measureEl);
+
+    // 加上一些内边距
+    const newWidth = Math.max(50, maxWidth + 28);
+    th.style.width = newWidth + 'px';
+    th.style.minWidth = newWidth + 'px';
+
+    // 对于非 fixed 布局，同步更新单元格
+    if (getComputedStyle(table).tableLayout !== 'fixed') {
+        for (let i = 0; i < rows.length; i++) {
+            const cell = rows[i].children[colIndex];
+            if (cell) {
+                cell.style.width = newWidth + 'px';
+                cell.style.minWidth = newWidth + 'px';
+            }
+        }
+    }
 }
 
 // ====== 提示消息 ======

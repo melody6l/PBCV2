@@ -500,7 +500,6 @@ h1 { display: none; }
     top: 0;
     z-index: 2;
     font-size: 12px;
-    cursor: col-resize;
     user-select: none;
     border-right: 1px solid rgba(255, 255, 255, 0.12);
     transition: border-color 0.2s, background 0.2s;
@@ -509,6 +508,52 @@ h1 { display: none; }
 .result-table thead th:hover {
     background: var(--primary-soft);
     border-right-color: var(--accent);
+}
+
+/* Excel 风格列宽拖拽把手（th 右侧可拖拽区域） */
+.result-table thead th .col-resize-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 3;
+    background: transparent;
+    transition: background 0.15s;
+}
+
+.result-table thead th .col-resize-handle:hover,
+.result-table thead th .col-resize-handle.active {
+    background: var(--accent);
+    opacity: 0.7;
+}
+
+/* 列宽拖拽时的垂直辅助线 */
+.col-resize-guide {
+    position: fixed;
+    top: 0;
+    width: 2px;
+    background: var(--accent);
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.1s;
+    box-shadow: 0 0 6px rgba(255, 230, 0, 0.5);
+}
+
+.col-resize-guide.visible {
+    opacity: 1;
+}
+
+/* 拖拽时禁止文本选中 */
+body.col-resizing {
+    cursor: col-resize !important;
+    user-select: none !important;
+}
+
+body.col-resizing .result-table thead th {
+    cursor: col-resize;
 }
 
 .result-table td {
@@ -1906,18 +1951,31 @@ h1 { display: none; }
 
 #browse-view-table {
     min-width: 900px;
-    table-layout: auto;
+    table-layout: fixed;
+    width: 100%;
 }
 
 #browse-view-table .browse-seq-col {
-    width: 60px;
-    min-width: 60px;
+    width: 70px;
+    min-width: 50px;
     text-align: center;
 }
-#browse-view-table .browse-folder-col { min-width: 150px; }
-#browse-view-table .browse-filename-col { min-width: 240px; }
-#browse-view-table .browse-status-col { width: 100px; }
-#browse-view-table .browse-requirements-col { min-width: 320px; }
+#browse-view-table .browse-folder-col {
+    width: 160px;
+    min-width: 80px;
+}
+#browse-view-table .browse-filename-col {
+    width: 260px;
+    min-width: 120px;
+}
+#browse-view-table .browse-status-col {
+    width: 90px;
+    min-width: 60px;
+}
+#browse-view-table .browse-requirements-col {
+    width: 340px;
+    min-width: 160px;
+}
 
 #browse-view-table tr.browse-row-matched td {
     background: #D1FAE5;

@@ -143,10 +143,10 @@
         </div>
 
 
-        <!-- 资料预览区域 -->
+        <!-- 核对工作台区域 -->
         <div class="panel hidden" id="preview-section">
             <div class="panel-title">
-                <span>&#128203; 资料预览</span>
+                <span>&#128203; 核对工作台</span>
                 <div class="panel-actions">
                     <div class="view-toggle" id="view-toggle">
                         <button class="view-toggle-btn active" data-view="matrix">&#128203; 矩阵视图</button>
@@ -180,7 +180,7 @@
                 <div class="list-preview-pane hidden" id="list-preview-pane">
                     <div class="list-preview-header">
                         <span class="list-preview-title" id="list-preview-title"></span>
-                        <button class="list-preview-close" id="list-preview-close" title="关闭预览">&#10005;</button>
+                        <button type="button" class="list-preview-close" id="list-preview-close" data-preview-prefix="list" title="关闭预览" onclick="closeSidePreview('list')">&#10005;</button>
                     </div>
                     <div class="list-preview-content" id="list-preview-content">
                         <div class="preview-empty">
@@ -189,8 +189,9 @@
                     </div>
                 </div>
             </div>
-            </div><!-- .list-view-container -->
 
+
+            </div><!-- .list-view-container -->
 
             <!-- 资料浏览视图容器（表格 + 预览并排） -->
             <div class="browse-view-container hidden" id="browse-view-container">
@@ -204,7 +205,7 @@
                 <div class="browse-preview-pane hidden" id="browse-preview-pane">
                     <div class="list-preview-header">
                         <span class="list-preview-title" id="browse-preview-title"></span>
-                        <button class="list-preview-close" id="browse-preview-close" title="关闭预览">&#10005;</button>
+                        <button type="button" class="list-preview-close" id="browse-preview-close" data-preview-prefix="browse" title="关闭预览" onclick="closeSidePreview('browse')">&#10005;</button>
                     </div>
                     <div class="list-preview-content" id="browse-preview-content">
                         <div class="preview-empty">
@@ -228,6 +229,10 @@
                     <option value="deepseek">DeepSeek</option>
                     <option value="openai-gpt4o-mini">OpenAI GPT-4o-mini</option>
                     <option value="openai-gpt4o">OpenAI GPT-4o</option>
+                    <option value="qwen-flash">阿里 Qwen3.5-Flash </option>
+                    <option value="qwen-plus">阿里 Qwen3.5-Plus</option>
+                    <option value="kimi">月之暗面 Kimi K2.5</option>
+                    <option value="minimax">MiniMax M2.5</option>
                     <option value="zhipu-glm4">智谱 GLM-4</option>
                     <option value="ollama">Ollama (本地)</option>
                 </select>
