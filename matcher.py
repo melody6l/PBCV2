@@ -83,7 +83,59 @@ def _find_company_in_filename(filename, company_names):
     return None
 
 
-def match_files(checklist_items, scanned_files, scanned_folders, prev_results=None, company_names=None):
+def _merge_company_coverage(result, new_paths, company_names):
+    """增量合并模式：为新匹配到的文件检测公司归属，合并到已有 company_coverage 中。"""
+    coverage = result.get("company_coverage") or {}
+    for path in new_paths:
+        is_dir = os.path.isdir(path)
+        assigned = False
+        if is_dir:
+            dirname = os.path.basename(path)
+            # 检查是否是公司文件夹本身
+            if dirname in company_names:
+                coverage.setdefault(dirname, {"files": [], "folders": []})
+                if path not in coverage[dirname]["folders"]:
+                    coverage[dirname]["folders"].append(path)
+                assigned = True
+            # 检查文件夹内是否有公司子文件夹
+            if not assigned:
+                try:
+                    subdirs = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+                    for cn in company_names:
+                        if cn in subdirs:
+                            coverage.setdefault(cn, {"files": [], "folders": []})
+                            if path not in coverage[cn]["folders"]:
+                                coverage[cn]["folders"].append(path)
+                            assigned = True
+                except Exception:
+                    pass
+            # 检查文件夹名称是否包含公司名
+            if not assigned:
+                for cn in company_names:
+                    if cn.lower() in dirname.lower():
+                        coverage.setdefault(cn, {"files": [], "folders": []})
+                        if path not in coverage[cn]["folders"]:
+                            coverage[cn]["folders"].append(path)
+                        assigned = True
+        else:
+            basename = os.path.basename(path)
+            cn = _find_company_in_path(path, company_names)
+            if cn:
+                coverage.setdefault(cn, {"files": [], "folders": []})
+                if path not in coverage[cn]["files"]:
+                    coverage[cn]["files"].append(path)
+                assigned = True
+            else:
+                cn = _find_company_in_filename(basename, company_names)
+                if cn:
+                    coverage.setdefault(cn, {"files": [], "folders": []})
+                    if path not in coverage[cn]["files"]:
+                        coverage[cn]["files"].append(path)
+                    assigned = True
+    result["company_coverage"] = coverage
+
+
+def match_files(checklist_items, scanned_files, scanned_folders, prev_results=None, company_names=None, merge_mode=False):
     """
     对清单中的每一项执行模糊匹配（同时匹配文件和文件夹）
 
@@ -92,6 +144,8 @@ def match_files(checklist_items, scanned_files, scanned_folders, prev_results=No
         scanned_files: 扫描得到的文件路径列表
         scanned_folders: 扫描得到的文件夹路径列表
         company_names: 公司简称列表（用于检测文件夹内的公司子文件夹和文件名中的公司名）
+        merge_mode: 增量合并模式。为 True 时，已匹配的条目也会重新匹配，
+                    如果发现新文件则追加到已有结果中，不覆盖原有匹配。
 
     返回:
         匹配结果列表，每项包含:
@@ -102,6 +156,7 @@ def match_files(checklist_items, scanned_files, scanned_folders, prev_results=No
         - matched_names: 匹配到的名称列表
         - matched_types: 匹配到的类型列表（"文件" 或 "文件夹"）
         - company_coverage: {company: {"files": [paths], "folders": [paths]}}
+        - newly_found: (仅 merge_mode) 本次新发现的匹配文件数
     """
     results = []
     fuzzy_match_func = fuzzy_match
@@ -112,7 +167,33 @@ def match_files(checklist_items, scanned_files, scanned_folders, prev_results=No
         item_key = _item_key(item)
         prev_result = history.get(item_key)
 
-        if prev_result and prev_result.get("status") == "已获取":
+        # 增量合并模式：已匹配项也重新匹配，追加新文件
+        if merge_mode and prev_result and prev_result.get("status") == "已获取":
+            kept = dict(prev_result)
+            kept["index"] = i + 1
+            # 对全量扫描文件重新做匹配
+            newly_matched = fuzzy_match_func(checklist_name, scanned_files, scanned_folders)
+            # 找出之前没匹配过的新文件
+            existing_paths = set(kept.get("matched_files", []))
+            new_paths = [p for p in newly_matched if p not in existing_paths]
+            if new_paths:
+                kept["matched_files"] = kept.get("matched_files", []) + new_paths
+                kept["matched_names"] = kept.get("matched_names", []) + [os.path.basename(p) for p in new_paths]
+                kept["matched_types"] = kept.get("matched_types", []) + [
+                    "文件夹" if os.path.isdir(p) else "文件" for p in new_paths
+                ]
+                kept["match_count"] = len(kept["matched_files"])
+                kept["newly_found"] = len(new_paths)
+                # 更新公司覆盖信息：为新文件检测公司归属
+                if company_names and "company_coverage" in kept:
+                    _merge_company_coverage(kept, new_paths, company_names)
+            else:
+                kept["newly_found"] = 0
+            results.append(kept)
+            continue
+
+        # 非合并模式：已匹配项直接保留
+        if not merge_mode and prev_result and prev_result.get("status") == "已获取":
             kept = dict(prev_result)
             kept["index"] = i + 1
             results.append(kept)

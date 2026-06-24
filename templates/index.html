@@ -15,6 +15,22 @@
                     <div class="brand-title">文件核对工具</div>
                 </div>
             </div>
+            <!-- 项目栏 -->
+            <div class="project-bar" id="project-bar">
+                <div class="project-state no-project" id="project-state-none">
+                    <span class="project-icon">&#128193;</span>
+                    <span class="project-label">未保存的项目</span>
+                    <button class="btn btn-sm btn-outline-light" id="btn-project-save-as">保存项目</button>
+                    <button class="btn btn-sm btn-outline-light" id="btn-project-open">打开项目</button>
+                </div>
+                <div class="project-state has-project hidden" id="project-state-active">
+                    <span class="project-icon">&#128193;</span>
+                    <span class="project-label" id="project-name-display"></span>
+                    <span class="project-dirty-indicator hidden" id="project-dirty" title="有未保存的更改">&#9679; 未保存</span>
+                    <button class="btn btn-sm btn-outline-light" id="btn-project-save">保存</button>
+                    <button class="btn btn-sm btn-outline-light" id="btn-project-switch">切换项目</button>
+                </div>
+            </div>
         </div>
         <div class="accent-line"></div>
     </header>
@@ -51,6 +67,10 @@
                                 <span class="or-divider">或</span>
                                 <button class="btn btn-outline btn-sm" id="upload-filled-btn">上传已填写的清单</button>
                                 <input type="file" id="filled-checklist-input" accept=".xlsx" class="hidden">
+                            </div>
+                            <div class="upload-alternative">
+                                <span class="or-divider">或</span>
+                                <button class="btn btn-outline btn-sm" id="btn-open-project-inline">&#128193; 打开已有项目...</button>
                             </div>
                         </div>
                         <div class="template-done hidden" id="template-done">
@@ -280,6 +300,53 @@
         </div>
     </div>
     <div class="toast" id="toast"></div>
+
+    <!-- 项目管理弹窗 -->
+    <div class="project-modal hidden" id="project-manage-modal">
+        <div class="project-modal-content">
+            <div class="project-modal-header">
+                <h3 id="project-modal-title">打开项目</h3>
+                <button class="project-modal-close" id="project-modal-close">&times;</button>
+            </div>
+            <div class="project-modal-body">
+                <!-- 项目列表 -->
+                <div class="project-list-section" id="project-list-section">
+                    <div class="project-list-empty hidden" id="project-list-empty">
+                        <p style="color:#999;text-align:center;padding:32px 0;">暂无已保存的项目<br><small>完成工作后点击"保存项目"即可</small></p>
+                    </div>
+                    <div class="project-list" id="project-list">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </div>
+            <div class="project-modal-footer">
+                <button class="btn btn-outline" id="project-modal-cancel">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 保存项目弹窗 -->
+    <div class="project-modal hidden" id="project-save-modal">
+        <div class="project-modal-content project-save-content">
+            <div class="project-modal-header">
+                <h3>保存项目</h3>
+                <button class="project-modal-close" id="project-save-close">&times;</button>
+            </div>
+            <div class="project-modal-body">
+                <div class="project-form-group">
+                    <label>项目名称</label>
+                    <input type="text" id="project-save-name" placeholder="例如：XX公司2024年度审计">
+                </div>
+                <div class="project-save-summary" id="project-save-summary">
+                    <!-- 动态填充当前进度 -->
+                </div>
+            </div>
+            <div class="project-modal-footer">
+                <button class="btn btn-outline" id="project-save-cancel">取消</button>
+                <button class="btn btn-primary" id="project-save-confirm">保存项目</button>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="/static/js/main.js"></script>

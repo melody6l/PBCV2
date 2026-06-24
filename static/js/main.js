@@ -1,5 +1,21 @@
 /* PBC文件核对工具 - 前端交互逻辑 */
 
+// ====== 会话 ID — 每个标签页独立 ======
+const SESSION_ID = crypto.randomUUID();
+// 拦截 fetch 为所有请求自动注入会话头
+const _origFetch = window.fetch;
+window.fetch = function(url, options = {}) {
+    if (typeof url === "string" && !url.startsWith("http") && !url.startsWith("//")) {
+        options.headers = options.headers || {};
+        if (options.headers instanceof Headers) {
+            options.headers.set("X-Session-Id", SESSION_ID);
+        } else {
+            options.headers["X-Session-Id"] = SESSION_ID;
+        }
+    }
+    return _origFetch.call(window, url, options);
+};
+
 const API = {
     templateInfo: "/api/template-info",
     generateChecklist: "/api/generate-checklist",
@@ -20,6 +36,13 @@ const API = {
     addRow: "/api/add-row",
     editRow: "/api/edit-row",
     deleteRow: "/api/delete-row",
+    // 项目管理
+    projectList: "/api/project/list",
+    projectCurrent: "/api/project/current",
+    projectCreate: "/api/project/create",
+    projectSave: "/api/project/save",
+    projectLoad: "/api/project/load",
+    projectDelete: "/api/project/delete",
 };
 
 // 全局状态
@@ -40,6 +63,11 @@ let manageMode = false;          // 行管理模式开关
 let contextMenuTargetRow = null; // 右键菜单目标行
 let insertPosition = null;       // 插入位置: "top" | "bottom" | null(末尾)
 
+// ====== 项目管理 ======
+let activeProject = null;        // {slug, name, is_dirty: bool}
+let autoSaveTimer = null;
+const AUTO_SAVE_DELAY = 3000;    // 3秒防抖
+
 // ====== 页面初始化 ======
 document.addEventListener("DOMContentLoaded", () => {
     console.log("[DEBUG] DOMContentLoaded: 页面加载完成，开始初始化");
@@ -55,6 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initAssignModal();
     initListPreviewPane();
     initBrowsePreviewPane();
+    initProjectBar();
     updateWorkflowState();
     console.log("[DEBUG] DOMContentLoaded: 所有初始化完成");
 });
@@ -187,6 +216,7 @@ function onChecklistGenerated(data, isNew) {
     document.getElementById("preview-section").classList.remove("hidden");
     document.getElementById("export-checklist-btn").classList.remove("hidden");
     document.getElementById("toggle-manage-btn").classList.remove("hidden");
+    markProjectDirty();
 }
 
 function downloadChecklist() {
@@ -868,6 +898,7 @@ function renameFilePrompt(originalPath, anchorEl, event) {
         anchorEl.textContent = newName.trim();
         anchorEl.title = newName.trim();
         showToast("已重命名: " + newName.trim(), "success");
+        markProjectDirty();
     }
 }
 
@@ -1028,6 +1059,7 @@ function cycleCellStatus(rowIndex, companyName, cell) {
             item.company_status[companyName] = next;
         }
     });
+    markProjectDirty();
 }
 
 // ====== 行管理模式 ======
@@ -1093,6 +1125,7 @@ async function saveInlineEdit(td) {
         if (data.success) {
             item[field] = newValue;
             showToast("已保存", "success");
+            markProjectDirty();
         } else {
             td.textContent = item[field] || ""; // 还原
             showToast(data.error || "保存失败", "error");
@@ -1176,6 +1209,7 @@ async function submitNewRow() {
             insertPosition = null;
             renderPreviewTable();
             showToast("新增行成功", "success");
+            markProjectDirty();
         } else {
             showToast(data.error || "新增失败", "error");
         }
@@ -1205,6 +1239,7 @@ async function confirmDeleteRow(event, rowIndex) {
             previewItems = previewItems.filter(it => it.row_index !== rowIndex);
             renderPreviewTable();
             showToast("已删除", "success");
+            markProjectDirty();
         } else {
             showToast(data.error || "删除失败", "error");
         }
@@ -1312,6 +1347,7 @@ function setCellStatus(rowIndex, companyName, cell, newStatus) {
     });
 
     updatePreviewStats();
+    markProjectDirty();
 }
 
 function initPreviewStatusMenu() {
@@ -1362,6 +1398,7 @@ function scanFolder() {
         }
         updateWorkflowState();
         showToast(`已扫描 ${data.scanned_count} 个文件`, "success");
+        markProjectDirty();
     })
     .catch(err => showToast("扫描失败: " + err.message, "error"));
 }
@@ -1463,6 +1500,7 @@ async function doMatch() {
         } else {
             showToast(`匹配完成: ${data.matched_count}/${data.total} 已获取`, "success");
         }
+        markProjectDirty();
     } catch (err) {
         showToast("匹配失败: " + err.message, "error");
     }
@@ -2451,6 +2489,7 @@ function saveCompanyAssignment(index, companyList, wrapEl, modalEl) {
         trigger.classList.remove('is-open');
 
         showToast(`已分配给: ${companyList.length ? companyList.join('、') : '未选择（可稍后重新确认）'}`, "success");
+        markProjectDirty();
         renderPreviewTable();
         checkAllAssigned(modalEl);
     })
@@ -2791,6 +2830,7 @@ function executeMatrixAssign(filePath, isDir, overlay) {
 
         if (overlay) overlay.remove();
         showToast(`已分配给: ${companies.join('、')}`, "success");
+        markProjectDirty();
     })
     .catch(err => {
         if (typeof err === 'string') return; // 已经在前面显示了 toast
@@ -2910,6 +2950,7 @@ async function runLlmMatch() {
         updateWorkflowState();
 
         showToast(`AI匹配完成: ${data.llm_matched}项新增匹配`, "success");
+        markProjectDirty();
         return true;
     } catch (err) {
         showToast("AI匹配失败: " + err.message, "error");
@@ -3225,6 +3266,358 @@ function autoFitColumn(table, colIndex, th) {
     if (table.id === 'preview-table') {
         updateFrozenColumnOffsets('#preview-table');
     }
+}
+
+// ====== 项目管理 ======
+
+function initProjectBar() {
+    // 按钮事件
+    const btnSaveAs = document.getElementById("btn-project-save-as");
+    const btnOpen = document.getElementById("btn-project-open");
+    const btnSave = document.getElementById("btn-project-save");
+    const btnSwitch = document.getElementById("btn-project-switch");
+    const btnOpenInline = document.getElementById("btn-open-project-inline");
+
+    if (btnSaveAs) btnSaveAs.addEventListener("click", showSaveProjectModal);
+    if (btnOpen) btnOpen.addEventListener("click", showOpenProjectModal);
+    if (btnOpenInline) btnOpenInline.addEventListener("click", showOpenProjectModal);
+    if (btnSave) btnSave.addEventListener("click", () => saveCurrentProject(false));
+    if (btnSwitch) btnSwitch.addEventListener("click", showOpenProjectModal);
+
+    // 保存项目弹窗事件
+    document.getElementById("project-save-close").addEventListener("click", closeSaveProjectModal);
+    document.getElementById("project-save-cancel").addEventListener("click", closeSaveProjectModal);
+    document.getElementById("project-save-confirm").addEventListener("click", createNewProject);
+
+    // 项目管理弹窗事件
+    document.getElementById("project-modal-close").addEventListener("click", closeProjectModal);
+    document.getElementById("project-modal-cancel").addEventListener("click", closeProjectModal);
+
+    // 检查当前是否有活动项目
+    checkCurrentProject();
+}
+
+async function checkCurrentProject() {
+    try {
+        const r = await fetch(API.projectCurrent);
+        const data = await r.json();
+        if (data.success && data.active) {
+            activeProject = { slug: data.active.slug, name: data.active.name, is_dirty: false };
+            showProjectActiveState();
+        }
+    } catch (e) {
+        // 忽略
+    }
+}
+
+function showProjectActiveState() {
+    document.getElementById("project-state-none").classList.add("hidden");
+    document.getElementById("project-state-active").classList.remove("hidden");
+    document.getElementById("project-name-display").textContent = activeProject.name;
+    document.getElementById("project-dirty").classList.add("hidden");
+}
+
+function showProjectNoneState() {
+    document.getElementById("project-state-none").classList.remove("hidden");
+    document.getElementById("project-state-active").classList.add("hidden");
+}
+
+function collectFrontendState() {
+    // 提取 company_status（精简：只发送每个item的关键字段，避免发送完整match数据）
+    const previewData = previewItems.map(item => ({
+        row_index: item.row_index,
+        company_status: item.company_status || {},
+    }));
+    return {
+        file_renames: fileRenames,
+        current_view: currentView,
+        manage_mode: manageMode,
+        col_filters: colFilters,
+        preview_items: previewData,
+    };
+}
+
+function restoreFrontendState(viewState) {
+    if (!viewState) return;
+    if (viewState.file_renames) fileRenames = viewState.file_renames;
+    if (viewState.current_view) {
+        currentView = viewState.current_view;
+        // 切换视图
+        const toggleBtns = document.querySelectorAll(".view-toggle-btn");
+        toggleBtns.forEach(b => b.classList.remove("active"));
+        const targetBtn = document.querySelector(`.view-toggle-btn[data-view="${currentView}"]`);
+        if (targetBtn) targetBtn.classList.add("active");
+        renderPreviewTable();
+    }
+    if (viewState.manage_mode !== undefined) manageMode = viewState.manage_mode;
+    if (viewState.col_filters) colFilters = viewState.col_filters;
+}
+
+function markProjectDirty() {
+    if (!activeProject) return;
+    activeProject.is_dirty = true;
+    const indicator = document.getElementById("project-dirty");
+    if (indicator) indicator.classList.remove("hidden");
+    // 防抖自动保存
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+        saveCurrentProject(true);
+    }, AUTO_SAVE_DELAY);
+}
+
+async function saveCurrentProject(silent) {
+    if (!activeProject) return;
+    const viewState = collectFrontendState();
+    try {
+        const r = await fetch(API.projectSave, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                project_slug: activeProject.slug,
+                file_renames: viewState.file_renames,
+                view_state: viewState,
+            }),
+        });
+        const data = await r.json();
+        if (data.success) {
+            activeProject.is_dirty = false;
+            const indicator = document.getElementById("project-dirty");
+            if (indicator) indicator.classList.add("hidden");
+            if (!silent) showToast(data.message || "项目已保存", "success");
+        } else if (!silent) {
+            showToast(data.error || "保存失败", "error");
+        }
+    } catch (e) {
+        if (!silent) showToast("保存失败: " + e.message, "error");
+    }
+}
+
+async function createNewProject() {
+    const nameInput = document.getElementById("project-save-name");
+    const name = nameInput.value.trim();
+    if (!name) { showToast("请输入项目名称", "error"); return; }
+    const viewState = collectFrontendState();
+    try {
+        const r = await fetch(API.projectCreate, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                project_name: name,
+                file_renames: viewState.file_renames,
+                view_state: viewState,
+            }),
+        });
+        const data = await r.json();
+        if (data.success) {
+            activeProject = { slug: data.slug, name: name, is_dirty: false };
+            showProjectActiveState();
+            closeSaveProjectModal();
+            showToast(data.message || "项目已保存", "success");
+        } else {
+            showToast(data.error || "创建失败", "error");
+        }
+    } catch (e) {
+        showToast("创建失败: " + e.message, "error");
+    }
+}
+
+function showSaveProjectModal() {
+    // 填充当前进度摘要
+    const summary = document.getElementById("project-save-summary");
+    const totalItems = previewItems ? previewItems.length : 0;
+    const matchedCount = matchResults ? matchResults.filter(r => r.status === "已获取").length : 0;
+    summary.innerHTML = `
+        <p>当前进度：<strong>${totalItems}</strong> 条需求，<strong>${scannedCount}</strong> 个扫描文件，<strong>${matchedCount}</strong> 已匹配</p>
+    `;
+    document.getElementById("project-save-name").value = activeProject ? activeProject.name : "";
+    document.getElementById("project-save-modal").classList.remove("hidden");
+    document.getElementById("project-save-name").focus();
+}
+
+function closeSaveProjectModal() {
+    document.getElementById("project-save-modal").classList.add("hidden");
+}
+
+async function showOpenProjectModal() {
+    // 如果有未保存更改，提示
+    if (activeProject && activeProject.is_dirty) {
+        if (!confirm("当前项目有未保存的更改，是否继续？\n\n（最近 3 秒内的更改可能已自动保存）")) return;
+    }
+    try {
+        const r = await fetch(API.projectList);
+        const data = await r.json();
+        if (!data.success) { showToast(data.error, "error"); return; }
+        renderProjectList(data.projects);
+        document.getElementById("project-manage-modal").classList.remove("hidden");
+    } catch (e) {
+        showToast("获取项目列表失败: " + e.message, "error");
+    }
+}
+
+function renderProjectList(projects) {
+    const listEl = document.getElementById("project-list");
+    const emptyEl = document.getElementById("project-list-empty");
+    listEl.innerHTML = "";
+
+    if (!projects || projects.length === 0) {
+        emptyEl.classList.remove("hidden");
+        return;
+    }
+    emptyEl.classList.add("hidden");
+
+    projects.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "project-card";
+        const updatedStr = p.updated_at ? p.updated_at.substring(0, 16).replace("T", " ") : "未知";
+        const total = p.total_count || 0;
+        const matched = p.matched_count || 0;
+        const pct = total > 0 ? Math.round(matched / total * 100) : 0;
+        card.innerHTML = `
+            <div class="project-card-info">
+                <div class="project-card-name">&#128193; ${escapeHtml(p.name)}</div>
+                <div class="project-card-meta">
+                    最后保存：${updatedStr} &nbsp;|&nbsp;
+                    ${p.item_count} 条需求 &middot; ${matched} 已匹配 &middot; ${pct}% 完成
+                </div>
+            </div>
+            <div class="project-card-actions">
+                <button class="btn btn-sm btn-primary project-load-btn" data-slug="${escapeHtml(p.slug)}">打开</button>
+                <button class="btn btn-sm btn-outline project-delete-btn" data-slug="${escapeHtml(p.slug)}">删除</button>
+            </div>
+        `;
+        listEl.appendChild(card);
+    });
+
+    // 绑定事件
+    listEl.querySelectorAll(".project-load-btn").forEach(btn => {
+        btn.addEventListener("click", () => loadProject(btn.dataset.slug));
+    });
+    listEl.querySelectorAll(".project-delete-btn").forEach(btn => {
+        btn.addEventListener("click", () => deleteProject(btn.dataset.slug));
+    });
+}
+
+function closeProjectModal() {
+    document.getElementById("project-manage-modal").classList.add("hidden");
+}
+
+async function loadProject(slug) {
+    try {
+        const r = await fetch(API.projectLoad, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ project_slug: slug }),
+        });
+        const data = await r.json();
+        if (!data.success) { showToast(data.error || "加载失败", "error"); return; }
+
+        // 恢复后端返回的数据到前端全局变量
+        const tpl = data.checklist_template;
+        if (tpl) {
+            previewItems = tpl.items || [];
+            previewCompanies = tpl.companies || [];
+            companyNames = tpl.company_names || [];
+        }
+        matchResults = data.match_results;
+        scanRoot = data.scan_root || "";
+        scannedCount = (data.scanned_files ? data.scanned_files.length : 0) +
+                       (data.scanned_folders ? data.scanned_folders.length : 0);
+        fileRenames = data.file_renames || {};
+        activeProject = { slug: slug, name: data.project_name, is_dirty: false };
+
+        // 恢复前端视图状态
+        restoreFrontendState(data.view_state);
+
+        // 重新渲染界面
+        if (previewItems.length > 0) {
+            document.getElementById("template-done").classList.remove("hidden");
+            document.getElementById("template-gen-area").classList.add("hidden");
+            document.getElementById("template-summary").innerHTML =
+                `已加载清单：<strong>${previewItems.length}</strong> 条需求，<strong>${companyNames.length}</strong> 家公司`;
+            document.getElementById("template-badge").textContent = "已完成";
+            document.getElementById("template-badge").style.background = "#00A86B";
+        }
+        if (scanRoot) {
+            document.getElementById("folder-path").value = scanRoot;
+            document.getElementById("folder-badge").textContent = "已扫描";
+            document.getElementById("folder-badge").style.background = "#00A86B";
+        }
+        if (matchResults && matchResults.length > 0) {
+            const matched = matchResults.filter(r => r.status === "已获取").length;
+            document.getElementById("match-badge").textContent = `已匹配 ${matched}/${matchResults.length}`;
+            document.getElementById("match-badge").style.background = "#00A86B";
+        }
+
+        // 从 matchResults 重建 company_status（已有手动设置的状态会被保留）
+        if (matchResults && matchResults.length > 0 && previewItems.length > 0) {
+            syncMatchToPreview();
+        }
+
+        renderPreviewTable();
+        // 显示操作按钮（加载项目后需要手动显示）
+        if (previewItems.length > 0) {
+            document.getElementById("export-checklist-btn").classList.remove("hidden");
+            document.getElementById("toggle-manage-btn").classList.remove("hidden");
+        }
+        if (scanRoot) {
+            document.getElementById("organize-files-btn")?.classList.remove("hidden");
+        }
+        // 恢复行管理模式UI
+        if (manageMode) {
+            const toggleBtn = document.getElementById("toggle-manage-btn");
+            toggleBtn.textContent = "✓ 退出编辑";
+            toggleBtn.classList.add("btn-warning");
+            document.getElementById("add-row-btn").classList.remove("hidden");
+        }
+        updateStatsFromMatchResults();
+        updateWorkflowState();
+        showProjectActiveState();
+        closeProjectModal();
+        showToast(`已加载项目「${data.project_name}」`, "success");
+        console.log("[DEBUG] loadProject: 项目加载完成", data.project_name);
+    } catch (e) {
+        showToast("加载项目失败: " + e.message, "error");
+    }
+}
+
+async function deleteProject(slug) {
+    if (!confirm("确定要删除此项目吗？项目文件将被永久删除。")) return;
+    try {
+        const r = await fetch(API.projectDelete, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ project_slug: slug }),
+        });
+        const data = await r.json();
+        if (data.success) {
+            if (activeProject && activeProject.slug === slug) {
+                activeProject = null;
+                showProjectNoneState();
+            }
+            showToast("项目已删除", "success");
+            // 刷新列表
+            showOpenProjectModal();
+        } else {
+            showToast(data.error || "删除失败", "error");
+        }
+    } catch (e) {
+        showToast("删除失败: " + e.message, "error");
+    }
+}
+
+function updateStatsFromMatchResults() {
+    if (!matchResults) return;
+    const total = matchResults.length;
+    const matched = matchResults.filter(r => r.status === "已获取").length;
+    const partial = matchResults.filter(r => r.status === "部分获取").length;
+    const missing = matchResults.filter(r => r.status === "未匹配").length;
+    updateStats(matched + partial, total);
+}
+
+function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
 }
 
 // ====== 提示消息 ======

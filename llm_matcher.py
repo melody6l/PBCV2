@@ -172,7 +172,6 @@ def llm_match(unmatched_items, scanned_names, config):
         "api_key": "sk-xxx",
         "model": "",                        # 可选，覆盖provider默认model
         "base_url": "",                     # 可选，覆盖provider默认base_url
-        "recheck_provider": "qwen-plus",    # 复核模型，默认plus
         "recheck_threshold": 0.5,           # 低于此置信度触发复核
       }
 
@@ -213,10 +212,10 @@ def llm_match(unmatched_items, scanned_names, config):
     ]
 
     if low_conf_items:
-        recheck_provider = config.get("recheck_provider", "qwen-plus")
-        recheck_preset = MODEL_PRESETS.get(recheck_provider, MODEL_PRESETS["qwen-plus"])
-        recheck_model = recheck_preset["model"]
-        recheck_base_url = recheck_preset["base_url"]
+        # 复核必须沿用第一轮的供应商配置，避免 API Key 被发送到其他供应商。
+        recheck_provider = provider
+        recheck_model = model
+        recheck_base_url = base_url
 
         # 用复核模型再做一次匹配（只传低置信度的条目）
         recheck_results, recheck_usage = _call_llm(
