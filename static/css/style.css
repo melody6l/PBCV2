@@ -1072,6 +1072,7 @@ body.dark .result-table tbody td.frozen-col-last {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -1105,16 +1106,41 @@ body.dark .result-table tbody td.frozen-col-last {
     color: #1a1a2e;
     font-size: 14px;
     margin-bottom: 4px;
+    word-break: break-all;
+    overflow-wrap: break-word;
 }
 
 .unassigned-item-file a {
     color: #0563c1;
     text-decoration: underline;
     font-size: 13px;
+    word-break: break-all;
+    overflow-wrap: break-word;
 }
 
 .unassigned-item-file a:hover {
     color: #0a4fa3;
+}
+
+/* 右侧：预览面板 */
+.unassigned-right {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #f9f9fb;
+}
+
+.unassigned-right .preview-header {
+    flex-shrink: 0;
+}
+
+.unassigned-right .preview-content {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* 公司下拉多选（未确认归属项） */
@@ -1606,10 +1632,10 @@ body.dark .result-table tbody td.frozen-col-last {
     50% { filter: saturate(1.35); }
 }
 
-/* 预览区域 — sticky固定在顶部 */
+/* 预览区域 — sticky固定在顶部（top=68px避开topbar，确保关闭按钮等交互元素不被topbar遮挡） */
 #preview-section {
     position: sticky;
-    top: 0;
+    top: 68px;  /* topbar高度(~67px)：padding 14+12 + brand-mark 38px + accent-line 3px，留1px余量避免层叠覆盖 */
     z-index: 15;
     background: var(--card-bg);
     margin-top: 10px;
