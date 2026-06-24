@@ -215,7 +215,6 @@ function onChecklistGenerated(data, isNew) {
     renderPreviewTable();
     document.getElementById("preview-section").classList.remove("hidden");
     document.getElementById("export-checklist-btn").classList.remove("hidden");
-    document.getElementById("toggle-manage-btn").classList.remove("hidden");
     markProjectDirty();
 }
 
@@ -272,6 +271,21 @@ function renderPreviewTable() {
     previewItems.forEach((item, idx) => {
         item.seq = idx + 1;
     });
+
+    // 根据视图控制编辑行按钮显隐（仅在矩阵视图下可用）
+    const toggleManageBtn = document.getElementById("toggle-manage-btn");
+    const addRowBtn = document.getElementById("add-row-btn");
+    if (currentView === "matrix") {
+        toggleManageBtn.classList.remove("hidden");
+        if (manageMode) {
+            addRowBtn.classList.remove("hidden");
+        } else {
+            addRowBtn.classList.add("hidden");
+        }
+    } else {
+        toggleManageBtn.classList.add("hidden");
+        addRowBtn.classList.add("hidden");
+    }
 
     // 直接使用每个 PBC 条目（不合并）
     if (currentView === "matrix") {
@@ -1395,7 +1409,6 @@ function scanFolder() {
             renderPreviewTable();
             document.getElementById("export-checklist-btn").classList.remove("hidden");
             document.getElementById("organize-files-btn")?.classList.remove("hidden");
-            document.getElementById("toggle-manage-btn").classList.remove("hidden");
         }
         updateWorkflowState();
         showToast(`已扫描 ${data.scanned_count} 个文件`, "success");
@@ -1493,7 +1506,6 @@ async function doMatch() {
         updateStats(data.matched_count, data.total, data.partial_count);
         document.getElementById("export-checklist-btn").classList.remove("hidden");
         document.getElementById("organize-files-btn")?.classList.remove("hidden");
-        document.getElementById("toggle-manage-btn").classList.remove("hidden");
         updateWorkflowState();
 
         if (document.getElementById("llm-enabled").checked) {
@@ -3585,17 +3597,15 @@ async function loadProject(slug) {
         // 显示操作按钮（加载项目后需要手动显示）
         if (previewItems.length > 0) {
             document.getElementById("export-checklist-btn").classList.remove("hidden");
-            document.getElementById("toggle-manage-btn").classList.remove("hidden");
         }
         if (scanRoot) {
             document.getElementById("organize-files-btn")?.classList.remove("hidden");
         }
-        // 恢复行管理模式UI
+        // 恢复行管理模式UI（renderPreviewTable 已处理按钮显隐，这里只需恢复按钮文字和样式）
         if (manageMode) {
             const toggleBtn = document.getElementById("toggle-manage-btn");
             toggleBtn.textContent = "✓ 退出编辑";
             toggleBtn.classList.add("btn-warning");
-            document.getElementById("add-row-btn").classList.remove("hidden");
         }
         updateStatsFromMatchResults();
         updateWorkflowState();
