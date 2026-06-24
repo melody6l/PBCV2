@@ -1011,6 +1011,7 @@ function initViewToggle() {
             document.querySelectorAll(".view-toggle-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             currentView = btn.dataset.view;
+            closeAllSidePreviews();
             renderPreviewTable();
         });
     });
@@ -1980,6 +1981,33 @@ function initBrowsePreviewPane() {
             }
         });
     }
+}
+
+// 关闭指定侧边预览面板
+function closeSidePreview(prefix) {
+    const configs = {
+        'list': { paneId: 'list-preview-pane', wrapperId: 'list-view-wrapper', contentId: 'list-preview-content', emptyText: '点击清单中的文件可在此预览' },
+        'browse': { paneId: 'browse-preview-pane', wrapperId: 'browse-view-wrapper', contentId: 'browse-preview-content', emptyText: '点击资料中的文件可在此预览' }
+    };
+    const cfg = configs[prefix];
+    if (!cfg) return;
+    const pane = document.getElementById(cfg.paneId);
+    const wrapper = document.getElementById(cfg.wrapperId);
+    const content = document.getElementById(cfg.contentId);
+    if (pane) pane.classList.add('hidden');
+    if (wrapper) wrapper.classList.remove('with-preview');
+    if (content) {
+        content.innerHTML = `<div class="preview-empty">
+            <div style="font-size:48px;color:#ccc;margin-bottom:12px;">&#128196;</div>
+            <p style="color:#999;font-size:14px;">${cfg.emptyText}</p>
+        </div>`;
+    }
+}
+
+// 关闭所有侧边预览面板（视图切换时调用）
+function closeAllSidePreviews() {
+    closeSidePreview('list');
+    closeSidePreview('browse');
 }
 
 // ====== 公司归属确认弹窗（全屏分栏：左侧列表 + 右侧预览） ======
