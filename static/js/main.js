@@ -526,12 +526,18 @@ function renderMatrixView(displayItems) {
     headHtml += '<th style="width:90px"><div class="th-content-wrap"><span class="th-label">科目</span><button class="col-filter-btn" data-col="1" title="筛选">▼</button></div></th>';
     headHtml += '<th style="width:110px"><div class="th-content-wrap"><span class="th-label">所需PBC</span><button class="col-filter-btn" data-col="2" title="筛选">▼</button></div></th>';
     headHtml += '<th style="width:140px"><div class="th-content-wrap"><span class="th-label">需求资料</span><button class="col-filter-btn" data-col="3" title="筛选">▼</button></div></th>';
+    // 公司列：精确测量文本宽度，确保默认完整显示公司简称
+    var _measureEl = document.createElement('span');
+    _measureEl.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-size:12px;font-weight:700;font-family:inherit;';
+    document.body.appendChild(_measureEl);
     companyNames.forEach((name, index) => {
         const colIndex = 4 + index;
-        // 根据公司名称长度估算合适列宽（中文约14px/字，加内边距和筛选按钮空间）
-        var nameWidth = Math.max(80, Math.min(name.length * 14 + 40, 220));
+        _measureEl.textContent = name;
+        var textWidth = _measureEl.offsetWidth;
+        var nameWidth = Math.max(textWidth + 43, 50);
         headHtml += '<th class="company-col" style="width:' + nameWidth + 'px"><div class="th-content-wrap"><span class="th-label">' + name + '</span><button class="col-filter-btn" data-col="' + colIndex + '" title="筛选">▼</button></div></th>';
     });
+    document.body.removeChild(_measureEl);
     headHtml += "</tr>";
     thead.innerHTML = headHtml;
 
@@ -552,8 +558,10 @@ function renderMatrixView(displayItems) {
         bodyHtml += "</tr>";
     });
     tbody.innerHTML = bodyHtml;
-    /* 冻结左侧4列：序号、科目、所需PBC、需求资料 */
+    /* 冻结左侧4列：序号、科目、所需PBC、需求资料（需求资料右边框为冻结分隔线） */
     markFrozenColumns('#preview-table', 4);
+    /* 将 th 列宽同步到所有 td，防止 table width:auto 时内容撑开列宽 */
+    enforceColumnWidths('#preview-table');
     updateFrozenColumnOffsets('#preview-table');
     initColumnResize('#preview-table');
     applyFilters('preview-table');
@@ -2712,21 +2720,20 @@ function initColumnResize(tableSelector) {
 
         const { table: activeTable, th, startX, startWidth, colIndex } = _columnResizeState;
         const deltaX = event.clientX - startX;
-        const newWidth = Math.max(50, startWidth + deltaX);
+        const newWidth = Math.max(30, startWidth + deltaX);
 
         // 更新表头宽度
         th.style.width = newWidth + 'px';
         th.style.minWidth = newWidth + 'px';
 
-        // 对于非 fixed 布局的表，同步更新所有行的对应单元格
-        if (getComputedStyle(activeTable).tableLayout !== 'fixed') {
-            const rows = activeTable.querySelectorAll('tbody tr');
-            for (let i = 0; i < rows.length; i++) {
-                const cell = rows[i].children[colIndex];
-                if (cell) {
-                    cell.style.width = newWidth + 'px';
-                    cell.style.minWidth = newWidth + 'px';
-                }
+        // 同步更新所有行的对应单元格宽度（包含 fixed 布局，防止内容撑开列宽）
+        const rows = activeTable.querySelectorAll('tbody tr');
+        for (let i = 0; i < rows.length; i++) {
+            const cell = rows[i].children[colIndex];
+            if (cell) {
+                cell.style.width = newWidth + 'px';
+                cell.style.minWidth = newWidth + 'px';
+                cell.style.maxWidth = newWidth + 'px'; /* 表格 cell 的 width 仅作为最小宽度，必须用 max-width 强制约束 */
             }
         }
 
@@ -2787,6 +2794,32 @@ function injectResizeHandles(table) {
         const handle = document.createElement('div');
         handle.className = 'col-resize-handle';
         th.appendChild(handle);
+    });
+}
+
+/**
+ * 将表头列宽强制同步到所有行的对应 td 单元格。
+ * 解决 table-layout:fixed + width:auto 时列宽可能被 td 内容撑开的问题。
+ * @param {string} tableSelector - 表格 CSS 选择器，如 '#preview-table'
+ */
+function enforceColumnWidths(tableSelector) {
+    var table = document.querySelector(tableSelector);
+    if (!table) return;
+
+    var ths = table.querySelectorAll('thead th');
+    var rows = table.querySelectorAll('tbody tr');
+    ths.forEach(function(th, colIndex) {
+        // 读取 th 上由渲染或拖拽设置的 inline width
+        var width = th.style.width;
+        if (!width) return;
+        rows.forEach(function(row) {
+            var cell = row.children[colIndex];
+            if (cell) {
+                cell.style.width = width;
+                cell.style.minWidth = width;
+                cell.style.maxWidth = width; /* table cell 的 width 只作为最小宽度，必须加 max-width 才能强制约束 */
+            }
+        });
     });
 }
 
@@ -2895,19 +2928,18 @@ function autoFitColumn(table, colIndex, th) {
 
     document.body.removeChild(measureEl);
 
-    // 加上一些内边距
-    const newWidth = Math.max(50, maxWidth + 28);
+    // 加上一些内边距（最小30px，允许拉窄后双击也能保持较窄列宽）
+    const newWidth = Math.max(30, maxWidth + 28);
     th.style.width = newWidth + 'px';
     th.style.minWidth = newWidth + 'px';
 
-    // 对于非 fixed 布局，同步更新单元格
-    if (getComputedStyle(table).tableLayout !== 'fixed') {
-        for (let i = 0; i < rows.length; i++) {
-            const cell = rows[i].children[colIndex];
-            if (cell) {
-                cell.style.width = newWidth + 'px';
-                cell.style.minWidth = newWidth + 'px';
-            }
+    // 同步更新所有行的对应单元格宽度（包含 fixed 布局，防止内容撑开列宽）
+    for (let i = 0; i < rows.length; i++) {
+        const cell = rows[i].children[colIndex];
+        if (cell) {
+            cell.style.width = newWidth + 'px';
+            cell.style.minWidth = newWidth + 'px';
+            cell.style.maxWidth = newWidth + 'px'; /* 表格 cell 的 width 仅作为最小宽度，必须用 max-width 强制约束 */
         }
     }
 

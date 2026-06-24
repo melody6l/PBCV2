@@ -493,6 +493,7 @@ h1 { display: none; }
 #preview-table {
     width: auto;
     min-width: 100%;
+    table-layout: fixed; /* 必须显式声明，配合 width:auto 时防止列宽被内容撑开 */
 }
 
 .result-table thead th {
@@ -502,6 +503,8 @@ h1 { display: none; }
     text-align: center;
     font-weight: 700;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     position: sticky;
     top: 0;
     z-index: 2;
@@ -509,6 +512,7 @@ h1 { display: none; }
     user-select: none;
     border-right: 1px solid rgba(255, 255, 255, 0.12);
     transition: border-color 0.2s, background 0.2s;
+    min-width: 0; /* 允许列宽缩小到文本宽度以下，由 inline width 决定实际宽度 */
 }
 
 .result-table thead th:hover {
@@ -562,7 +566,7 @@ body.col-resizing .result-table thead th {
     cursor: col-resize;
 }
 
-/* ====== 冻结左侧列（矩阵视图水平滚动时固定前4列） ====== */
+/* ====== 冻结左侧列（矩阵视图水平滚动时固定前4列：序号/科目/所需PBC/需求资料） ====== */
 .result-table thead th.frozen-col,
 .result-table tbody td.frozen-col {
     position: sticky;
@@ -586,12 +590,19 @@ body.dark .result-table tbody td.frozen-col {
     background: rgba(255, 230, 0, 0.12);
 }
 
-/* 最后一列冻结列的视觉边界 */
+/* Excel 风格冻结分隔线 — 在冻结区域最右侧绘制一条醒目竖线，类似 Excel 冻结窗格线 */
 .result-table thead th.frozen-col-last {
-    border-right-color: rgba(255, 255, 255, 0.35);
+    border-right: 3px solid #666 !important;
 }
 .result-table tbody td.frozen-col-last {
-    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
+    border-right: 3px solid #999;
+    box-shadow: none;
+}
+body.dark .result-table thead th.frozen-col-last {
+    border-right: 3px solid #999 !important;
+}
+body.dark .result-table tbody td.frozen-col-last {
+    border-right: 3px solid #555;
 }
 
 .result-table td {
@@ -601,6 +612,7 @@ body.dark .result-table tbody td.frozen-col {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0; /* 允许列宽缩小到文本宽度以下，配合 table-layout:fixed 由 th 决定列宽 */
 }
 
 .result-table tr:hover td { background: rgba(255, 230, 0, 0.12); }
@@ -1859,8 +1871,10 @@ body.dark .result-table tbody td.frozen-col {
     color: #856404;
 }
 
-.company-col {
+.result-table thead th.company-col {
     min-width: 64px;
+}
+.company-col {
     white-space: nowrap;
 }
 
