@@ -17,6 +17,9 @@ const API = {
     assignCompany: "/api/assign-company",
     organizeFiles: "/api/organize-files",
     browseViewData: "/api/browse-view-data",
+    addRow: "/api/add-row",
+    editRow: "/api/edit-row",
+    deleteRow: "/api/delete-row",
 };
 
 // 全局状态
@@ -33,6 +36,9 @@ let previewStatusCell = null;   // 预览区当前右键的状态单元格
 let previewStatusRowIndex = null;
 let previewStatusCompany = null;
 let fileRenames = {};  // {原始路径: 重命名后的文件名称}
+let manageMode = false;          // 行管理模式开关
+let contextMenuTargetRow = null; // 右键菜单目标行
+let insertPosition = null;       // 插入位置: "top" | "bottom" | null(末尾)
 
 // ====== 页面初始化 ======
 document.addEventListener("DOMContentLoaded", () => {
@@ -180,6 +186,7 @@ function onChecklistGenerated(data, isNew) {
     renderPreviewTable();
     document.getElementById("preview-section").classList.remove("hidden");
     document.getElementById("export-checklist-btn").classList.remove("hidden");
+    document.getElementById("toggle-manage-btn").classList.remove("hidden");
 }
 
 function downloadChecklist() {
@@ -515,6 +522,15 @@ function wrapThWithFilter(th, colIndex) {
 function renderMatrixView(displayItems) {
     const thead = document.getElementById("preview-table-head");
     const tbody = document.getElementById("preview-table-body");
+    const table = document.getElementById("preview-table");
+
+    // 管理模式样式
+    if (manageMode) {
+        table.classList.add("manage-mode");
+    } else {
+        table.classList.remove("manage-mode");
+    }
+
     document.getElementById("preview-table-wrapper").classList.remove("hidden");
     document.getElementById("list-view-wrapper").classList.add("hidden");
     document.getElementById("list-view-container").classList.add("hidden");
@@ -538,25 +554,51 @@ function renderMatrixView(displayItems) {
         headHtml += '<th class="company-col" style="width:' + nameWidth + 'px"><div class="th-content-wrap"><span class="th-label">' + name + '</span><button class="col-filter-btn" data-col="' + colIndex + '" title="筛选">▼</button></div></th>';
     });
     document.body.removeChild(_measureEl);
+    // 管理模式：操作列头
+    if (manageMode) {
+        headHtml += '<th class="row-actions-th" style="width:40px"></th>';
+    }
     headHtml += "</tr>";
     thead.innerHTML = headHtml;
 
     let bodyHtml = "";
     displayItems.forEach((item) => {
         const rowIndex = item.row_index;
-        bodyHtml += `<tr data-row-index="${rowIndex}">`;
+        const isCustom = item._custom === true;
+        const rowClass = isCustom ? ' class="row-custom"' : '';
+        const rowCtx = manageMode ? ` oncontextmenu="showRowContextMenu(event, ${rowIndex})"` : '';
+        bodyHtml += `<tr data-row-index="${rowIndex}"${rowClass}${rowCtx}>`;
         bodyHtml += `<td>${item.seq ?? ''}</td>`;
-        bodyHtml += `<td>${item.subject}</td>`;
-        bodyHtml += `<td>${item.pbc_name}</td>`;
-        bodyHtml += `<td>${item.demand_name}</td>`;
+
+        if (manageMode) {
+            // 管理模式：可编辑单元格
+            bodyHtml += renderEditableCell(rowIndex, "subject", item.subject, false);
+            bodyHtml += renderEditableCell(rowIndex, "pbc_name", item.pbc_name, false);
+            bodyHtml += renderEditableCell(rowIndex, "demand_name", item.demand_name, true);
+        } else {
+            bodyHtml += `<td>${item.subject}</td>`;
+            bodyHtml += `<td>${item.pbc_name}</td>`;
+            bodyHtml += `<td>${item.demand_name}</td>`;
+        }
 
         companyNames.forEach(cName => {
             const status = (item.company_status && item.company_status[cName]) || "";
             bodyHtml += renderStatusCellPreview(rowIndex, cName, status);
         });
 
+        // 管理模式：删除按钮
+        if (manageMode) {
+            bodyHtml += `<td class="row-actions"><button class="btn-delete-row" onclick="confirmDeleteRow(event, ${rowIndex})" title="删除此行">🗑</button></td>`;
+        }
+
         bodyHtml += "</tr>";
     });
+
+    // 管理模式：底部新增行表单
+    if (manageMode) {
+        bodyHtml += renderAddRowForm();
+    }
+
     tbody.innerHTML = bodyHtml;
     /* 冻结左侧4列：序号、科目、所需PBC、需求资料（需求资料右边框为冻结分隔线） */
     markFrozenColumns('#preview-table', 4);
@@ -988,6 +1030,239 @@ function cycleCellStatus(rowIndex, companyName, cell) {
     });
 }
 
+// ====== 行管理模式 ======
+
+function toggleManageMode() {
+    manageMode = !manageMode;
+    const toggleBtn = document.getElementById("toggle-manage-btn");
+    const addBtn = document.getElementById("add-row-btn");
+
+    if (manageMode) {
+        toggleBtn.textContent = "✓ 退出编辑";
+        toggleBtn.classList.add("btn-accent");
+        addBtn.classList.remove("hidden");
+    } else {
+        toggleBtn.textContent = "✏ 编辑行";
+        toggleBtn.classList.remove("btn-accent");
+        addBtn.classList.add("hidden");
+        // 隐藏右键菜单
+        const menu = document.getElementById("row-context-menu");
+        if (menu) menu.classList.add("hidden");
+    }
+    renderPreviewTable();
+}
+
+// 渲染可编辑单元格（管理模式用）
+function renderEditableCell(rowIndex, field, value, isLastFrozen) {
+    const cls = isLastFrozen ? "frozen-col frozen-col-last editable-cell" : "frozen-col editable-cell";
+    const escaped = escapeHtml(value || "");
+    return `<td class="${cls}" data-row="${rowIndex}" data-field="${field}"
+                ondblclick="startInlineEdit(this)" onblur="saveInlineEdit(this)"
+                title="双击编辑">${escaped}</td>`;
+}
+
+function startInlineEdit(td) {
+    if (!manageMode) return;
+    td.contentEditable = "true";
+    td.classList.add("editing");
+    td.focus();
+    // 选中全部文本
+    const range = document.createRange();
+    range.selectNodeContents(td);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+}
+
+async function saveInlineEdit(td) {
+    td.contentEditable = "false";
+    td.classList.remove("editing");
+
+    const rowIndex = parseInt(td.dataset.row);
+    const field = td.dataset.field;
+    const newValue = td.textContent.trim();
+    const item = previewItems.find(it => it.row_index === rowIndex);
+    if (!item || item[field] === newValue) return;
+
+    try {
+        const resp = await fetch(API.editRow, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ row_index: rowIndex, field: field, value: newValue })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            item[field] = newValue;
+            showToast("已保存", "success");
+        } else {
+            td.textContent = item[field] || ""; // 还原
+            showToast(data.error || "保存失败", "error");
+        }
+    } catch (e) {
+        td.textContent = item[field] || ""; // 还原
+        showToast("网络错误", "error");
+    }
+}
+
+// 渲染新增行表单
+function renderAddRowForm() {
+    if (!manageMode) return "";
+    // 收集现有科目列表（去重）
+    const subjects = [...new Set(previewItems.map(it => it.subject))].filter(Boolean);
+    const numCols = 4 + companyNames.length; // 总列数
+
+    let html = '<tr class="add-row-form">';
+    html += '<td class="frozen-col" style="text-align:center;color:var(--accent);font-weight:bold;">+</td>';
+
+    // 科目下拉
+    html += '<td class="frozen-col"><select class="inline-select" id="new-subject">';
+    html += '<option value="">选择科目...</option>';
+    subjects.forEach(s => { html += '<option value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</option>'; });
+    html += '<option value="__new__">+ 新科目...</option>';
+    html += '</select></td>';
+
+    // PBC名称输入
+    html += '<td class="frozen-col"><input class="inline-input" id="new-pbc" placeholder="所需PBC名称" /></td>';
+
+    // 需求资料输入
+    html += '<td class="frozen-col frozen-col-last"><input class="inline-input" id="new-demand" placeholder="需求资料（默认同PBC）" /></td>';
+
+    // 公司列占位
+    companyNames.forEach(() => { html += '<td style="text-align:center;color:#999;">-</td>'; });
+
+    // 操作按钮
+    html += '<td class="row-actions">';
+    html += '<button class="btn-confirm-row" onclick="submitNewRow()" title="确认新增">✅</button>';
+    html += '<button class="btn-cancel-row" onclick="cancelNewRow()" title="取消">❌</button>';
+    html += '</td>';
+    html += '</tr>';
+    return html;
+}
+
+async function submitNewRow() {
+    const subjectEl = document.getElementById("new-subject");
+    const pbcEl = document.getElementById("new-pbc");
+    const demandEl = document.getElementById("new-demand");
+
+    let subject = subjectEl ? subjectEl.value.trim() : "";
+    const pbcName = pbcEl ? pbcEl.value.trim() : "";
+    const demandName = (demandEl ? demandEl.value.trim() : "") || pbcName;
+
+    // 处理新科目
+    if (subject === "__new__") {
+        subject = prompt("请输入新科目名称：");
+        if (!subject || !subject.trim()) return;
+        subject = subject.trim();
+    }
+
+    if (!subject || !pbcName) {
+        showToast("科目和PBC名称不能为空", "error");
+        return;
+    }
+
+    // 检查是否指定了插入位置
+    let position = insertPosition;
+    let refRowIndex = contextMenuTargetRow;
+
+    try {
+        const resp = await fetch(API.addRow, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ subject, pbc_name: pbcName, demand_name: demandName, position: position, ref_row_index: refRowIndex })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            previewItems.push(data.item);
+            contextMenuTargetRow = null;
+            insertPosition = null;
+            renderPreviewTable();
+            showToast("新增行成功", "success");
+        } else {
+            showToast(data.error || "新增失败", "error");
+        }
+    } catch (e) {
+        showToast("网络错误: " + e.message, "error");
+    }
+}
+
+function cancelNewRow() {
+    contextMenuTargetRow = null;
+    insertPosition = null;
+    renderPreviewTable();
+}
+
+async function confirmDeleteRow(event, rowIndex) {
+    event.stopPropagation();
+    if (!confirm("确定要删除此行吗？此操作不可撤销。")) return;
+
+    try {
+        const resp = await fetch(API.deleteRow, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ row_index: rowIndex })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            previewItems = previewItems.filter(it => it.row_index !== rowIndex);
+            renderPreviewTable();
+            showToast("已删除", "success");
+        } else {
+            showToast(data.error || "删除失败", "error");
+        }
+    } catch (e) {
+        showToast("网络错误: " + e.message, "error");
+    }
+}
+
+// ====== 行级右键菜单 ======
+
+function showRowContextMenu(event, rowIndex) {
+    if (!manageMode) return;
+    event.preventDefault();
+    event.stopPropagation();
+    contextMenuTargetRow = rowIndex;
+
+    const menu = document.getElementById("row-context-menu");
+    if (!menu) return;
+    menu.style.top = event.clientY + "px";
+    menu.style.left = event.clientX + "px";
+    menu.classList.remove("hidden");
+
+    // 点击其他地方关闭
+    setTimeout(() => {
+        document.addEventListener("click", hideRowContextMenu, { once: true });
+    }, 0);
+}
+
+function hideRowContextMenu() {
+    const menu = document.getElementById("row-context-menu");
+    if (menu) menu.classList.add("hidden");
+    // 不重置 contextMenuTargetRow，它用于 insert 操作
+}
+
+function insertRowAbove() {
+    insertPosition = "top";
+    hideRowContextMenu();
+    showToast("请在下方\"新增行\"表单中填入内容，将插入到该行上方", "info");
+    const addForm = document.querySelector(".add-row-form");
+    if (addForm) addForm.scrollIntoView({ behavior: "smooth" });
+}
+
+function insertRowBelow() {
+    insertPosition = "bottom";
+    hideRowContextMenu();
+    showToast("请在下方\"新增行\"表单中填入内容，将插入到该行下方", "info");
+    const addForm = document.querySelector(".add-row-form");
+    if (addForm) addForm.scrollIntoView({ behavior: "smooth" });
+}
+
+function deleteRowViaMenu() {
+    const rowIndex = contextMenuTargetRow;
+    hideRowContextMenu();
+    if (rowIndex) {
+        confirmDeleteRow({ stopPropagation: function(){} }, rowIndex);
+    }
+}
+
 // ====== 预览区状态右键菜单 ======
 function showPreviewStatusMenu(event, rowIndex, companyName, cell) {
     event.preventDefault();
@@ -1083,6 +1358,7 @@ function scanFolder() {
             renderPreviewTable();
             document.getElementById("export-checklist-btn").classList.remove("hidden");
             document.getElementById("organize-files-btn")?.classList.remove("hidden");
+            document.getElementById("toggle-manage-btn").classList.remove("hidden");
         }
         updateWorkflowState();
         showToast(`已扫描 ${data.scanned_count} 个文件`, "success");
@@ -1156,6 +1432,8 @@ function initMatchControls() {
     document.getElementById("export-checklist-btn").addEventListener("click", exportChecklist);
     const orgBtn = document.getElementById("organize-files-btn");
     if (orgBtn) orgBtn.addEventListener("click", organizeFiles);
+    document.getElementById("toggle-manage-btn").addEventListener("click", toggleManageMode);
+    document.getElementById("add-row-btn").addEventListener("click", () => { renderPreviewTable(); });
 }
 
 async function doMatch() {
@@ -1177,6 +1455,7 @@ async function doMatch() {
         updateStats(data.matched_count, data.total, data.partial_count);
         document.getElementById("export-checklist-btn").classList.remove("hidden");
         document.getElementById("organize-files-btn")?.classList.remove("hidden");
+        document.getElementById("toggle-manage-btn").classList.remove("hidden");
         updateWorkflowState();
 
         if (document.getElementById("llm-enabled").checked) {

@@ -9,7 +9,10 @@ from flask import Flask, request, jsonify, render_template, send_file, make_resp
 from matcher import match_files, _find_company_in_path, _find_company_in_filename
 from excel_handler import normalize_item_name, export_checklist_two_sheets, build_browse_items
 from llm_matcher import llm_match
-from template_handler import read_template, generate_checklist, read_user_checklist, update_cell_status
+from template_handler import (
+    read_template, generate_checklist, read_user_checklist, update_cell_status,
+    add_row_to_checklist, edit_row_in_checklist, delete_row_from_checklist,
+)
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = "uploads"
@@ -369,6 +372,131 @@ def api_update_cell_status():
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/add-row", methods=["POST"])
+def api_add_row():
+    """在核对清单中新增一行 PBC 需求"""
+    data = request.get_json()
+    subject = (data.get("subject") or "").strip()
+    pbc_name = (data.get("pbc_name") or "").strip()
+    demand_name = (data.get("demand_name") or "").strip() or pbc_name
+    # 可选：插入位置（上方/下方的参照 row_index）
+    position = data.get("position")         # "top" | "bottom" | None(末尾)
+    ref_row_index = data.get("ref_row_index")  # 参照行
+
+    file_path = state.get("checklist_file_path")
+    if not file_path:
+        return jsonify({"error": "请先上传或生成清单"}), 400
+    if not subject or not pbc_name:
+        return jsonify({"error": "科目和PBC名称不能为空"}), 400
+
+    try:
+        new_row_index = add_row_to_checklist(
+            file_path, subject, pbc_name, demand_name,
+            position=position, ref_row_index=ref_row_index
+        )
+    except Exception as e:
+        return jsonify({"error": f"写入Excel失败: {str(e)}"}), 500
+
+    # 构造新条目
+    company_names = []
+    if state.get("checklist_template"):
+        company_names = state["checklist_template"].get("company_names", [])
+
+    new_item = {
+        "row_index": new_row_index,
+        "seq": new_row_index,  # 前端会重新编号
+        "subject": subject,
+        "pbc_name": pbc_name,
+        "demand_name": demand_name,
+        "company_status": {cn: "N" for cn in company_names},
+        "_custom": True,  # 标记为自定义行
+    }
+
+    # 更新内存 state
+    if state.get("checklist_template"):
+        state["checklist_template"]["items"].append(new_item)
+    if state.get("checklist"):
+        state["checklist"]["items"].append({
+            "name": demand_name,
+            "source_key": normalize_item_name(demand_name),
+            "row_uid": f"custom_{new_row_index}",
+        })
+
+    return jsonify({"success": True, "item": new_item})
+
+
+@app.route("/api/edit-row", methods=["POST"])
+def api_edit_row():
+    """编辑核对清单中某行的科目/PBC/需求资料"""
+    data = request.get_json()
+    row_index = data.get("row_index")
+    field = data.get("field")       # "subject" | "pbc_name" | "demand_name"
+    value = (data.get("value") or "").strip()
+
+    if not row_index or not field:
+        return jsonify({"error": "缺少 row_index 或 field"}), 400
+    if field not in ("subject", "pbc_name", "demand_name"):
+        return jsonify({"error": "无效的字段名"}), 400
+
+    file_path = state.get("checklist_file_path")
+    if not file_path:
+        return jsonify({"error": "请先上传或生成清单"}), 400
+
+    try:
+        edit_row_in_checklist(file_path, row_index, field, value)
+    except Exception as e:
+        return jsonify({"error": f"编辑Excel失败: {str(e)}"}), 500
+
+    # 更新内存 state
+    if state.get("checklist_template"):
+        for item in state["checklist_template"]["items"]:
+            if item.get("row_index") == row_index:
+                item[field] = value
+                # 如果编辑了 demand_name，同步更新 checklist.items
+                if field == "demand_name" and state.get("checklist"):
+                    for ci in state["checklist"]["items"]:
+                        if ci.get("row_uid") == f"custom_{row_index}" or \
+                           ci.get("row_uid") == str(row_index):
+                            ci["name"] = value
+                            ci["source_key"] = normalize_item_name(value)
+                break
+
+    return jsonify({"success": True})
+
+
+@app.route("/api/delete-row", methods=["POST"])
+def api_delete_row():
+    """删除核对清单中的一行（逻辑删除：在隐藏列标记 _deleted）"""
+    data = request.get_json()
+    row_index = data.get("row_index")
+
+    if not row_index:
+        return jsonify({"error": "缺少 row_index"}), 400
+
+    file_path = state.get("checklist_file_path")
+    if not file_path:
+        return jsonify({"error": "请先上传或生成清单"}), 400
+
+    try:
+        delete_row_from_checklist(file_path, row_index)
+    except Exception as e:
+        return jsonify({"error": f"删除失败: {str(e)}"}), 500
+
+    # 更新内存 state
+    if state.get("checklist_template"):
+        state["checklist_template"]["items"] = [
+            it for it in state["checklist_template"]["items"]
+            if it.get("row_index") != row_index
+        ]
+    if state.get("checklist"):
+        state["checklist"]["items"] = [
+            ci for ci in state["checklist"]["items"]
+            if ci.get("row_uid") not in (f"custom_{row_index}", str(row_index))
+        ]
+
+    return jsonify({"success": True})
 
 
 @app.route("/api/export-checklist", methods=["GET", "POST"])

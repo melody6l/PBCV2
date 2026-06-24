@@ -147,6 +147,8 @@
                         <button class="view-toggle-btn" data-view="list">&#128205; 清单视图</button>
                         <button class="view-toggle-btn" data-view="browse">&#128193; 资料浏览视图</button>
                     </div>
+                    <button class="btn btn-outline btn-sm hidden" id="toggle-manage-btn" title="编辑行模式">&#9998; 编辑行</button>
+                    <button class="btn btn-outline btn-sm hidden" id="add-row-btn" title="新增一行">+ 新增行</button>
                     <button class="btn btn-success btn-sm hidden" id="export-checklist-btn">&#128190; 导出清单</button>
                     <button class="btn btn-outline btn-sm hidden" id="organize-files-btn">&#128193; 整理文件</button>
                 </div>
@@ -251,6 +253,13 @@
         <button type="button" data-status="不完整">&#9888; 不完整</button>
         <button type="button" data-status="N/A">&#8856; 不适用</button>
         <button type="button" data-status="N">&#10007; 未匹配</button>
+    </div>
+
+    <!-- 行管理右键菜单 -->
+    <div class="row-context-menu hidden" id="row-context-menu">
+        <button type="button" onclick="insertRowAbove()">&#11014; 在上方插入</button>
+        <button type="button" onclick="insertRowBelow()">&#11015; 在下方插入</button>
+        <button type="button" class="danger" onclick="deleteRowViaMenu()">&#128465; 删除此行</button>
     </div>
 
     <!-- 分配公司弹窗 -->
