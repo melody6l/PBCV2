@@ -229,7 +229,6 @@ h1 { display: none; }
 
 .folder-input-group input,
 .llm-row input,
-.mode-selector select,
 .llm-row select {
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -274,7 +273,6 @@ h1 { display: none; }
 .folder-input-group input:focus,
 .llm-row input:focus,
 .llm-row select:focus,
-.mode-selector select:focus,
 .name-col-selector select:focus {
     outline: 2px solid rgba(255, 230, 0, 0.42);
     border-color: var(--accent-hover);
@@ -423,27 +421,6 @@ h1 { display: none; }
 .stat-card.matched .stat-value { color: var(--success); }
 .stat-card.incomplete .stat-value { color: var(--warning); }
 .stat-card.missing .stat-value { color: var(--danger); }
-
-/* 匹配模式选择 */
-.mode-selector {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-}
-
-.mode-selector label {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--primary);
-}
-
-.mode-selector select {
-    padding: 8px 12px;
-    font-size: 14px;
-    min-height: 38px;
-}
 
 /* 名称列选择器 */
 .name-col-selector {
@@ -2473,7 +2450,6 @@ body.dark .result-table tbody td.frozen-col-last {
     }
 
     .folder-input-group,
-    .mode-selector,
     .llm-row {
         align-items: stretch;
         flex-direction: column;

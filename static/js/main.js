@@ -1162,12 +1162,11 @@ async function doMatch() {
     if (!previewItems.length) { showToast("请先生成或上传PBC需求清单", "error"); return; }
     if (!scannedCount) { showToast("请先扫描目标文件夹", "error"); return; }
 
-    const mode = document.getElementById("match-mode").value;
     try {
         const r = await fetch(API.match, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ mode, incremental: false }),
+            body: JSON.stringify({ incremental: false }),
         });
         const data = await r.json();
         if (data.error) { showToast(data.error, "error"); return; }

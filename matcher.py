@@ -1,4 +1,4 @@
-"""文件匹配引擎 - 支持精确匹配和模糊匹配（文件+文件夹）"""
+"""文件匹配引擎 - 基于关键词的模糊匹配（文件+文件夹）"""
 
 import os
 import re
@@ -19,22 +19,6 @@ def extract_keywords(name):
     # 拆分为关键词列表
     keywords = [kw.strip() for kw in cleaned.split() if kw.strip()]
     return keywords
-
-
-def exact_match(checklist_name, scanned_files, scanned_folders):
-    """精确匹配：清单名称与实际文件/文件夹名完全一致（忽略文件扩展名）"""
-    checklist_base = os.path.splitext(checklist_name)[0]
-    matches = []
-    for path in scanned_files:
-        name = os.path.basename(path)
-        base = os.path.splitext(name)[0]
-        if checklist_base == base:
-            matches.append(path)
-    for path in scanned_folders:
-        name = os.path.basename(path)
-        if checklist_base == name:
-            matches.append(path)
-    return matches
 
 
 def fuzzy_match(checklist_name, scanned_files, scanned_folders):
@@ -99,15 +83,14 @@ def _find_company_in_filename(filename, company_names):
     return None
 
 
-def match_files(checklist_items, scanned_files, scanned_folders, mode="fuzzy", prev_results=None, company_names=None):
+def match_files(checklist_items, scanned_files, scanned_folders, prev_results=None, company_names=None):
     """
-    对清单中的每一项执行匹配（同时匹配文件和文件夹）
+    对清单中的每一项执行模糊匹配（同时匹配文件和文件夹）
 
     参数:
         checklist_items: 清单名称列表
         scanned_files: 扫描得到的文件路径列表
         scanned_folders: 扫描得到的文件夹路径列表
-        mode: "exact" 或 "fuzzy"
         company_names: 公司简称列表（用于检测文件夹内的公司子文件夹和文件名中的公司名）
 
     返回:
@@ -121,7 +104,7 @@ def match_files(checklist_items, scanned_files, scanned_folders, mode="fuzzy", p
         - company_coverage: {company: {"files": [paths], "folders": [paths]}}
     """
     results = []
-    match_func = exact_match if mode == "exact" else fuzzy_match
+    fuzzy_match_func = fuzzy_match
 
     history = _history_lookup(prev_results)
     for i, item in enumerate(checklist_items):
@@ -135,7 +118,7 @@ def match_files(checklist_items, scanned_files, scanned_folders, mode="fuzzy", p
             results.append(kept)
             continue
 
-        matched = match_func(checklist_name, scanned_files, scanned_folders)
+        matched = fuzzy_match_func(checklist_name, scanned_files, scanned_folders)
 
         # 检查匹配项中的公司覆盖情况
         company_coverage = {}  # {company: {"files": [...], "folders": [...]}}

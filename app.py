@@ -21,7 +21,6 @@ state = {
     "scanned_files": None,   # 扫描到的文件列表
     "scanned_folders": None, # 扫描到的文件夹列表
     "match_results": None,   # 匹配结果
-    "match_mode": "fuzzy",   # 当前匹配模式
     "scan_root": None,       # 当前扫描根目录
     "new_items": [],
     "existing_items": [],
@@ -105,7 +104,6 @@ def reset_state_values():
         "scanned_files": None,
         "scanned_folders": None,
         "match_results": None,
-        "match_mode": "fuzzy",
         "scan_root": None,
         "new_items": [],
         "existing_items": [],
@@ -153,7 +151,6 @@ def scan_folder():
             state["checklist"]["items"],
             scanned_files,
             scanned_folders,
-            mode=state["match_mode"],
             prev_results=prev_results,
             company_names=company_names,
         )
@@ -185,11 +182,9 @@ def scan_folder():
 
 @app.route("/api/match", methods=["POST"])
 def do_match():
-    """执行匹配（可切换匹配模式）"""
+    """执行模糊匹配"""
     data = request.get_json()
-    mode = data.get("mode", "fuzzy")
     incremental = data.get("incremental", False)
-    state["match_mode"] = mode
 
     if not state["checklist"]:
         return jsonify({"error": "请先上传清单文件"}), 400
@@ -206,7 +201,6 @@ def do_match():
         state["checklist"]["items"],
         state["scanned_files"],
         state.get("scanned_folders", []),
-        mode=mode,
         prev_results=prev_results,
         company_names=company_names,
     )
@@ -218,7 +212,6 @@ def do_match():
         "matched_count": matched_count,
         "partial_count": partial_count,
         "total": len(results),
-        "mode": mode,
         "root_path": state.get("scan_root", ""),
     })
 
