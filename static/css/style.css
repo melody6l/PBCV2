@@ -1878,7 +1878,7 @@ body.dark .result-table tbody td.frozen-col-last {
 /* ====== 预览区表格包装 ====== */
 
 #preview-table-wrapper {
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 140px);
     overflow-y: auto;
 }
 
@@ -1886,13 +1886,13 @@ body.dark .result-table tbody td.frozen-col-last {
 .list-view-container {
     display: flex;
     gap: 0;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 140px);
 }
 
 #list-view-wrapper {
     flex: 1;
     min-width: 0;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 140px);
     overflow-y: auto;
     transition: flex 0.3s;
 }
@@ -1909,7 +1909,7 @@ body.dark .result-table tbody td.frozen-col-last {
     border: 1px solid var(--border);
     border-radius: 6px;
     overflow: hidden;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 140px);
     flex-direction: column;
 }
 .list-preview-pane:not(.hidden) {
@@ -1967,13 +1967,13 @@ body.dark .result-table tbody td.frozen-col-last {
 .browse-view-container {
     display: flex;
     gap: 0;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 140px);
 }
 
 #browse-view-wrapper {
     flex: 1;
     min-width: 0;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 140px);
     overflow: auto;
     transition: flex 0.3s;
 }
@@ -1990,7 +1990,7 @@ body.dark .result-table tbody td.frozen-col-last {
     border: 1px solid var(--border);
     border-radius: 6px;
     overflow: hidden;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 140px);
     flex-direction: column;
 }
 
