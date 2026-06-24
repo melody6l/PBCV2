@@ -344,7 +344,7 @@ def build_browse_items(scanned_files, scanned_folders, scan_root, match_results)
     for result in match_results or []:
         requirement = {
             "index": result.get("index"),
-            "checklist_name": result.get("checklist_name", ""),
+            "pbc_name": result.get("pbc_name", ""),
         }
         for path in result.get("matched_files", []) or []:
             requirements = path_requirements.setdefault(path, [])
@@ -572,7 +572,7 @@ def export_checklist_two_sheets(items, company_names, match_results, file_rename
         row_fill = green_fill if browse_item["is_matched"] else red_fill
         folder_parts = browse_item["folder_parts"]
         requirement_text = "、".join(
-            f"第{requirement['index']}项 {requirement['checklist_name']}"
+            requirement["pbc_name"]
             for requirement in browse_item["matched_requirements"]
         )
         values = folder_parts + [""] * (folder_levels - len(folder_parts))

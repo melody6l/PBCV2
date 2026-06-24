@@ -732,7 +732,7 @@ async function renderBrowseView() {
             const requirementText = document.createElement("span");
             requirementText.textContent = item.matched_requirements.length
                 ? item.matched_requirements.map(requirement =>
-                    `第${requirement.index}项 ${requirement.checklist_name}`
+                    requirement.pbc_name
                 ).join("、")
                 : "暂无关联需求";
             requirementCell.appendChild(requirementText);

@@ -114,6 +114,7 @@ def build_history_results(checklist):
         results.append({
             "index": i,
             "checklist_name": item.get("name", ""),
+            "pbc_name": item.get("pbc_name", ""),
             "row_uid": item.get("row_uid", ""),
             "source_key": item.get("source_key", normalize_item_name(item.get("name", ""))),
             "status": status,
@@ -309,6 +310,7 @@ def gen_checklist():
             if name:
                 items_for_match.append({
                     "name": name,
+                    "pbc_name": it.get("pbc_name", ""),
                     "source_key": normalize_item_name(name),
                     "row_uid": "",
                 })
@@ -368,6 +370,7 @@ def upload_checklist_v2():
             if name:
                 items.append({
                     "name": name,
+                    "pbc_name": it.get("pbc_name", ""),
                     "source_key": normalize_item_name(name),
                     "row_uid": "",
                 })

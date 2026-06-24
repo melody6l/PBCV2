@@ -278,6 +278,7 @@ def match_files(checklist_items, scanned_files, scanned_folders, prev_results=No
         results.append({
             "index": i + 1,
             "checklist_name": checklist_name,
+            "pbc_name": item.get("pbc_name", "") if isinstance(item, dict) else "",
             "row_uid": item.get("row_uid", "") if isinstance(item, dict) else "",
             "source_key": item.get("source_key", normalize_item_name(checklist_name)) if isinstance(item, dict) else normalize_item_name(checklist_name),
             "status": status,
