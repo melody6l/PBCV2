@@ -31,6 +31,7 @@ const API = {
     createFolder: "/api/create-folder",
     resetState: "/api/reset-state",
     assignCompany: "/api/assign-company",
+    unmatchFile: "/api/unmatch-file",
     organizeFiles: "/api/organize-files",
     browseViewData: "/api/browse-view-data",
     addRow: "/api/add-row",
@@ -891,10 +892,10 @@ function renderUnassignedButton() {
         btn.innerHTML = '⚠️ 需人工确认公司归属 (' + unassignedItems.length + '项)';
         btn.onclick = showUnassignedModal;
 
-        // 插入到 export-checklist-btn 之前
-        const exportBtn = document.getElementById('export-checklist-btn');
-        if (exportBtn && exportBtn.parentNode === panelActions) {
-            panelActions.insertBefore(btn, exportBtn);
+        // 插入到 view-toggle 之前（即新增行按钮之后）
+        const viewToggle = document.getElementById('view-toggle');
+        if (viewToggle && viewToggle.parentNode === panelActions) {
+            panelActions.insertBefore(btn, viewToggle);
         } else {
             panelActions.appendChild(btn);
         }
@@ -1491,6 +1492,13 @@ async function doMatch() {
     if (!previewItems.length) { showToast("请先生成或上传PBC需求清单", "error"); return; }
     if (!scannedCount) { showToast("请先扫描目标文件夹", "error"); return; }
 
+    const statusEl = document.getElementById("llm-status");
+    const matchBtn = document.getElementById("match-btn");
+    statusEl.classList.remove("hidden");
+    statusEl.textContent = "正在智能匹配中，请稍候...";
+    matchBtn.disabled = true;
+    matchBtn.style.opacity = "0.6";
+
     try {
         const r = await fetch(API.match, {
             method: "POST",
@@ -1498,7 +1506,13 @@ async function doMatch() {
             body: JSON.stringify({ incremental: false }),
         });
         const data = await r.json();
-        if (data.error) { showToast(data.error, "error"); return; }
+        if (data.error) {
+            statusEl.classList.add("hidden");
+            matchBtn.disabled = false;
+            matchBtn.style.opacity = "1";
+            showToast(data.error, "error");
+            return;
+        }
         matchResults = data.results;
         scanRoot = data.root_path || scanRoot;
         syncMatchToPreview();
@@ -1511,10 +1525,16 @@ async function doMatch() {
         if (document.getElementById("llm-enabled").checked) {
             await runLlmMatch();
         } else {
+            statusEl.classList.add("hidden");
+            matchBtn.disabled = false;
+            matchBtn.style.opacity = "1";
             showToast(`匹配完成: ${data.matched_count}/${data.total} 已获取`, "success");
         }
         markProjectDirty();
     } catch (err) {
+        statusEl.classList.add("hidden");
+        matchBtn.disabled = false;
+        matchBtn.style.opacity = "1";
         showToast("匹配失败: " + err.message, "error");
     }
 }
@@ -2571,8 +2591,8 @@ function showMatrixAssignModal(filePath, isDir, fileName) {
     const modal = document.createElement("div");
     modal.className = "assign-matrix-modal";
 
-    // 检查哪些行已经分配了此文件
-    const assignedRows = new Set();
+    // 检查哪些行已经分配了此文件，并记录已分配的公司列表
+    const assignedRows = new Map(); // rowIndex → 已分配的公司名称数组
     if (matchResults) {
         matchResults.forEach(mr => {
             const allFiles = [...(mr.matched_files || [])];
@@ -2583,7 +2603,16 @@ function showMatrixAssignModal(filePath, isDir, fileName) {
                 });
             }
             if (allFiles.some(f => f === filePath)) {
-                assignedRows.add(mr.index);
+                // 找出具体哪些公司包含了此文件
+                const assignedCompanies = [];
+                if (mr.company_coverage) {
+                    Object.entries(mr.company_coverage).forEach(([cName, info]) => {
+                        const hasFile = (info.files && info.files.includes(filePath)) ||
+                                        (info.folders && info.folders.includes(filePath));
+                        if (hasFile) assignedCompanies.push(cName);
+                    });
+                }
+                assignedRows.set(mr.index, assignedCompanies);
             }
         });
     }
@@ -2596,6 +2625,7 @@ function showMatrixAssignModal(filePath, isDir, fileName) {
 
     previewItems.forEach(item => {
         const rowIndex = item.row_index;
+        const preAssignedCompanies = assignedRows.get(rowIndex) || [];
         const alreadyAssigned = assignedRows.has(rowIndex);
         const rowStatus = item._rowStatus || 'N';
 
@@ -2630,35 +2660,39 @@ function showMatrixAssignModal(filePath, isDir, fileName) {
             statusColor = 'var(--danger)';
         }
 
-        // 公司下拉多选（类似需人工确认公司归属的交互方式）
+        // 公司下拉多选（含已分配行：预选公司、支持取消分配）
         let companyCheckboxesHtml = '';
-        if (alreadyAssigned) {
-            companyCheckboxesHtml = '<span style="color:var(--success);font-weight:600;font-size:12px;">已分配</span>';
-        } else {
-            const optionsHtml = companyNames.map(cName => {
-                // 显示该公司当前状态作为参考标记
-                const currStatus = item.company_status ? (item.company_status[cName] || 'N') : 'N';
-                let statusBadge = '';
-                if (currStatus === 'Y') {
-                    statusBadge = ' <span class="company-status-badge status-y">Y</span>';
-                } else if (currStatus === '不完整') {
-                    statusBadge = ' <span class="company-status-badge status-incomplete">不完整</span>';
-                }
-                return `<label><input type="checkbox" value="${cName}" class="matrix-company-cb"> ${cName}${statusBadge}</label>`;
-            }).join('');
+        const optionsHtml = companyNames.map(cName => {
+            const currStatus = item.company_status ? (item.company_status[cName] || 'N') : 'N';
+            let statusBadge = '';
+            if (currStatus === 'Y') {
+                statusBadge = ' <span class="company-status-badge status-y">Y</span>';
+            } else if (currStatus === '不完整') {
+                statusBadge = ' <span class="company-status-badge status-incomplete">不完整</span>';
+            }
+            const checked = preAssignedCompanies.includes(cName) ? ' checked' : '';
+            return `<label><input type="checkbox" value="${cName}" class="matrix-company-cb"${checked}> ${cName}${statusBadge}</label>`;
+        }).join('');
 
-            companyCheckboxesHtml = `<div class="company-select-wrap matrix-company-wrap" data-row="${rowIndex}">
-                <div class="company-select-trigger matrix-company-trigger">
-                    <span class="select-label">请选择公司</span>
-                    <span class="arrow">▼</span>
-                </div>
-                <div class="company-select-dropdown matrix-company-dropdown">
-                    <label><input type="checkbox" class="select-all-cb"> 全选</label>
-                    <div class="company-select-divider"></div>
-                    ${optionsHtml}
-                </div>
-            </div>`;
-        }
+        // 已分配行显示"取消此需求分配"按钮
+        const unassignBtn = alreadyAssigned
+            ? `<div class="company-select-divider"></div>
+               <button type="button" class="unassign-row-btn" data-row="${rowIndex}">✕ 取消此需求分配</button>`
+            : '';
+
+        const initialLabel = alreadyAssigned ? preAssignedCompanies.join('、') : '请选择公司';
+        companyCheckboxesHtml = `<div class="company-select-wrap matrix-company-wrap" data-row="${rowIndex}" data-was-assigned="${alreadyAssigned ? '1' : '0'}">
+            <div class="company-select-trigger matrix-company-trigger">
+                <span class="select-label" style="${alreadyAssigned ? 'color:var(--primary);' : ''}">${initialLabel}</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="company-select-dropdown matrix-company-dropdown">
+                <label><input type="checkbox" class="select-all-cb"> 全选</label>
+                <div class="company-select-divider"></div>
+                ${optionsHtml}
+                ${unassignBtn}
+            </div>
+        </div>`;
 
         tableHtml += `<tr class="${alreadyAssigned ? 'assign-row-matched' : ''}" data-row="${rowIndex}">
             <td>${item.seq ?? ''}</td>
@@ -2777,6 +2811,44 @@ function showMatrixAssignModal(filePath, isDir, fileName) {
             updateMatrixTriggerLabel(wrap);
         });
     });
+
+    // "取消此需求分配" 按钮：一键清空该行的公司勾选，并立即更新状态显示
+    modal.querySelectorAll('.unassign-row-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const wrap = btn.closest('.matrix-company-wrap');
+            wrap.querySelectorAll('.matrix-company-cb').forEach(cb => cb.checked = false);
+            updateMatrixTriggerLabel(wrap);
+
+            // 立即更新该行的获取状态显示为 N
+            const row = wrap.closest('tr');
+            if (row) {
+                row.classList.remove('assign-row-matched');
+                const statusCell = row.querySelectorAll('td')[4]; // 第5列：获取状态
+                if (statusCell) {
+                    statusCell.textContent = 'N';
+                    statusCell.style.color = 'var(--danger)';
+                    statusCell.style.fontWeight = '600';
+                    statusCell.style.fontSize = '12px';
+                }
+            }
+
+            // 关闭下拉
+            const dropdown = wrap.querySelector('.matrix-company-dropdown');
+            if (dropdown && dropdown.classList.contains('open')) {
+                dropdown.classList.remove('open');
+                dropdown.style.position = '';
+                dropdown.style.top = '';
+                dropdown.style.left = '';
+                dropdown.style.width = '';
+                dropdown.style.zIndex = '';
+                dropdown.style.minWidth = '';
+                dropdown.style.transform = '';
+                const trigger = wrap.querySelector('.matrix-company-trigger');
+                if (trigger) trigger.classList.remove('is-open');
+            }
+        });
+    });
 }
 
 // 更新矩阵分配弹窗中下拉触发器的显示文本
@@ -2795,86 +2867,160 @@ function updateMatrixTriggerLabel(wrap) {
 }
 
 function executeMatrixAssign(filePath, isDir, overlay) {
-    // 收集所有勾选了公司的行（从下拉多选组件中读取）
+    // 收集所有行的状态（从下拉多选组件中读取）
     const checkGroups = document.querySelectorAll('.matrix-company-wrap');
-    const assignments = [];
+    const assignments = [];      // 有勾选公司的行 → 需要分配
+    const toUnassign = [];       // 之前已分配但现已取消全部勾选的行 → 需要取消分配
     checkGroups.forEach(wrap => {
         const rowIndex = parseInt(wrap.dataset.row);
         const cbs = wrap.querySelectorAll('.matrix-company-cb:checked');
         const companies = Array.from(cbs).map(cb => cb.value);
+        const wasAssigned = wrap.dataset.wasAssigned === '1';
         if (companies.length > 0) {
-            assignments.push({ rowIndex, companies });
+            assignments.push({ rowIndex, companies, wasAssigned });
+        } else if (wasAssigned) {
+            // 之前已分配但现在取消了所有勾选
+            toUnassign.push(rowIndex);
         }
     });
 
-    if (!assignments.length) {
+    if (!assignments.length && !toUnassign.length) {
         showToast("请至少为一个需求勾选公司", "error");
         return;
     }
 
-    // 取第一个选中的行+公司组合执行分配
-    const { rowIndex, companies } = assignments[0];
-
-    // 步骤1：manual-match 将文件绑定到清单行
-    fetch(API.manualMatch, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ file_path: filePath, index: rowIndex }),
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.error) { showToast(data.error, "error"); return Promise.reject(data.error); }
-
-        // 更新 matchResults
-        if (data.match_results) {
-            const idx = matchResults.findIndex(r => r.index === rowIndex);
-            if (idx >= 0) {
-                matchResults[idx] = data.match_results;
-            } else {
-                matchResults.push(data.match_results);
-            }
-        }
-
-        // 步骤2：assign-company 设置公司归属（支持多公司）
-        return fetch(API.assignCompany, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ index: rowIndex, company_names: companies }),
+    // 如果有需要取消分配的行，先处理取消分配
+    let unassignPromise = Promise.resolve();
+    if (toUnassign.length) {
+        // 依次取消分配（逐个调用 API）
+        const unassignFns = toUnassign.map(rowIndex => () => {
+            return fetch(API.unmatchFile, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ file_path: filePath, index: rowIndex }),
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) { showToast("取消分配失败: " + data.error, "error"); throw new Error(data.error); }
+                // 更新 matchResults
+                if (data.match_results) {
+                    const idx = matchResults.findIndex(r => r.index === rowIndex);
+                    if (idx >= 0) {
+                        if (data.match_results.status === "未匹配") {
+                            // 该行已无匹配文件，移除 matchResults
+                            matchResults.splice(idx, 1);
+                        } else {
+                            matchResults[idx] = data.match_results;
+                        }
+                    }
+                }
+            });
         });
-    })
-    .then(r => r.json())
-    .then(d => {
-        if (d && d.error) { showToast(d.error, "error"); return; }
+        unassignPromise = unassignFns.reduce((p, fn) => p.then(fn), Promise.resolve());
+    }
 
-        // 更新 company_coverage
-        if (d && d.company_coverage) {
-            const mr = matchResults.find(r => r.index === rowIndex);
-            if (mr) mr.company_coverage = d.company_coverage;
+    // 取消分配完成后，处理分配
+    unassignPromise.then(() => {
+        if (!assignments.length) {
+            // 只有取消分配操作
+            syncMatchToPreview();
+            if (currentView === "browse") {
+                renderBrowseView();
+            } else {
+                renderPreviewTable();
+            }
+            updateStats();
+            if (overlay) overlay.remove();
+            const count = toUnassign.length;
+            showToast(`已取消 ${count} 个需求的分配`, "success");
+            markProjectDirty();
+            return;
         }
 
-        // 更新 previewItems
-        const item = previewItems.find(it => it.row_index === rowIndex);
-        if (item) {
-            if (!item.company_status) item.company_status = {};
-            companies.forEach(c => { item.company_status[c] = "Y"; });
-            item._rowStatus = "Y";
+        // 取第一个选中的行+公司组合执行分配
+        const { rowIndex, companies, wasAssigned } = assignments[0];
+
+        // 如果该行之前已分配但公司选择有变化，先取消再重新分配
+        let prePromise = Promise.resolve();
+        if (wasAssigned) {
+            prePromise = fetch(API.unmatchFile, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ file_path: filePath, index: rowIndex }),
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) { /* 取消旧的分配，即使失败也继续 */ }
+            })
+            .catch(() => { /* 忽略错误，继续分配 */ });
         }
 
-        syncMatchToPreview();
-        if (currentView === "browse") {
-            renderBrowseView();
-        } else {
-            renderPreviewTable();
-        }
-        updateStats();
+        prePromise.then(() => {
+            // 步骤1：manual-match 将文件绑定到清单行
+            fetch(API.manualMatch, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ file_path: filePath, index: rowIndex }),
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) { showToast(data.error, "error"); return Promise.reject(data.error); }
 
-        if (overlay) overlay.remove();
-        showToast(`已分配给: ${companies.join('、')}`, "success");
-        markProjectDirty();
-    })
-    .catch(err => {
-        if (typeof err === 'string') return; // 已经在前面显示了 toast
-        showToast("分配失败: " + err.message, "error");
+                // 更新 matchResults
+                if (data.match_results) {
+                    const idx = matchResults.findIndex(r => r.index === rowIndex);
+                    if (idx >= 0) {
+                        matchResults[idx] = data.match_results;
+                    } else {
+                        matchResults.push(data.match_results);
+                    }
+                }
+
+                // 步骤2：assign-company 设置公司归属（支持多公司）
+                return fetch(API.assignCompany, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ index: rowIndex, company_names: companies }),
+                });
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d && d.error) { showToast(d.error, "error"); return; }
+
+                // 更新 company_coverage
+                if (d && d.company_coverage) {
+                    const mr = matchResults.find(r => r.index === rowIndex);
+                    if (mr) mr.company_coverage = d.company_coverage;
+                }
+
+                // 更新 previewItems
+                const item = previewItems.find(it => it.row_index === rowIndex);
+                if (item) {
+                    if (!item.company_status) item.company_status = {};
+                    companies.forEach(c => { item.company_status[c] = "Y"; });
+                    item._rowStatus = "Y";
+                }
+
+                syncMatchToPreview();
+                if (currentView === "browse") {
+                    renderBrowseView();
+                } else {
+                    renderPreviewTable();
+                }
+                updateStats();
+
+                if (overlay) overlay.remove();
+                const msg = wasAssigned
+                    ? `已更新分配: ${companies.join('、')}`
+                    : `已分配给: ${companies.join('、')}`;
+                showToast(msg, "success");
+                markProjectDirty();
+            })
+            .catch(err => {
+                if (typeof err === 'string') return;
+                showToast("分配失败: " + err.message, "error");
+            });
+        });
     });
 }
 

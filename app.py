@@ -718,6 +718,64 @@ def assign_company():
     return jsonify({"error": "未找到指定序号"}), 400
 
 
+@app.route("/api/unmatch-file", methods=["POST"])
+def unmatch_file():
+    """从指定清单行中移除文件关联"""
+    s = _state()
+    data = request.get_json()
+    file_path = data.get("file_path")
+    index = data.get("index")
+
+    if not s["match_results"]:
+        return jsonify({"error": "尚无匹配结果"}), 400
+
+    target = None
+    for r in s["match_results"]:
+        if r["index"] == index:
+            target = r
+            break
+
+    if target is None:
+        return jsonify({"error": "未找到指定序号"}), 400
+
+    # 从 matched_files / matched_names / matched_types 中移除该文件
+    if file_path in target.get("matched_files", []):
+        idx = target["matched_files"].index(file_path)
+        target["matched_files"].pop(idx)
+        if idx < len(target.get("matched_names", [])):
+            target["matched_names"].pop(idx)
+        if idx < len(target.get("matched_types", [])):
+            target["matched_types"].pop(idx)
+
+    # 从 company_coverage 各公司的 files/folders 中移除该文件
+    for company, info in (target.get("company_coverage") or {}).items():
+        if file_path in info.get("files", []):
+            info["files"].remove(file_path)
+        if file_path in info.get("folders", []):
+            info["folders"].remove(file_path)
+
+    # 清理空的 company_coverage 条目
+    target["company_coverage"] = {
+        k: v for k, v in target.get("company_coverage", {}).items()
+        if v.get("files") or v.get("folders")
+    }
+
+    # 更新状态和计数
+    target["match_count"] = len(target.get("matched_files", []))
+    if target["match_count"] == 0:
+        target["status"] = "未匹配"
+
+    matched_count = sum(1 for r in s["match_results"] if r["status"] in ("已获取", "部分获取"))
+    partial_count = sum(1 for r in s["match_results"] if r["status"] == "部分获取")
+    return jsonify({
+        "success": True,
+        "matched_count": matched_count,
+        "partial_count": partial_count,
+        "total": len(s["match_results"]),
+        "match_results": target,
+    })
+
+
 # ====== 文件整理 ======
 
 @app.route("/api/organize-files", methods=["POST"])
