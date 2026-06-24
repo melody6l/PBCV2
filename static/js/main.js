@@ -1963,7 +1963,11 @@ function updateWorkflowState() {
     setWorkflowStep("workflow-step-1", hasScannedFolder ? "completed" : (hasTemplate ? "active" : "pending"));
     setWorkflowStep("workflow-step-2", hasMatchResult ? "completed" : (hasScannedFolder ? "active" : "pending"));
 
-    document.getElementById("match-badge").textContent = hasMatchResult ? "✓ 已完成" : (hasScannedFolder ? "待匹配" : "待前置");
+    // 已完成步骤badge轻量化：仅显示 ✓；待操作步骤保留提示文字
+    document.getElementById("template-badge").textContent = hasTemplate ? "✓" : "未开始";
+    document.getElementById("folder-badge").textContent = hasScannedFolder ? "✓" : "未扫描";
+    document.getElementById("match-badge").textContent = hasMatchResult ? "✓" : (hasScannedFolder ? "待匹配" : "待前置");
+
     const badgeText = hasMatchResult ? "匹配完成" : (hasScannedFolder ? "步骤 2 待匹配" : (hasTemplate ? "步骤 1 待扫描" : "步骤 0 待生成"));
     document.getElementById("workflow-state-badge").textContent = badgeText;
 }
@@ -3720,18 +3724,14 @@ async function loadProject(slug) {
             document.getElementById("template-gen-area").classList.add("hidden");
             document.getElementById("template-summary").innerHTML =
                 `已加载清单：<strong>${previewItems.length}</strong> 条需求，<strong>${companyNames.length}</strong> 家公司`;
-            document.getElementById("template-badge").textContent = "已完成";
-            document.getElementById("template-badge").style.background = "#00A86B";
+            document.getElementById("template-badge").textContent = "✓";
         }
         if (scanRoot) {
             document.getElementById("folder-path").value = scanRoot;
-            document.getElementById("folder-badge").textContent = "已扫描";
-            document.getElementById("folder-badge").style.background = "#00A86B";
+            document.getElementById("folder-badge").textContent = "✓";
         }
         if (matchResults && matchResults.length > 0) {
-            const matched = matchResults.filter(r => r.status === "已获取").length;
-            document.getElementById("match-badge").textContent = `已匹配 ${matched}/${matchResults.length}`;
-            document.getElementById("match-badge").style.background = "#00A86B";
+            document.getElementById("match-badge").textContent = "✓";
         }
 
         // 从 matchResults 重建 company_status（已有手动设置的状态会被保留）

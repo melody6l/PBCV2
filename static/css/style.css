@@ -151,8 +151,13 @@ h1 { display: none; }
 }
 
 .workflow-step-card.completed .panel-title .badge {
-    background: var(--success-bg);
-    color: var(--success);
+    background: rgba(26, 26, 46, 0.05);
+    color: #aaa;
+}
+
+.workflow-step-card.active .panel-title .badge {
+    background: rgba(255, 180, 0, 0.15);
+    color: #b8860b;
 }
 
 .workflow-step-card.pending {
@@ -563,17 +568,16 @@ body.dark .result-table tbody td.frozen-col {
     background: #1e1e2e;
 }
 
-/* 使用多层背景：半透明黄色浮在不透明白色之上，防止水平滚动时右侧内容穿透冻结列产生重影 */
+/* 冻结列 hover：background-color 保底不透明白色 + background-image 叠加半透明高亮。
+   CSS background 简写不支持逗号分隔的裸颜色值（那是无效语法），必须用 linear-gradient 创建纯色图层。 */
 .result-table tbody tr:hover td.frozen-col {
-    background:
-        rgba(255, 230, 0, 0.12),  /* hover 高亮层（半透明黄色） */
-        #fff;                       /* 底色层（不透明白色，阻止背后内容穿透） */
+    background-color: #fff;
+    background-image: linear-gradient(rgba(255, 230, 0, 0.12), rgba(255, 230, 0, 0.12));
 }
 
 body.dark .result-table tbody tr:hover td.frozen-col {
-    background:
-        rgba(255, 230, 0, 0.15),   /* 深色模式下略微提高亮度 */
-        #1e1e2e;                    /* 深色模式底色 */
+    background-color: #1e1e2e;
+    background-image: linear-gradient(rgba(255, 230, 0, 0.15), rgba(255, 230, 0, 0.15));
 }
 
 /* Excel 风格冻结分隔线 — 在冻结区域最右侧绘制一条醒目竖线，类似 Excel 冻结窗格线 */
