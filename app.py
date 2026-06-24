@@ -552,7 +552,7 @@ def api_delete_row():
 
 @app.route("/api/export-checklist", methods=["GET", "POST"])
 def export_checklist():
-    """导出包含矩阵视图和清单视图两个sheet的Excel"""
+    """导出包含核对总览和需求列表两个sheet的Excel"""
     s = _state()
     tpl_data = s.get("checklist_template")
     if not tpl_data:
@@ -678,7 +678,7 @@ def manual_match():
 
 @app.route("/api/assign-company", methods=["POST"])
 def assign_company():
-    """人工确认公司归属：为已匹配清单项指定公司列表"""
+    """待认领文件：为已匹配清单项指定公司列表"""
     s = _state()
     data = request.get_json()
     index = data.get("index")

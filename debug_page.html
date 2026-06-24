@@ -143,16 +143,16 @@
                 <span>&#128203; 核对工作台</span>
                 <div class="panel-actions">
                     <div class="view-toggle" id="view-toggle">
-                        <button class="view-toggle-btn active" data-view="matrix">&#128203; 矩阵视图</button>
-                        <button class="view-toggle-btn" data-view="list">&#128205; 清单视图</button>
-                        <button class="view-toggle-btn" data-view="browse">&#128193; 资料浏览视图</button>
+                        <button class="view-toggle-btn active" data-view="matrix">&#128203; 核对总览</button>
+                        <button class="view-toggle-btn" data-view="list">&#128205; 需求列表</button>
+                        <button class="view-toggle-btn" data-view="browse">&#128193; 文件浏览</button>
                     </div>
                     <button class="btn btn-success btn-sm hidden" id="export-checklist-btn">&#128190; 导出清单</button>
                     <button class="btn btn-outline btn-sm hidden" id="organize-files-btn">&#128193; 整理文件</button>
                 </div>
             </div>
 
-            <!-- 矩阵视图 -->
+            <!-- 核对总览 -->
             <div class="result-table-wrapper" id="preview-table-wrapper">
                 <table class="result-table" id="preview-table">
                     <thead id="preview-table-head"></thead>
@@ -160,9 +160,9 @@
                 </table>
             </div>
 
-            <!-- 清单视图容器（表格 + 预览并排） -->
+            <!-- 需求列表容器（表格 + 预览并排） -->
             <div class="list-view-container" id="list-view-container">
-                <!-- 清单视图表格 -->
+                <!-- 需求列表表格 -->
                 <div class="result-table-wrapper hidden" id="list-view-wrapper">
                     <table class="result-table" id="list-view-table">
                         <thead id="list-view-head"></thead>
@@ -170,7 +170,7 @@
                     </table>
                 </div>
 
-                <!-- 清单视图预览面板 -->
+                <!-- 需求列表预览面板 -->
                 <div class="list-preview-pane hidden" id="list-preview-pane">
                     <div class="list-preview-header">
                         <span class="list-preview-title" id="list-preview-title"></span>
@@ -186,7 +186,7 @@
             </div><!-- .list-view-container -->
 
 
-            <!-- 资料浏览视图容器（表格 + 预览并排） -->
+            <!-- 文件浏览容器（表格 + 预览并排） -->
             <div class="browse-view-container hidden" id="browse-view-container">
                 <div class="result-table-wrapper hidden" id="browse-view-wrapper">
                     <table class="result-table" id="browse-view-table">

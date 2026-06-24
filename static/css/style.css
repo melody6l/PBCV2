@@ -466,7 +466,7 @@ h1 { display: none; }
     table-layout: fixed;
 }
 
-/* 矩阵视图：允许表格根据列宽自由扩展，超出容器时出现水平滚动条 */
+/* 核对总览：允许表格根据列宽自由扩展，超出容器时出现水平滚动条 */
 #preview-table {
     width: auto;
     min-width: 100%;
@@ -543,7 +543,7 @@ body.col-resizing .result-table thead th {
     cursor: col-resize;
 }
 
-/* ====== 冻结左侧列（矩阵视图水平滚动时固定前4列：序号/科目/所需PBC/需求资料） ====== */
+/* ====== 冻结左侧列（核对总览水平滚动时固定前4列：序号/科目/所需PBC/需求资料） ====== */
 .result-table thead th.frozen-col,
 .result-table tbody td.frozen-col {
     position: sticky;
@@ -1908,7 +1908,7 @@ body.dark .result-table tbody td.frozen-col-last {
     overflow-y: auto;
 }
 
-/* 清单视图容器：表格 + 预览并排 */
+/* 需求列表容器：表格 + 预览并排 */
 .list-view-container {
     display: flex;
     gap: 0;
@@ -1926,7 +1926,7 @@ body.dark .result-table tbody td.frozen-col-last {
     flex: 0 0 55%;
 }
 
-/* 清单视图右侧预览面板 */
+/* 需求列表右侧预览面板 */
 .list-preview-pane {
     display: none;
     flex: 0 0 42%;
@@ -1989,7 +1989,7 @@ body.dark .result-table tbody td.frozen-col-last {
     50% { opacity: 0.5; }
 }
 
-/* ====== 资料浏览视图 ====== */
+/* ====== 文件浏览 ====== */
 .browse-view-container {
     display: flex;
     gap: 0;

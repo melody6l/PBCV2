@@ -382,7 +382,7 @@ def build_browse_items(scanned_files, scanned_folders, scan_root, match_results)
     return items, folder_levels
 
 def export_checklist_two_sheets(items, company_names, match_results, file_renames=None, scanned_files=None, scanned_folders=None, scan_root=""):
-    """导出包含矩阵视图、清单视图和资料浏览视图的Excel文件。
+    """导出包含核对总览、需求列表和文件浏览三个sheet的Excel文件。
 
     Args:
         items: 清单项列表（每个PBC条目独立，含 company_status）
@@ -410,9 +410,9 @@ def export_checklist_two_sheets(items, company_names, match_results, file_rename
         top=Side(style="thin"), bottom=Side(style="thin"),
     )
 
-    # ========== Sheet 1: 矩阵视图 ==========
+    # ========== Sheet 1: 核对总览 ==========
     ws_matrix = wb.active
-    ws_matrix.title = "矩阵视图"
+    ws_matrix.title = "核对总览"
 
     matrix_headers = ["序号", "科目", "所需PBC", "需求资料"] + company_names
     for col_idx, h in enumerate(matrix_headers, 1):
@@ -454,8 +454,8 @@ def export_checklist_two_sheets(items, company_names, match_results, file_rename
     for ci in range(5, 5 + len(company_names)):
         ws_matrix.column_dimensions[get_column_letter(ci)].width = 10
 
-    # ========== Sheet 2: 清单视图 ==========
-    ws_list = wb.create_sheet("清单视图")
+    # ========== Sheet 2: 需求列表 ==========
+    ws_list = wb.create_sheet("需求列表")
 
     list_headers = ["科目", "所需PBC", "需求资料", "公司", "是否获取", "文件"]
     for col_idx, h in enumerate(list_headers, 1):
@@ -549,11 +549,11 @@ def export_checklist_two_sheets(items, company_names, match_results, file_rename
     ws_list.column_dimensions["E"].width = 10
     ws_list.column_dimensions["F"].width = 50
 
-    # ========== Sheet 3: 资料浏览视图 ==========
+    # ========== Sheet 3: 文件浏览 ==========
     browse_items, folder_levels = build_browse_items(
         scanned_files, scanned_folders, scan_root, match_results
     )
-    ws_browse = wb.create_sheet("资料浏览视图")
+    ws_browse = wb.create_sheet("文件浏览")
     level_names = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
     browse_headers = [
         f"{level_names[level - 1] if level <= len(level_names) else level}级文件夹"

@@ -273,7 +273,7 @@ function renderPreviewTable() {
         item.seq = idx + 1;
     });
 
-    // 根据视图控制编辑行按钮显隐（仅在矩阵视图下可用）
+    // 根据视图控制编辑行按钮显隐（仅在核对总览下可用）
     const toggleManageBtn = document.getElementById("toggle-manage-btn");
     const addRowBtn = document.getElementById("add-row-btn");
     if (currentView === "matrix") {
@@ -320,7 +320,7 @@ function updatePreviewStats() {
 }
 
 
-// 收集未确认公司归属的资料（供"需人工确认公司归属"按钮使用）
+// 收集未确认公司归属的资料（供"待认领文件"按钮使用）
 function collectUnassignedItems() {
     const unassignedItems = [];
     if (matchResults) {
@@ -667,7 +667,7 @@ async function renderBrowseView() {
         if (data.error) throw new Error(data.error);
         if (currentView !== "browse") return;
 
-        // 数据就绪后才隐藏其他视图、显示资料浏览视图
+        // 数据就绪后才隐藏其他视图、显示文件浏览
         document.getElementById("preview-table-wrapper").classList.add("hidden");
         document.getElementById("list-view-wrapper").classList.add("hidden");
         document.getElementById("list-view-container").classList.add("hidden");
@@ -775,7 +775,7 @@ async function renderBrowseView() {
         wrapper.classList.remove("hidden");
         thead.innerHTML = "";
         tbody.innerHTML = '<tr><td class="browse-view-loading">资料加载失败</td></tr>';
-        showToast("资料浏览视图加载失败: " + error.message, "error");
+        showToast("文件浏览加载失败: " + error.message, "error");
     }
 }
 function renderListView(displayItems) {
@@ -889,7 +889,7 @@ function renderUnassignedButton() {
     if (unassignedItems.length > 0) {
         const btn = document.createElement('button');
         btn.className = 'btn btn-warning btn-sm unassigned-btn';
-        btn.innerHTML = '⚠️ 需人工确认公司归属 (' + unassignedItems.length + '项)';
+        btn.innerHTML = '⚠️ 待认领文件 (' + unassignedItems.length + '项)';
         btn.onclick = showUnassignedModal;
 
         // 插入到 view-toggle 之前（即新增行按钮之后）
@@ -1975,7 +1975,7 @@ function setWorkflowStep(id, state) {
     el.classList.add(state);
 }
 
-// 初始化清单视图预览面板的关闭按钮
+// 初始化需求列表预览面板的关闭按钮
 function initListPreviewPane() {
     const closeBtn = document.getElementById('list-preview-close');
     if (closeBtn) {
@@ -1995,7 +1995,7 @@ function initListPreviewPane() {
     }
 }
 
-// 初始化资料浏览视图预览面板的关闭按钮
+// 初始化文件浏览预览面板的关闭按钮
 function initBrowsePreviewPane() {
     const closeBtn = document.getElementById('browse-preview-close');
     if (closeBtn) {
@@ -2099,7 +2099,7 @@ function showUnassignedModal() {
     modal.innerHTML = `
         <button class="unassigned-close-btn" title="关闭">&#10005;</button>
         <div class="unassigned-left">
-            <h3 style="color:#f59e0b;margin:0 0 4px;">&#9888;&#65039; 需人工确认公司归属的资料</h3>
+            <h3 style="color:#f59e0b;margin:0 0 4px;">&#9888;&#65039; 待认领文件</h3>
             <p class="unassigned-hint" style="color:#666;font-size:13px;margin:0 0 12px;">以下资料已匹配成功，但无法自动确认属于哪些公司。请点击下拉框选择所属公司后确认。</p>
             <div class="unassigned-list">${listHtml}</div>
         </div>
@@ -3166,7 +3166,7 @@ function ensureResizeGuide() {
 
 /**
  * 为指定表格初始化 Excel 风格列宽拖拽。
- * 支持：矩阵视图、清单视图、资料浏览视图。
+ * 支持：核对总览、需求列表、文件浏览。
  * @param {string} tableSelector - 表格 CSS 选择器，如 '#preview-table'
  */
 function initColumnResize(tableSelector) {
