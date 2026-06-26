@@ -219,9 +219,27 @@ function onChecklistGenerated(data, isNew) {
     markProjectDirty();
 }
 
-function downloadChecklist() {
-    window.location.href = API.downloadChecklist;
-    showToast("正在下载清单...", "success");
+async function downloadChecklist() {
+    try {
+        const response = await fetch(API.downloadChecklist);
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            showToast(err.error || "下载失败，请先生成清单", "error");
+            return;
+        }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "PBC需求清单_待填写.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        showToast("正在下载清单...", "success");
+    } catch (e) {
+        showToast("下载失败: " + e.message, "error");
+    }
 }
 
 function resetTemplate() {
