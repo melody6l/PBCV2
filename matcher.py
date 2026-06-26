@@ -7,36 +7,94 @@ from excel_handler import normalize_item_name
 
 
 def extract_keywords(name):
-    """从文件名中提取核心关键词，去除序号、特殊字符等"""
+    """从文件名中提取核心关键词和可选关键词（括号内信息）
+
+    返回 (core_keywords, optional_keywords) 两个列表：
+    - core_keywords：去除括号后提取的关键词，用于宽松匹配
+    - optional_keywords：括号内有实际信息量的关键词（过滤纯数字/序号），用于精确区分
+
+    分层匹配策略：
+    1. 优先用 core + optional 全量关键词精确匹配（区分 CN02 vs CN03、合并 vs 单体）
+    2. 若无精确匹配，回退到仅 core 关键词宽松匹配（处理括号内仅英文解释等场景）
+    """
+    cleaned = name.strip()
+
     # 移除常见序号前缀：如 "1.", "1)", "(1)", "一、", "第1项" 等
-    cleaned = re.sub(r'^[\(（]?\d+[\)）]?[.、\s]*', '', name)
+    cleaned = re.sub(r'^[\(（]?\d+[\)）]?[.、\s]*', '', cleaned)
     cleaned = re.sub(r'^第\d+项[、\s]*', '', cleaned)
     cleaned = re.sub(r'^[一二三四五六七八九十]+[、\s]*', '', cleaned)
-    # 移除括号内的序号说明
-    cleaned = re.sub(r'[\(（][^)）]*[\)）]', '', cleaned)
+
+    # 提取括号内的内容作为可选关键词（在移除括号之前提取）
+    optional_parts = re.findall(r'[\(（]([^)）]*)[\)）]', cleaned)
+
+    # 移除括号及其内容，得到核心文本
+    core_text = re.sub(r'[\(（][^)）]*[\)）]', '', cleaned)
     # 移除特殊字符，保留中文、字母、数字
-    cleaned = re.sub(r'[^\w一-鿿]+', ' ', cleaned)
-    # 拆分为关键词列表
-    keywords = [kw.strip() for kw in cleaned.split() if kw.strip()]
-    return keywords
+    core_text = re.sub(r'[^\w一-鿿]+', ' ', core_text)
+    core_keywords = [kw.strip() for kw in core_text.split() if kw.strip()]
+
+    # 处理括号内内容：拆分为关键词，过滤纯数字和序号噪声
+    optional_keywords = []
+    for part in optional_parts:
+        part = part.strip()
+        if not part:
+            continue
+        # 过滤纯数字/纯序号（如 "1"、"一"、"2)"等）
+        if re.match(r'^[\d\s.\-、/]+$', part):
+            continue
+        # 过滤纯中文序号
+        if re.match(r'^[一二三四五六七八九十百千万亿\s]+$', part):
+            continue
+        # 过滤单字符噪声
+        if len(part) <= 1:
+            continue
+        # 拆分为子关键词（中英文数字混排）
+        sub_kws = re.findall(r'[\w]+|[一-鿿]+', part)
+        for kw in sub_kws:
+            kw = kw.strip()
+            if kw and (len(kw) > 1 or kw.isalpha()):
+                optional_keywords.append(kw)
+
+    return core_keywords, optional_keywords
 
 
 def fuzzy_match(checklist_name, scanned_files, scanned_folders):
-    """模糊匹配：清单关键词出现在实际文件/文件夹名中即匹配"""
-    keywords = extract_keywords(checklist_name)
-    if not keywords:
+    """模糊匹配：分层匹配策略
+
+    第一层：core + optional 全量关键词精确匹配（区分 CN02 vs CN03、合并 vs 单体）
+    第二层：仅 core 关键词宽松匹配（处理括号内仅英文解释等场景）
+    """
+    core_keywords, optional_keywords = extract_keywords(checklist_name)
+    all_keywords = core_keywords + optional_keywords
+
+    if not core_keywords:
         return []
-    matches = []
-    for path in scanned_files:
-        name = os.path.basename(path)
-        base = os.path.splitext(name)[0]
-        if all(kw.lower() in base.lower() for kw in keywords):
-            matches.append(path)
-    for path in scanned_folders:
-        name = os.path.basename(path)
-        if all(kw.lower() in name.lower() for kw in keywords):
-            matches.append(path)
-    return matches
+
+    def _match_paths(paths, keywords, get_name_func):
+        """在路径列表中查找所有关键词都匹配的路径"""
+        results = []
+        for path in paths:
+            name = get_name_func(path)
+            if all(kw.lower() in name.lower() for kw in keywords):
+                results.append(path)
+        return results
+
+    def _get_file_base(path):
+        return os.path.splitext(os.path.basename(path))[0]
+
+    def _get_folder_name(path):
+        return os.path.basename(path)
+
+    # 第一层：全量关键词精确匹配
+    file_matches = _match_paths(scanned_files, all_keywords, _get_file_base)
+    folder_matches = _match_paths(scanned_folders, all_keywords, _get_folder_name)
+
+    # 如果精确匹配无结果且有可选关键词，回退到核心关键词宽松匹配
+    if not file_matches and not folder_matches and optional_keywords:
+        file_matches = _match_paths(scanned_files, core_keywords, _get_file_base)
+        folder_matches = _match_paths(scanned_folders, core_keywords, _get_folder_name)
+
+    return file_matches + folder_matches
 
 
 def _item_name(item):
