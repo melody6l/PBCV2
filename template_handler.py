@@ -11,6 +11,21 @@ from excel_handler import normalize_item_name
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "资料表.xlsx")
 
 
+def extract_company_names(companies):
+    """从公司字典列表中提取简称列表（简称优先，无简称时用全称）"""
+    if not companies:
+        return []
+    return [c.get("short_name") or c.get("full_name") for c in companies]
+
+
+def get_company_names_from_session(session):
+    """从 session 的 checklist_template 中提取公司简称列表"""
+    template = session.get("checklist_template")
+    if not template:
+        return []
+    return extract_company_names(template.get("companies", []))
+
+
 def read_template():
     """读取资料表模板，返回科目列表和资料项列表"""
     wb = openpyxl.load_workbook(TEMPLATE_PATH)
@@ -223,7 +238,7 @@ def read_user_checklist(file_path):
 
     wb.close()
 
-    company_names = [c["short_name"] or c["full_name"] for c in companies]
+    company_names = extract_company_names(companies)
     return {
         "companies": companies,
         "company_names": company_names,

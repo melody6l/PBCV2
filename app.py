@@ -12,7 +12,7 @@ from excel_handler import normalize_item_name, export_checklist_two_sheets, buil
 from llm_matcher import llm_match
 from template_handler import (
     read_template, generate_checklist, read_user_checklist,
-    generate_checklist_from_memory,
+    generate_checklist_from_memory, get_company_names_from_session,
 )
 from project_manager import (
     list_projects, load_project, save_project, create_project, delete_project,
@@ -173,9 +173,7 @@ def scan_folder():
     if s["checklist"]:
         prev_results = s.get("match_results") if s["checklist"].get("has_previous_results") else None
         # 获取公司列表
-        company_names = []
-        if s.get("checklist_template") and s["checklist_template"].get("companies"):
-            company_names = [c.get("short_name") or c.get("full_name") for c in s["checklist_template"]["companies"]]
+        company_names = get_company_names_from_session(s)
 
         results = match_files(
             s["checklist"]["items"],
@@ -225,9 +223,7 @@ def do_match():
 
     prev_results = s.get("match_results") if incremental and s["checklist"].get("has_previous_results") else None
     # 获取公司列表
-    company_names = []
-    if s.get("checklist_template") and s["checklist_template"].get("companies"):
-        company_names = [c.get("short_name") or c.get("full_name") for c in s["checklist_template"]["companies"]]
+    company_names = get_company_names_from_session(s)
 
     results = match_files(
         s["checklist"]["items"],
@@ -951,9 +947,7 @@ def do_llm_match():
             llm_map[item["index"]] = item
 
     updated_count = 0
-    company_names = []
-    if s.get("checklist_template") and s["checklist_template"].get("companies"):
-        company_names = [c.get("short_name") or c.get("full_name") for c in s["checklist_template"]["companies"]]
+    company_names = get_company_names_from_session(s)
 
     for r in s["match_results"]:
         if r["index"] in llm_map:
