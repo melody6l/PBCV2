@@ -61,6 +61,16 @@ MODEL_PRESETS = {
 # 分层匹配默认阈值：低于此置信度的结果将进入复核
 DEFAULT_RECHECK_THRESHOLD = 0.5
 
+# 匹配规则（公共常量，_build_prompt 和 _build_recheck_prompt 共用）
+MATCH_RULES = """匹配规则：
+1. 忽略纯序号前缀（如 "1."、"(2)"、"一、"）和括号内纯序号
+2. 括号内如果是关键区分信息（如公司代码 CN02/CN03、合并/单体/母公司），则必须匹配
+3. 括号内如果只是英文翻译或补充说明，可以忽略
+4. 中英文可以互相匹配
+5. 日期可以忽略，重点匹配业务含义
+6. 如果清单项包含多个关键词，文件名需要体现主要业务含义即可，不要求完全一致
+7. 如果确定没有合适的文件，matched_name 设为 null"""
+
 
 def _build_prompt(unmatched_items, scanned_names):
     """构建LLM匹配的提示词"""
@@ -78,14 +88,7 @@ def _build_prompt(unmatched_items, scanned_names):
 需要匹配的清单项：
 {items_text}
 
-请判断每个清单项最可能对应哪个文件。匹配规则：
-1. 忽略纯序号前缀（如 "1."、"(2)"、"一、"）和括号内纯序号
-2. 括号内如果是关键区分信息（如公司代码 CN02/CN03、合并/单体/母公司），则必须匹配
-3. 括号内如果只是英文翻译或补充说明（如 "银行存款明细表（Bank balance check）"），可以忽略
-4. 中英文可以互相匹配（如 "银行存款明细表" 可以匹配 "Bank Balance Check"）
-5. 日期可以忽略，重点匹配业务含义
-6. 如果清单项包含多个关键词，文件名需要体现主要业务含义即可，不要求完全一致
-7. 如果确定没有合适的文件，matched_name 设为 null
+请判断每个清单项最可能对应哪个文件。{MATCH_RULES}
 
 返回 JSON 数组格式（仅返回 JSON，不要其他内容）：
 [{{"index": 1, "matched_name": "文件名或null", "confidence": 0.85}}]
@@ -113,13 +116,7 @@ def _build_recheck_prompt(unmatched_items, scanned_names, initial_results):
 第一轮匹配结果（供参考）：
 {prev_text}
 
-请重新判断每个清单项最可能对应哪个文件。匹配规则：
-1. 忽略纯序号前缀和括号内纯序号
-2. 括号内如果是关键区分信息（如公司代码、合并/单体），则必须匹配
-3. 括号内如果只是英文翻译或补充说明，可以忽略
-4. 中英文可以互相匹配
-5. 日期可忽略，重点匹配业务含义
-6. 确认有合理依据才给高置信度，无依据则 matched_name 设为 null
+请重新判断每个清单项最可能对应哪个文件。{MATCH_RULES}
 
 返回 JSON 数组格式（仅返回 JSON）：
 [{{"index": 1, "matched_name": "文件名或null", "confidence": 0.85}}]
@@ -216,10 +213,20 @@ def llm_match(unmatched_items, scanned_names, config):
     ]
 
     if low_conf_items:
-        # 复核必须沿用第一轮的供应商配置，避免 API Key 被发送到其他供应商。
-        recheck_provider = provider
-        recheck_model = model
-        recheck_base_url = base_url
+        # 如果主模型是 flash，复核自动升级到同厂商的 plus，提升复核质量
+        FLASH_TO_PLUS = {
+            "qwen-flash": "qwen-plus",
+            "openai-gpt4o-mini": "openai-gpt4o",
+        }
+        if provider in FLASH_TO_PLUS and config.get("recheck_provider") is None:
+            recheck_provider = FLASH_TO_PLUS[provider]
+            recheck_preset = MODEL_PRESETS[recheck_provider]
+            recheck_model = recheck_preset["model"]
+            recheck_base_url = recheck_preset["base_url"]
+        else:
+            recheck_provider = provider
+            recheck_model = model
+            recheck_base_url = base_url
 
         # 用复核模型再做一次匹配（只传低置信度的条目）
         recheck_results, recheck_usage = _call_llm(
