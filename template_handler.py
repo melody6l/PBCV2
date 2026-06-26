@@ -285,6 +285,118 @@ def export_checklist_with_status(file_path):
     return file_path
 
 
+def generate_checklist_from_memory(tpl_data):
+    """
+    从内存中的 checklist_template 数据生成 Excel 文件，供下载用。
+
+    tpl_data 结构（与 read_user_checklist 返回值一致）:
+    {
+        "companies": [{"full_name": "...", "short_name": "..."}],
+        "company_names": ["CN02", "CN03", ...],
+        "items": [
+            {
+                "row_index": 2,
+                "seq": 1,
+                "subject": "货币资金",
+                "pbc_name": "科目余额表",
+                "demand_name": "PRC Report",
+                "company_status": {"CN02": "Y", "CN03": "N", ...},
+            }
+        ],
+        "headers": [...]
+    }
+    """
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "核对工作台"
+
+    # 样式定义（与 generate_checklist 保持一致）
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=11)
+    center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    thin_border = Border(
+        left=Side(style="thin"), right=Side(style="thin"),
+        top=Side(style="thin"), bottom=Side(style="thin"),
+    )
+    green_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
+    red_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
+    gray_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
+    orange_fill = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid")
+
+    companies = tpl_data.get("companies", [])
+    company_names = tpl_data.get("company_names", [])
+    items = tpl_data.get("items", [])
+
+    # 表头: 序号 | 科目 | 所需PBC | 需求资料 | 公司1 | 公司2 | ...
+    base_headers = ["序号", "科目", "所需PBC", "需求资料"]
+    headers = base_headers + company_names
+    for col_idx, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_idx, value=h)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = center_align
+        cell.border = thin_border
+
+    # 数据行
+    for row_idx, item in enumerate(items, 2):
+        seq = item.get("seq", row_idx - 1)
+        subject = item.get("subject", "")
+        pbc_name = item.get("pbc_name", "")
+        demand_name = item.get("demand_name", "") or pbc_name
+        company_status = item.get("company_status", {})
+
+        vals = [seq, subject, pbc_name, demand_name]
+        for col_idx, val in enumerate(vals, 1):
+            cell = ws.cell(row=row_idx, column=col_idx, value=val)
+            cell.alignment = center_align
+            cell.border = thin_border
+
+        # 公司状态列（从第5列开始）
+        for ci, cn in enumerate(company_names):
+            cell = ws.cell(row=row_idx, column=5 + ci, value=company_status.get(cn, ""))
+            cell.alignment = center_align
+            cell.border = thin_border
+            status = company_status.get(cn, "")
+            if status == "Y":
+                cell.fill = green_fill
+            elif status == "不完整":
+                cell.fill = orange_fill
+            elif status == "N/A":
+                cell.fill = gray_fill
+            elif status == "N":
+                cell.fill = red_fill
+
+    # 列宽
+    ws.column_dimensions["A"].width = 14
+    ws.column_dimensions["B"].width = 14
+    ws.column_dimensions["C"].width = 36
+    ws.column_dimensions["D"].width = 42
+    for ci in range(len(company_names)):
+        col_letter = get_column_letter(5 + ci)
+        ws.column_dimensions[col_letter].width = 14
+
+    # 公司名称 sheet
+    ws_company = wb.create_sheet("公司名称")
+    ws_company.cell(row=1, column=1, value="公司全称").fill = header_fill
+    ws_company.cell(row=1, column=1).font = header_font
+    ws_company.cell(row=1, column=1).alignment = center_align
+    ws_company.cell(row=1, column=2, value="简称").fill = header_fill
+    ws_company.cell(row=1, column=2).font = header_font
+    ws_company.cell(row=1, column=2).alignment = center_align
+    for ri, company in enumerate(companies, 2):
+        ws_company.cell(row=ri, column=1, value=company.get("full_name", "")).alignment = center_align
+        ws_company.cell(row=ri, column=2, value=company.get("short_name", "")).alignment = center_align
+    ws_company.column_dimensions["A"].width = 30
+    ws_company.column_dimensions["B"].width = 14
+
+    # 保存
+    os.makedirs("uploads", exist_ok=True)
+    output_path = os.path.join("uploads", "PBC需求清单_待填写.xlsx")
+    wb.save(output_path)
+    wb.close()
+    return output_path
+
+
 # ====== 行管理：新增 / 编辑 / 删除 ======
 
 def _find_checklist_sheet(wb):

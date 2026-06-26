@@ -3,6 +3,7 @@ __pycache__/
 *.pyo
 exports/
 uploads/
+sessions/
 .env
 venv/
 .venv/

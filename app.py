@@ -11,12 +11,13 @@ from matcher import match_files, _find_company_in_path, _find_company_in_filenam
 from excel_handler import normalize_item_name, export_checklist_two_sheets, build_browse_items
 from llm_matcher import llm_match
 from template_handler import (
-    read_template, generate_checklist, read_user_checklist, update_cell_status,
-    add_row_to_checklist, edit_row_in_checklist, delete_row_from_checklist,
+    read_template, generate_checklist, read_user_checklist,
+    generate_checklist_from_memory,
 )
 from project_manager import (
     list_projects, load_project, save_project, create_project, delete_project,
 )
+from session_manager import get_session_store, create_fresh_state
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = "uploads"
@@ -25,37 +26,22 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # ====== 会话隔离（替代原来的全局 state） ======
 
-def create_fresh_state():
-    """创建全新的空白状态字典。"""
-    return {
-        "checklist": None,
-        "scanned_files": None,
-        "scanned_folders": None,
-        "match_results": None,
-        "scan_root": None,
-        "new_items": [],
-        "existing_items": [],
-        "previous_scanned_files": [],
-        "previous_scanned_folders": [],
-        "checklist_template": None,
-        "checklist_file_path": None,
-        "active_project": None,
-    }
-
-
-sessions = {}  # {session_id: state_dict}
+session_store = get_session_store()
 
 
 def get_session():
     """从请求头 X-Session-Id 获取或创建当前会话的状态。
 
     每个浏览器标签页有独立的 session ID，状态完全隔离。
+    内存中仅保留最近 20 个活跃会话（LRU 淘汰），冷会话从磁盘惰性加载。
+    每次请求后自动防抖保存到磁盘，重启不丢数据。
     """
     sid = request.headers.get("X-Session-Id", "")
-    if not sid or sid not in sessions:
-        sid = sid or uuid.uuid4().hex
-        sessions[sid] = create_fresh_state()
-    return sessions[sid]
+    if not sid:
+        sid = uuid.uuid4().hex
+    state = session_store.get(sid)
+    session_store.schedule_save(sid)
+    return state
 
 
 def _state():
@@ -112,7 +98,7 @@ def build_history_results(checklist):
         if status == "未获取":
             status = "未匹配"
         results.append({
-            "index": i,
+            "index": item.get("row_index", i),
             "checklist_name": item.get("name", ""),
             "pbc_name": item.get("pbc_name", ""),
             "row_uid": item.get("row_uid", ""),
@@ -267,8 +253,8 @@ def do_match():
 def reset_state():
     """重置当前会话的所有状态。"""
     sid = request.headers.get("X-Session-Id", "")
-    if sid and sid in sessions:
-        sessions[sid] = create_fresh_state()
+    if sid:
+        session_store.reset(sid)
     return jsonify({"success": True})
 
 
@@ -337,12 +323,20 @@ def gen_checklist():
 
 @app.route("/api/download-checklist", methods=["GET"])
 def download_checklist():
-    """下载生成的PBC需求清单"""
+    """下载PBC需求清单（从内存状态生成，确保包含最新修改）"""
     s = _state()
+    tpl_data = s.get("checklist_template")
     file_path = s.get("checklist_file_path")
-    if not file_path or not os.path.exists(file_path):
-        return jsonify({"error": "请先生成PBC需求清单"}), 400
-    return send_file(file_path, as_attachment=True, download_name="PBC需求清单_待填写.xlsx")
+
+    if tpl_data:
+        # 从内存状态生成 Excel（包含所有单元格状态修改）
+        output_path = generate_checklist_from_memory(tpl_data)
+        return send_file(output_path, as_attachment=True, download_name="PBC需求清单_待填写.xlsx")
+
+    if file_path and os.path.exists(file_path):
+        return send_file(file_path, as_attachment=True, download_name="PBC需求清单_待填写.xlsx")
+
+    return jsonify({"error": "请先生成PBC需求清单"}), 400
 
 
 @app.route("/api/upload-checklist-v2", methods=["POST"])
@@ -400,60 +394,51 @@ def upload_checklist_v2():
 
 @app.route("/api/update-cell-status", methods=["POST"])
 def api_update_cell_status():
-    """更新某个单元格的获取状态"""
+    """更新某个单元格的获取状态（仅操作内存，导出时统一写入 Excel）"""
     s = _state()
     data = request.get_json()
     row_index = data.get("row_index")
+    if row_index is not None:
+        row_index = int(row_index)
     company_name = data.get("company_name")
     status = data.get("status", "Y")
-    file_path = s.get("checklist_file_path")
 
-    if not file_path:
+    if not s.get("checklist_template"):
         return jsonify({"error": "请先上传或生成清单"}), 400
-    if not row_index or not company_name:
+    if row_index is None or not company_name:
         return jsonify({"error": "参数不完整"}), 400
 
-    try:
-        update_cell_status(file_path, row_index, company_name, status)
-        # 同步更新内存中的数据
-        if s["checklist_template"]:
-            for item in s["checklist_template"]["items"]:
-                if item["row_index"] == row_index:
-                    item["company_status"][company_name] = status
-                    break
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    # 只在内存中更新，不再逐个写入 Excel（避免并发覆盖）
+    for item in s["checklist_template"]["items"]:
+        if item["row_index"] == row_index:
+            item["company_status"][company_name] = status
+            return jsonify({"success": True})
+
+    return jsonify({"error": f"未找到行: {row_index}"}), 404
 
 
 @app.route("/api/add-row", methods=["POST"])
 def api_add_row():
-    """在核对清单中新增一行 PBC 需求"""
+    """在核对清单中新增一行 PBC 需求（仅操作内存）"""
     s = _state()
     data = request.get_json()
     subject = (data.get("subject") or "").strip()
     pbc_name = (data.get("pbc_name") or "").strip()
     demand_name = (data.get("demand_name") or "").strip() or pbc_name
-    position = data.get("position")
-    ref_row_index = data.get("ref_row_index")
 
-    file_path = s.get("checklist_file_path")
-    if not file_path:
+    if not s.get("checklist_template"):
         return jsonify({"error": "请先上传或生成清单"}), 400
     if not subject or not pbc_name:
         return jsonify({"error": "科目和PBC名称不能为空"}), 400
 
-    try:
-        new_row_index = add_row_to_checklist(
-            file_path, subject, pbc_name, demand_name,
-            position=position, ref_row_index=ref_row_index
-        )
-    except Exception as e:
-        return jsonify({"error": f"写入Excel失败: {str(e)}"}), 500
+    company_names = s["checklist_template"].get("company_names", [])
 
-    company_names = []
-    if s.get("checklist_template"):
-        company_names = s["checklist_template"].get("company_names", [])
+    # 在内存中生成唯一 row_index（比 Excel 最大行号更大，避免冲突）
+    existing_rows = [
+        it.get("row_index", 0)
+        for it in s["checklist_template"]["items"]
+    ]
+    new_row_index = max(existing_rows) + 1 if existing_rows else 2
 
     new_item = {
         "row_index": new_row_index,
@@ -465,8 +450,8 @@ def api_add_row():
         "_custom": True,
     }
 
-    if s.get("checklist_template"):
-        s["checklist_template"]["items"].append(new_item)
+    s["checklist_template"]["items"].append(new_item)
+
     if s.get("checklist"):
         s["checklist"]["items"].append({
             "name": demand_name,
@@ -479,66 +464,57 @@ def api_add_row():
 
 @app.route("/api/edit-row", methods=["POST"])
 def api_edit_row():
-    """编辑核对清单中某行的科目/PBC/需求资料"""
+    """编辑核对清单中某行的科目/PBC/需求资料（仅操作内存）"""
     s = _state()
     data = request.get_json()
     row_index = data.get("row_index")
+    if row_index is not None:
+        row_index = int(row_index)
     field = data.get("field")
     value = (data.get("value") or "").strip()
 
-    if not row_index or not field:
+    if not s.get("checklist_template"):
+        return jsonify({"error": "请先上传或生成清单"}), 400
+    if row_index is None or not field:
         return jsonify({"error": "缺少 row_index 或 field"}), 400
     if field not in ("subject", "pbc_name", "demand_name"):
         return jsonify({"error": "无效的字段名"}), 400
 
-    file_path = s.get("checklist_file_path")
-    if not file_path:
-        return jsonify({"error": "请先上传或生成清单"}), 400
-
-    try:
-        edit_row_in_checklist(file_path, row_index, field, value)
-    except Exception as e:
-        return jsonify({"error": f"编辑Excel失败: {str(e)}"}), 500
-
-    if s.get("checklist_template"):
-        for item in s["checklist_template"]["items"]:
-            if item.get("row_index") == row_index:
-                item[field] = value
-                if field == "demand_name" and s.get("checklist"):
-                    for ci in s["checklist"]["items"]:
-                        if ci.get("row_uid") == f"custom_{row_index}" or \
-                           ci.get("row_uid") == str(row_index):
-                            ci["name"] = value
-                            ci["source_key"] = normalize_item_name(value)
-                break
+    # 只在内存中更新
+    for item in s["checklist_template"]["items"]:
+        if item.get("row_index") == row_index:
+            item[field] = value
+            if field == "demand_name" and s.get("checklist"):
+                for ci in s["checklist"]["items"]:
+                    if ci.get("row_uid") == f"custom_{row_index}" or \
+                       ci.get("row_uid") == str(row_index):
+                        ci["name"] = value
+                        ci["source_key"] = normalize_item_name(value)
+            break
 
     return jsonify({"success": True})
 
 
 @app.route("/api/delete-row", methods=["POST"])
 def api_delete_row():
-    """删除核对清单中的一行（逻辑删除：在隐藏列标记 _deleted）"""
+    """删除核对清单中的一行（仅操作内存）"""
     s = _state()
     data = request.get_json()
     row_index = data.get("row_index")
+    if row_index is not None:
+        row_index = int(row_index)
 
-    if not row_index:
+    if not s.get("checklist_template"):
+        return jsonify({"error": "请先上传或生成清单"}), 400
+    if row_index is None:
         return jsonify({"error": "缺少 row_index"}), 400
 
-    file_path = s.get("checklist_file_path")
-    if not file_path:
-        return jsonify({"error": "请先上传或生成清单"}), 400
+    # 只在内存中删除
+    s["checklist_template"]["items"] = [
+        it for it in s["checklist_template"]["items"]
+        if it.get("row_index") != row_index
+    ]
 
-    try:
-        delete_row_from_checklist(file_path, row_index)
-    except Exception as e:
-        return jsonify({"error": f"删除失败: {str(e)}"}), 500
-
-    if s.get("checklist_template"):
-        s["checklist_template"]["items"] = [
-            it for it in s["checklist_template"]["items"]
-            if it.get("row_index") != row_index
-        ]
     if s.get("checklist"):
         s["checklist"]["items"] = [
             ci for ci in s["checklist"]["items"]
@@ -646,6 +622,8 @@ def manual_match():
     data = request.get_json()
     file_path = data.get("file_path")
     index = data.get("index")
+    if index is not None:
+        index = int(index)
 
     if not s["match_results"]:
         return jsonify({"error": "尚无匹配结果"}), 400
@@ -653,12 +631,13 @@ def manual_match():
     matched_result = None
     for r in s["match_results"]:
         if r["index"] == index:
-            if file_path not in r["matched_files"]:
-                r["status"] = "已获取"
-                r["matched_files"].append(file_path)
-                r["matched_names"].append(os.path.basename(file_path))
-                r["matched_types"].append("文件夹" if os.path.isdir(file_path) else "文件")
-                r["match_count"] = len(r["matched_files"])
+            if file_path in r["matched_files"]:
+                return jsonify({"error": "该文件/文件夹已添加，请勿重复操作"}), 400
+            r["status"] = "已获取"
+            r["matched_files"].append(file_path)
+            r["matched_names"].append(os.path.basename(file_path))
+            r["matched_types"].append("文件夹" if os.path.isdir(file_path) else "文件")
+            r["match_count"] = len(r["matched_files"])
             matched_result = r
             break
 
@@ -682,11 +661,13 @@ def assign_company():
     s = _state()
     data = request.get_json()
     index = data.get("index")
+    if index is not None:
+        index = int(index)
     company_names = data.get("company_names") or []
 
     if not s["match_results"]:
         return jsonify({"error": "尚无匹配结果"}), 400
-    if not index:
+    if index is None:
         return jsonify({"error": "缺少序号参数"}), 400
 
     for r in s["match_results"]:
@@ -725,6 +706,8 @@ def unmatch_file():
     data = request.get_json()
     file_path = data.get("file_path")
     index = data.get("index")
+    if index is not None:
+        index = int(index)
 
     if not s["match_results"]:
         return jsonify({"error": "尚无匹配结果"}), 400
@@ -810,10 +793,9 @@ def organize_files():
             continue
 
         idx = result["index"]
-        if idx < 1 or idx > len(items):
-            continue
-        item = items[idx - 1]
-        if not item:
+        # 按 row_index 查找对应清单项（而非数组位置）
+        item = next((it for it in items if it.get("row_index") == idx), None)
+        if item is None:
             continue
 
         subject = item.get("subject", "")
@@ -1298,4 +1280,16 @@ def api_project_delete():
 # ====== 启动 ======
 
 if __name__ == "__main__":
+    import atexit
+    import webbrowser
+    import threading
+    atexit.register(session_store.shutdown)
+
+    # 只在 reloader 子进程中打开浏览器，避免 debug 模式弹出两个标签页
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        def _open_browser():
+            webbrowser.open("http://127.0.0.1:5001")
+        threading.Timer(1.0, _open_browser).start()
+
+    print("🚀 启动中，稍后将自动打开浏览器...")
     app.run(debug=True, port=5001)
