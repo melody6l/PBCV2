@@ -6,9 +6,10 @@ import openpyxl
 from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
 from excel_handler import normalize_item_name
+from path_utils import get_bundle_path, get_data_dir
 
 
-TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "资料表.xlsx")
+TEMPLATE_PATH = get_bundle_path("资料表.xlsx")
 
 
 def extract_company_names(companies):
@@ -140,8 +141,8 @@ def generate_checklist(selected_subjects, company_full_name="", company_short_na
     ws_company.column_dimensions["A"].width = 30
     ws_company.column_dimensions["B"].width = 14
 
-    os.makedirs("uploads", exist_ok=True)
-    output_path = os.path.join("uploads", "PBC需求清单_待填写.xlsx")
+    uploads_dir = get_data_dir("uploads")
+    output_path = os.path.join(uploads_dir, "PBC需求清单_待填写.xlsx")
     wb.save(output_path)
     wb.close()
     return output_path
@@ -405,8 +406,8 @@ def generate_checklist_from_memory(tpl_data):
     ws_company.column_dimensions["B"].width = 14
 
     # 保存
-    os.makedirs("uploads", exist_ok=True)
-    output_path = os.path.join("uploads", "PBC需求清单_待填写.xlsx")
+    uploads_dir = get_data_dir("uploads")
+    output_path = os.path.join(uploads_dir, "PBC需求清单_待填写.xlsx")
     wb.save(output_path)
     wb.close()
     return output_path

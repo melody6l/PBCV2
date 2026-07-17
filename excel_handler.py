@@ -7,6 +7,7 @@ import uuid
 import openpyxl
 from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
+from path_utils import get_data_dir
 
 META_HEADERS = {"row_uid", "source_key"}
 
@@ -331,8 +332,8 @@ def export_results(results, headers, data, name_col_index, scan_root="", scanned
         else:
             ws.column_dimensions[get_column_letter(i)].width = 36
 
-    os.makedirs("exports", exist_ok=True)
-    output_path = "exports/result.xlsx"
+    exports_dir = get_data_dir("exports")
+    output_path = os.path.join(exports_dir, "result.xlsx")
     wb.save(output_path)
     wb.close()
     return output_path
@@ -599,8 +600,8 @@ def export_checklist_two_sheets(items, company_names, match_results, file_rename
     ws_browse.column_dimensions[get_column_letter(folder_levels + 3)].width = 50
     ws_browse.freeze_panes = "A2"
 
-    os.makedirs("exports", exist_ok=True)
-    output_path = "exports/PBC需求清单_三视图.xlsx"
+    exports_dir = get_data_dir("exports")
+    output_path = os.path.join(exports_dir, "PBC需求清单_三视图.xlsx")
     wb.save(output_path)
     wb.close()
     return output_path

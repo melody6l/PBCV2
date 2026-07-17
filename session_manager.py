@@ -12,6 +12,7 @@ import os
 import threading
 import time
 import uuid as _uuid
+from path_utils import get_data_dir
 
 
 # ====== 创建空白状态 ======
@@ -245,9 +246,7 @@ def get_session_store():
     global _session_store
     if _session_store is None:
         _session_store = SessionStore(
-            sessions_dir=os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), "sessions"
-            ),
+            sessions_dir=get_data_dir("sessions"),
             max_memory=20,
             save_delay=5.0,
         )

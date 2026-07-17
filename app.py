@@ -1,12 +1,14 @@
 """审计文件匹配工具 - Flask主应用"""
 
 import os
+import sys
 import re
 import shutil
 import json
 import uuid
 import urllib.parse
 from flask import Flask, request, jsonify, render_template, send_file, make_response
+from path_utils import get_bundle_path, get_data_dir
 from matcher import match_files, _find_company_in_path, _find_company_in_filename
 from excel_handler import normalize_item_name, export_checklist_two_sheets, build_browse_items
 from llm_matcher import llm_match
@@ -20,7 +22,11 @@ from project_manager import (
 from session_manager import get_session_store, create_fresh_state
 
 app = Flask(__name__)
-app.config["UPLOAD_FOLDER"] = "uploads"
+# 模板和静态文件始终从打包资源目录读取（开发环境即项目根目录）
+app.template_folder = get_bundle_path("templates")
+app.static_folder = get_bundle_path("static")
+# 上传文件存入用户数据目录
+app.config["UPLOAD_FOLDER"] = get_data_dir("uploads")
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 
@@ -1275,15 +1281,29 @@ def api_project_delete():
 
 if __name__ == "__main__":
     import atexit
-    import webbrowser
     import threading
+    import webbrowser
     atexit.register(session_store.shutdown)
 
-    # 只在 reloader 子进程中打开浏览器，避免 debug 模式弹出两个标签页
-    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+    # 是否为 PyInstaller 打包运行
+    is_frozen = getattr(sys, "frozen", False)
+
+    if is_frozen:
+        # 打包后直接启动浏览器，不加 debug 模式（避免双进程）
         def _open_browser():
             webbrowser.open("http://127.0.0.1:5001")
-        threading.Timer(1.0, _open_browser).start()
-
-    print("🚀 启动中，稍后将自动打开浏览器...")
-    app.run(debug=True, port=5001)
+        threading.Timer(1.5, _open_browser).start()
+        # 打包后 stdout 可能是 GBK 编码，避免 emoji 报错
+        try:
+            print("\U0001f680 PBC审计工具已启动，浏览器将自动打开...")
+        except UnicodeEncodeError:
+            print("PBC审计工具已启动，浏览器将自动打开...")
+        app.run(debug=False, port=5001)
+    else:
+        # 开发环境：只在 reloader 子进程中打开浏览器，避免 debug 模式弹出两个标签页
+        if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+            def _open_browser():
+                webbrowser.open("http://127.0.0.1:5001")
+            threading.Timer(1.0, _open_browser).start()
+        print("\U0001f680 启动中，稍后将自动打开浏览器...")
+        app.run(debug=True, port=5001)

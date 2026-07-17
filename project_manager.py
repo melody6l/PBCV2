@@ -9,9 +9,15 @@ import os
 import re
 import shutil
 from datetime import datetime
+from path_utils import get_data_dir
 
 
-PROJECTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "projects")
+def _get_projects_dir():
+    """获取项目存储目录（用户数据目录下，确保不受打包影响）。"""
+    return get_data_dir("projects")
+
+
+PROJECTS_DIR = _get_projects_dir()
 
 
 def _ensure_dir():
