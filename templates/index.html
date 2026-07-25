@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文件核对工具</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=7">
+    <link rel="stylesheet" href="/static/css/style.css?v=12">
 </head>
 <body>
     <header class="topbar">
@@ -39,43 +39,61 @@
         <div class="accent-line"></div>
     </header>
     <div class="container">
+        <div class="panel project-start-panel" id="project-start-panel">
+            <div class="project-start-copy">
+                <strong>开始本次核对</strong>
+                <span>建议先创建项目，后续进度将自动保存。</span>
+            </div>
+            <div class="project-start-actions">
+                <button class="btn btn-primary" id="btn-project-create-start">新建项目</button>
+                <button class="btn btn-outline" id="btn-project-open-start">打开已有项目</button>
+                <button class="btn btn-text" id="btn-project-temp-start">暂不保存，直接使用</button>
+            </div>
+        </div>
+
         <!-- 主流程 -->
         <div class="panel workflow-panel" id="workflow-panel">
             <div class="workflow-title">
                 <div class="panel-title">
-                    <span>&#128203; 首屏主流程</span>
+                    <span>核对流程</span>
                     <span class="badge" id="workflow-state-badge">待开始</span>
                 </div>
             </div>
             <div class="workflow-steps">
-                <!-- 步骤0：生成PBC需求清单 -->
-                <div class="panel workflow-step-card" id="workflow-step-0">
+                <!-- 步骤1：准备清单 -->
+                <div class="panel workflow-step-card" id="workflow-step-1">
                     <div class="panel-title">
-                        <span>步骤 0 · 生成清单</span>
+                        <span>步骤 1 · 准备清单</span>
                         <span class="badge" id="template-badge">未开始</span>
                     </div>
                     <div class="template-section">
                         <div class="template-gen-area" id="template-gen-area">
-                            <div class="subject-select-area" id="subject-select-area">
-                                <p class="section-hint">选择需要的科目，生成PBC需求清单</p>
+                            <div class="checklist-entry">
+                                <div class="checklist-entry-title">创建标准清单</div>
+                                <p class="section-hint">按审计科目生成标准 PBC 需求清单</p>
                                 <div class="multi-select-wrap" id="subject-select-wrap">
                                     <div class="multi-select-trigger" id="subject-select-trigger">请选择科目</div>
-                                    <div class="multi-select-dropdown hidden" id="subject-select-dropdown"></div>
+                                    <div class="multi-select-dropdown hidden" id="subject-select-dropdown">
+                                        <div class="multi-select-actions">
+                                            <button type="button" data-subject-action="all">全选</button>
+                                            <button type="button" data-subject-action="clear">清空</button>
+                                        </div>
+                                        <div id="subject-select-options"></div>
+                                    </div>
                                     <input type="hidden" id="subject-selected-values">
                                 </div>
                                 <div class="btn-group">
                                     <button class="btn btn-primary btn-sm" id="gen-checklist-btn">生成PBC需求清单</button>
                                 </div>
                             </div>
-                            <div class="upload-alternative">
-                                <span class="or-divider">或</span>
-                                <button class="btn btn-outline btn-sm" id="upload-filled-btn">上传已填写的清单</button>
+                            <div class="checklist-entry checklist-entry-import">
+                                <div>
+                                    <div class="checklist-entry-title">导入现有清单</div>
+                                </div>
+                                <button class="btn btn-outline btn-sm" id="upload-filled-btn">选择 Excel 清单</button>
                                 <input type="file" id="filled-checklist-input" accept=".xlsx" class="hidden">
                             </div>
-                            <div class="upload-alternative">
-                                <span class="or-divider">或</span>
-                                <button class="btn btn-outline btn-sm" id="btn-open-project-inline">&#128193; 打开已有项目...</button>
-                            </div>
+                            <p class="next-action" id="template-next-action">完成后进入“选择资料”。</p>
                         </div>
                         <div class="template-done hidden" id="template-done">
                             <div class="upload-summary" id="template-summary"></div>
@@ -91,54 +109,55 @@
 
                 <div class="step-arrow">&rarr;</div>
 
-                <!-- 步骤1：上传清单（原步骤1，改为可选或上传已填写的） -->
-                <div class="panel workflow-step-card" id="workflow-step-1">
+                <!-- 步骤2：选择资料 -->
+                <div class="panel workflow-step-card" id="workflow-step-2">
                     <div class="panel-title">
-                        <span>步骤 1 · 扫描文件夹</span>
+                        <span>步骤 2 · 选择资料</span>
                         <span class="badge" id="folder-badge">未扫描</span>
                     </div>
                     <div class="folder-input-group">
                         <input type="text" id="folder-path" placeholder="请输入文件夹路径，如: D:\客户资料\2024年度">
-                        <button class="btn btn-outline" id="select-folder-btn" type="button">&#128193; 选择文件夹</button>
-                        <button class="btn btn-primary" id="scan-btn">&#128270; 扫描</button>
+                        <button class="btn btn-outline" id="select-folder-btn" type="button">选择文件夹</button>
+                        <button class="btn btn-primary" id="scan-btn">扫描</button>
                     </div>
+                    <p class="next-action" id="folder-next-action">选择客户资料所在文件夹后扫描。</p>
                 </div>
 
                 <div class="step-arrow">&rarr;</div>
 
-                <!-- 步骤2：匹配 -->
-                <div class="panel workflow-step-card" id="workflow-step-2">
+                <!-- 步骤3：智能匹配 -->
+                <div class="panel workflow-step-card" id="workflow-step-3">
                     <div class="panel-title">
-                        <span>步骤 2 · 开始匹配</span>
+                        <span>步骤 3 · 智能匹配</span>
                         <span class="badge" id="match-badge">待匹配</span>
                     </div>
-                    <div class="match-options">
-                        <label class="match-option">
-                            <input type="checkbox" id="smart-match-enabled" checked disabled>
-                            <span>智能模式匹配（推荐）</span>
-                        </label>
-                        <label class="match-option">
-                            <input type="checkbox" id="llm-enabled">
-                            <span>AI辅助匹配（可选）</span>
-                        </label>
-                        <label class="match-option">
-                            <input type="checkbox" id="content-match-enabled">
-                            <span>内容识别匹配（高级）</span>
-                        </label>
+                    <div class="advanced-match-settings" id="advanced-match-settings">
+                        <div class="match-options">
+                            <label class="match-option">
+                                <input type="checkbox" id="llm-enabled">
+                                <span>AI辅助匹配（可选）</span>
+                            </label>
+                            <label class="match-option">
+                                <input type="checkbox" id="content-match-enabled">
+                                <span>内容识别匹配（高级）</span>
+                            </label>
+                        </div>
+                        <div class="llm-config-summary hidden" id="llm-config-summary">
+                            <span class="llm-config-tag" id="llm-config-tag" title="点击修改配置">AI 已配置</span>
+                        </div>
+                        <div class="llm-config-summary hidden" id="ocr-config-summary">
+                            <span class="llm-config-tag ocr-config-tag" id="ocr-config-tag" title="点击配置OCR">OCR 未配置</span>
+                        </div>
                     </div>
-                    <div class="llm-config-summary hidden" id="llm-config-summary">
-                        <span class="llm-config-tag" id="llm-config-tag" title="点击修改配置">已配置</span>
-                    </div>
-                    <div class="llm-config-summary hidden" id="ocr-config-summary">
-                        <span class="llm-config-tag ocr-config-tag" id="ocr-config-tag" title="点击配置OCR">OCR未配置</span>
-                    </div>
-                    <button class="btn btn-success btn-match" id="match-btn">&#9889; 开始匹配</button>
+                    <button class="btn btn-success btn-match" id="match-btn">开始匹配</button>
                     <span class="llm-status hidden" id="llm-status">正在匹配中...</span>
                     <span class="hidden" id="content-status">正在读取文件内容…</span>
                     <div class="progress-bar">
                         <div class="fill" id="progress-fill" style="width: 0%"></div>
                     </div>
+                    <p class="next-action" id="match-next-action">扫描完成后开始匹配。</p>
                 </div>
+
             </div>
         </div>
 
@@ -174,17 +193,17 @@
         <!-- 核对工作台区域 -->
         <div class="panel hidden" id="preview-section">
             <div class="panel-title">
-                <span>&#128203; 核对工作台</span>
+                <span>核对工作台</span>
                 <div class="panel-actions">
                     <button class="btn btn-outline btn-sm hidden" id="toggle-manage-btn" title="编辑行模式">&#9998; 编辑行</button>
                     <button class="btn btn-outline btn-sm hidden" id="add-row-btn" title="新增一行">+ 新增行</button>
                     <div class="view-toggle" id="view-toggle">
-                        <button class="view-toggle-btn active" data-view="matrix">&#128203; 核对总览</button>
-                        <button class="view-toggle-btn" data-view="list">&#128205; 需求列表</button>
-                        <button class="view-toggle-btn" data-view="browse">&#128193; 文件浏览</button>
+                        <button class="view-toggle-btn active" data-view="matrix">核对总览</button>
+                        <button class="view-toggle-btn" data-view="list">需求列表</button>
+                        <button class="view-toggle-btn" data-view="browse">文件浏览</button>
                     </div>
-                    <button class="btn btn-outline btn-sm hidden" id="organize-files-btn">&#128230; 整理文件</button>
-                    <button class="btn btn-outline btn-sm hidden" id="export-checklist-btn">&#128202; 导出清单</button>
+                    <button class="btn btn-outline btn-sm hidden" id="organize-files-btn">整理文件</button>
+                    <button class="btn btn-outline btn-sm hidden" id="export-checklist-btn">导出清单</button>
                 </div>
             </div>
 
@@ -448,9 +467,9 @@
 
     <!-- 保存项目弹窗 -->
     <div class="project-modal hidden" id="project-save-modal">
-        <div class="project-modal-content project-save-content">
-            <div class="project-modal-header">
-                <h3>保存项目</h3>
+            <div class="project-modal-content project-save-content">
+                <div class="project-modal-header">
+                    <h3>新建并保存项目</h3>
                 <button class="project-modal-close" id="project-save-close">&times;</button>
             </div>
             <div class="project-modal-body">
@@ -464,12 +483,12 @@
             </div>
             <div class="project-modal-footer">
                 <button class="btn btn-outline" id="project-save-cancel">取消</button>
-                <button class="btn btn-primary" id="project-save-confirm">保存项目</button>
+                <button class="btn btn-primary" id="project-save-confirm">创建项目</button>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="/static/js/main.js?v=12"></script>
+    <script src="/static/js/main.js?v=21"></script>
 </body>
 </html>

@@ -257,6 +257,50 @@ def get_matched_paths(state):
     return matched
 
 
+def prune_match_results(results, valid_paths):
+    """删除已不存在的文件引用，保留仍有效的历史及人工匹配。"""
+    valid = {os.path.normcase(os.path.normpath(path)) for path in valid_paths}
+    pruned = []
+    for original in results or []:
+        result = dict(original)
+        paths = result.get("matched_files") or []
+        names = result.get("matched_names") or []
+        types = result.get("matched_types") or []
+        kept_positions = [
+            index for index, path in enumerate(paths)
+            if os.path.normcase(os.path.normpath(path)) in valid
+        ]
+        result["matched_files"] = [paths[index] for index in kept_positions]
+        result["matched_names"] = [
+            names[index] if index < len(names) else os.path.basename(paths[index])
+            for index in kept_positions
+        ]
+        result["matched_types"] = [
+            types[index] if index < len(types) else ("文件夹" if os.path.isdir(paths[index]) else "文件")
+            for index in kept_positions
+        ]
+        result["match_count"] = len(result["matched_files"])
+        if not result["matched_files"]:
+            result["status"] = "未匹配"
+            result["company_coverage"] = {}
+        else:
+            coverage = {}
+            for company, company_data in (result.get("company_coverage") or {}).items():
+                kept_files = [
+                    path for path in company_data.get("files", [])
+                    if os.path.normcase(os.path.normpath(path)) in valid
+                ]
+                kept_folders = [
+                    path for path in company_data.get("folders", [])
+                    if os.path.normcase(os.path.normpath(path)) in valid
+                ]
+                if kept_files or kept_folders:
+                    coverage[company] = {"files": kept_files, "folders": kept_folders}
+            result["company_coverage"] = coverage
+        pruned.append(result)
+    return pruned
+
+
 def build_browse_view_items(state):
     """构建以扫描资料为中心的动态层级列表。"""
     return build_browse_items(
@@ -297,63 +341,57 @@ def select_folder():
 
 @app.route("/api/scan-folder", methods=["POST"])
 def scan_folder():
-    """扫描指定文件夹"""
+    """只扫描指定文件夹并记录变化；匹配由用户在下一步明确触发。"""
     s = _state()
     data = request.get_json()
     folder_path = data.get("folder_path", "")
     if not folder_path or not os.path.isdir(folder_path):
         return jsonify({"error": "文件夹路径无效"}), 400
 
-    prev_files = s.get("scanned_files")
-    prev_folders = s.get("scanned_folders")
+    previous_root = s.get("scan_root") or ""
+    same_root = bool(previous_root) and os.path.normcase(os.path.abspath(previous_root)) == os.path.normcase(os.path.abspath(folder_path))
+    prev_files = s.get("scanned_files") if same_root else None
+    prev_folders = s.get("scanned_folders") if same_root else None
     if prev_files is None and prev_folders is None:
-        prev_files = s.get("previous_scanned_files") or None
-        prev_folders = s.get("previous_scanned_folders") or None
+        prev_files = (s.get("previous_scanned_files") or None) if same_root else None
+        prev_folders = (s.get("previous_scanned_folders") or None) if same_root else None
     scanned_files, scanned_folders = scan_all(folder_path)
     diff = calculate_diff(prev_files, scanned_files, prev_folders, scanned_folders)
 
+    s["previous_scanned_files"] = list(prev_files or [])
+    s["previous_scanned_folders"] = list(prev_folders or [])
     s["scanned_files"] = scanned_files
     s["scanned_folders"] = scanned_folders
     s["scan_root"] = folder_path
-
-    # 自动执行匹配
-    if s["checklist"]:
-        prev_results = s.get("match_results") if s["checklist"].get("has_previous_results") else None
-        # 获取公司列表
-        company_names = get_company_names_from_session(s)
-
-        results = match_files(
-            s["checklist"]["items"],
-            scanned_files,
-            scanned_folders,
-            prev_results=prev_results,
-            company_names=company_names,
-            merge_mode=True,  # 增量合并模式：已匹配项也检查新文件
-        )
-        s["match_results"] = results
-        matched_count, partial_count = result_counts(results)
-        return jsonify({
-            "success": True,
-            "scanned_count": len(scanned_files) + len(scanned_folders),
-            "diff": diff,
-            "checklist_diff": {
-                "new_count": len(s.get("new_items", [])),
-                "existing_count": len(s.get("existing_items", [])),
-            },
-            "results": results,
-            "matched_count": matched_count,
-            "partial_count": partial_count,
-            "total": len(results),
-            "root_path": folder_path,
-        })
+    if diff["mode"] == "full_scan":
+        pending_files = scanned_files
+        pending_folders = scanned_folders
+        match_required = True
     else:
-        return jsonify({
-            "success": True,
-            "scanned_count": len(scanned_files) + len(scanned_folders),
-            "diff": diff,
-            "results": [],
-            "message": "请先上传清单文件再执行匹配",
-        })
+        pending_files = diff["added_files"]
+        pending_folders = diff["added_folders"]
+        match_required = bool(diff["total_added"] or diff["total_removed"])
+    if not s.get("match_results"):
+        match_required = True
+        pending_files = scanned_files
+        pending_folders = scanned_folders
+    s["pending_match_files"] = pending_files
+    s["pending_match_folders"] = pending_folders
+    s["scan_needs_match"] = match_required
+    s["last_scan_diff"] = diff
+
+    return jsonify({
+        "success": True,
+        "scanned_count": len(scanned_files) + len(scanned_folders),
+        "file_count": len(scanned_files),
+        "folder_count": len(scanned_folders),
+        "diff": diff,
+        "match_required": match_required,
+        "has_previous_results": bool(s.get("match_results")),
+        "pending_file_count": len(pending_files),
+        "pending_folder_count": len(pending_folders),
+        "root_path": folder_path,
+    })
 
 
 @app.route("/api/match", methods=["POST"])
@@ -368,20 +406,31 @@ def do_match():
     if not s["scanned_files"] and not s.get("scanned_folders"):
         return jsonify({"error": "请先扫描目标文件夹"}), 400
 
-    prev_results = s.get("match_results") if incremental and s["checklist"].get("has_previous_results") else None
+    prev_results = None
+    candidate_files = s["scanned_files"]
+    candidate_folders = s.get("scanned_folders", [])
+    if incremental and s.get("match_results"):
+        all_valid_paths = list(s["scanned_files"]) + list(s.get("scanned_folders", []))
+        prev_results = prune_match_results(s["match_results"], all_valid_paths)
+        candidate_files = s.get("pending_match_files") or []
+        candidate_folders = s.get("pending_match_folders") or []
     # 获取公司列表
     company_names = get_company_names_from_session(s)
 
     started = time.perf_counter()
     results = match_files(
         s["checklist"]["items"],
-        s["scanned_files"],
-        s.get("scanned_folders", []),
+        candidate_files,
+        candidate_folders,
         prev_results=prev_results,
         company_names=company_names,
-        merge_mode=True,
+        merge_mode=bool(prev_results),
     )
     s["match_results"] = results
+    s["checklist"]["has_previous_results"] = True
+    s["pending_match_files"] = []
+    s["pending_match_folders"] = []
+    s["scan_needs_match"] = False
     matched_count, partial_count = result_counts(results)
     duration_ms = round((time.perf_counter() - started) * 1000)
     root = s.get("scan_root", "")
@@ -489,6 +538,10 @@ def gen_checklist():
             "items": items_for_match,
             "has_previous_results": False,
         }
+        s["match_results"] = None
+        s["pending_match_files"] = list(s.get("scanned_files") or [])
+        s["pending_match_folders"] = list(s.get("scanned_folders") or [])
+        s["scan_needs_match"] = bool(s.get("scanned_files") or s.get("scanned_folders"))
 
         return jsonify({
             "success": True,
@@ -567,6 +620,10 @@ def upload_checklist_v2():
             "has_previous_results": False,
         }
         s["checklist"] = checklist
+        s["match_results"] = None
+        s["pending_match_files"] = list(s.get("scanned_files") or [])
+        s["pending_match_folders"] = list(s.get("scanned_folders") or [])
+        s["scan_needs_match"] = bool(s.get("scanned_files") or s.get("scanned_folders"))
 
         return jsonify({
             "success": True,
@@ -2128,6 +2185,8 @@ def api_project_load():
         "scanned_files": s.get("scanned_files"),
         "scanned_folders": s.get("scanned_folders"),
         "scan_root": s.get("scan_root"),
+        "scan_needs_match": s.get("scan_needs_match", False),
+        "last_scan_diff": s.get("last_scan_diff"),
         "checklist": s.get("checklist"),
         "checklist_file_path": s.get("checklist_file_path"),
         "dev_logs": s.get("dev_logs") or [],

@@ -61,6 +61,9 @@ let companyNames = [];           // 公司简称列表
 let matchResults = null;
 let scannedCount = 0;
 let scanRoot = "";
+let scanNeedsMatch = false;
+let pendingMatchIsIncremental = false;
+let lastScanDiff = null;
 let showCols = null;
 let colFilters = {};
 let previewStatusCell = null;   // 预览区当前右键的状态单元格
@@ -83,6 +86,7 @@ const DEV_LOG_EVENT_LABELS = {
 
 // ====== 项目管理 ======
 let activeProject = null;        // {slug, name, is_dirty: bool}
+let temporaryMode = false;
 let autoSaveTimer = null;
 const AUTO_SAVE_DELAY = 3000;    // 3秒防抖
 
@@ -542,6 +546,14 @@ function initTemplatePanel() {
         dropdown.classList.toggle("hidden");
     });
     dropdown.addEventListener("change", () => updateSubjectTriggerText());
+    dropdown.addEventListener("click", event => {
+        const action = event.target.closest("[data-subject-action]")?.dataset.subjectAction;
+        if (!action) return;
+        event.stopPropagation();
+        const checked = action === "all";
+        dropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = checked; });
+        updateSubjectTriggerText();
+    });
     document.addEventListener("click", (e) => {
         if (!dropdown.contains(e.target) && e.target !== trigger) dropdown.classList.add("hidden");
     });
@@ -686,7 +698,7 @@ function loadTemplateInfo() {
 }
 
 function renderSubjectCheckboxes(subjects) {
-    const dropdown = document.getElementById("subject-select-dropdown");
+    const dropdown = document.getElementById("subject-select-options");
     dropdown.innerHTML = "";
     subjects.forEach(s => {
         const label = document.createElement("label");
@@ -694,7 +706,7 @@ function renderSubjectCheckboxes(subjects) {
         const cb = document.createElement("input");
         cb.type = "checkbox";
         cb.value = s;
-        cb.checked = true;
+        cb.checked = false;
         label.appendChild(cb);
         label.appendChild(document.createTextNode(s));
         dropdown.appendChild(label);
@@ -704,7 +716,7 @@ function renderSubjectCheckboxes(subjects) {
 
 function updateSubjectTriggerText() {
     const trigger = document.getElementById("subject-select-trigger");
-    const cbs = document.querySelectorAll("#subject-select-dropdown input[type=checkbox]:checked");
+    const cbs = document.querySelectorAll("#subject-select-options input[type=checkbox]:checked");
     const names = Array.from(cbs).map(cb => cb.value);
     if (names.length === 0) trigger.textContent = "请选择科目";
     else if (names.length <= 2) trigger.textContent = names.join("、");
@@ -712,7 +724,7 @@ function updateSubjectTriggerText() {
 }
 
 function getSelectedSubjects() {
-    const cbs = document.querySelectorAll("#subject-select-dropdown input[type=checkbox]:checked");
+    const cbs = document.querySelectorAll("#subject-select-options input[type=checkbox]:checked");
     return Array.from(cbs).map(cb => cb.value);
 }
 
@@ -747,6 +759,9 @@ function onChecklistGenerated(data, isNew) {
     previewItems = data.items;
     previewCompanies = data.companies || [];
     companyNames = data.company_names || [];
+    matchResults = null;
+    scanNeedsMatch = scannedCount > 0;
+    pendingMatchIsIncremental = false;
 
     document.getElementById("template-gen-area").classList.add("hidden");
     document.getElementById("template-done").classList.remove("hidden");
@@ -756,6 +771,7 @@ function onChecklistGenerated(data, isNew) {
     renderPreviewTable();
     document.getElementById("preview-section").classList.remove("hidden");
     document.getElementById("export-checklist-btn").classList.remove("hidden");
+    updateWorkflowState();
     markProjectDirty();
 }
 
@@ -807,6 +823,10 @@ function resetTemplate() {
     previewItems = [];
     previewCompanies = [];
     companyNames = [];
+    matchResults = null;
+    scanNeedsMatch = false;
+    pendingMatchIsIncremental = false;
+    updateWorkflowState();
 }
 
 function uploadFilledChecklist(file) {
@@ -1977,6 +1997,25 @@ function initFolderInput() {
     document.getElementById("select-folder-btn").addEventListener("click", chooseScanFolder);
 }
 
+function renderScanDiff(diff) {
+    const section = document.getElementById("diff-section");
+    const content = document.getElementById("diff-content");
+    if (!diff || diff.mode === "full_scan") {
+        section.classList.add("hidden");
+        return;
+    }
+    section.classList.remove("hidden");
+    document.getElementById("diff-badge").textContent = "本次扫描";
+    const added = diff.total_added || 0;
+    const removed = diff.total_removed || 0;
+    content.innerHTML = `
+        <div class="scan-diff-summary">
+            <span class="${added ? 'has-change' : ''}">新增 ${added} 项</span>
+            <span class="${removed ? 'has-change' : ''}">移除 ${removed} 项</span>
+            <span>${added || removed ? '已有匹配将保留，仅处理变化内容。' : '资料没有变化，无需再次匹配。'}</span>
+        </div>`;
+}
+
 async function selectSystemFolder(title, initialPath) {
     const response = await fetch(API.selectFolder, {
         method: "POST",
@@ -2005,7 +2044,9 @@ async function chooseScanFolder() {
     } catch (error) {
         showToast("系统窗口不可用，已切换到内置文件夹选择器", "info");
         showDirectoryPicker(path => {
-            if (path) input.value = path;
+            if (path) {
+                input.value = path;
+            }
         }, input.value.trim());
     } finally {
         button.disabled = false;
@@ -2015,7 +2056,12 @@ async function chooseScanFolder() {
 function scanFolder() {
     const folderPath = document.getElementById("folder-path").value.trim();
     if (!folderPath) { showToast("请输入文件夹路径", "error"); return; }
-    fetch(API.scanFolder, {
+    const scanBtn = document.getElementById("scan-btn");
+    const selectBtn = document.getElementById("select-folder-btn");
+    scanBtn.disabled = true;
+    selectBtn.disabled = true;
+    scanBtn.textContent = "扫描中...";
+    return fetch(API.scanFolder, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ folder_path: folderPath }),
@@ -2025,20 +2071,23 @@ function scanFolder() {
         if (data.error) { showToast(data.error, "error"); return; }
         scannedCount = data.scanned_count;
         scanRoot = data.root_path || folderPath;
-        document.getElementById("folder-badge").textContent = `✓ ${data.scanned_count}个文件`;
-
-        if (data.results && data.results.length) {
-            matchResults = data.results;
-            syncMatchToPreview();
-            renderPreviewTable();
-            document.getElementById("export-checklist-btn").classList.remove("hidden");
-            document.getElementById("organize-files-btn")?.classList.remove("hidden");
-        }
+        scanNeedsMatch = Boolean(data.match_required);
+        pendingMatchIsIncremental = Boolean(data.has_previous_results);
+        lastScanDiff = data.diff || null;
+        document.getElementById("folder-badge").textContent = `✓ ${data.file_count ?? data.scanned_count} 个文件`;
+        renderScanDiff(data.diff);
         updateWorkflowState();
-        showToast(`已扫描 ${data.scanned_count} 个文件`, "success");
+        if (data.diff?.mode === "incremental" && !data.match_required) {
+            showToast("扫描完成，资料没有变化，无需再次匹配", "success");
+        } else if (data.has_previous_results) {
+            showToast(`扫描完成，发现 ${data.diff?.total_added || 0} 项新增、${data.diff?.total_removed || 0} 项移除；下一步请匹配变化资料`, "success");
+        } else {
+            showToast(`扫描完成，共发现 ${data.file_count ?? data.scanned_count} 个文件；下一步请开始匹配`, "success");
+        }
         markProjectDirty();
     })
-    .catch(err => showToast("扫描失败: " + err.message, "error"));
+    .catch(err => showToast("扫描失败: " + err.message, "error"))
+    .finally(() => updateWorkflowState());
 }
 
 // 将匹配结果同步到预览区
@@ -2127,17 +2176,19 @@ async function doMatch() {
         const r = await fetch(API.match, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ incremental: false }),
+            body: JSON.stringify({ incremental: pendingMatchIsIncremental }),
         });
         const data = await r.json();
         if (data.error) {
             statusEl.classList.add("hidden");
-            matchBtn.disabled = false;
             matchBtn.style.opacity = "1";
+            updateWorkflowState();
             showToast(data.error, "error");
             return;
         }
         matchResults = data.results;
+        scanNeedsMatch = false;
+        pendingMatchIsIncremental = true;
         appendDevLogs(data.dev_logs);
         scanRoot = data.root_path || scanRoot;
         syncMatchToPreview();
@@ -2156,13 +2207,15 @@ async function doMatch() {
         }
         // 如果没有勾选任何AI选项，在这里恢复按钮
         statusEl.classList.add("hidden");
-        matchBtn.disabled = false;
         matchBtn.style.opacity = "1";
+        updateWorkflowState();
+        const unmatched = Math.max(0, data.total - data.matched_count);
+        showToast(`匹配完成，已获取 ${data.matched_count}/${data.total} 项；${unmatched ? `下一步请核对 ${unmatched} 项未匹配资料` : "下一步请核对结果"}`, "success");
         markProjectDirty();
     } catch (err) {
         statusEl.classList.add("hidden");
-        matchBtn.disabled = false;
         matchBtn.style.opacity = "1";
+        updateWorkflowState();
         showToast("匹配失败: " + err.message, "error");
     }
 }
@@ -2619,17 +2672,41 @@ function updateWorkflowState() {
     const hasScannedFolder = scannedCount > 0;
     const hasMatchResult = Boolean(matchResults && matchResults.length);
 
-    setWorkflowStep("workflow-step-0", hasTemplate ? "completed" : "active");
-    setWorkflowStep("workflow-step-1", hasScannedFolder ? "completed" : (hasTemplate ? "active" : "pending"));
-    setWorkflowStep("workflow-step-2", hasMatchResult ? "completed" : (hasScannedFolder ? "active" : "pending"));
+    setWorkflowStep("workflow-step-1", hasTemplate ? "completed" : "active");
+    setWorkflowStep("workflow-step-2", hasScannedFolder ? "completed" : (hasTemplate ? "active" : "pending"));
+    setWorkflowStep("workflow-step-3", hasMatchResult && !scanNeedsMatch ? "completed" : (hasScannedFolder ? "active" : "pending"));
 
-    // 已完成步骤badge轻量化：仅显示 ✓；待操作步骤保留提示文字
-    document.getElementById("template-badge").textContent = hasTemplate ? "✓" : "未开始";
-    document.getElementById("folder-badge").textContent = hasScannedFolder ? "✓" : "未扫描";
-    document.getElementById("match-badge").textContent = hasMatchResult ? "✓" : (hasScannedFolder ? "待匹配" : "待前置");
+    document.getElementById("template-badge").textContent = hasTemplate ? "✓ 已准备" : "未开始";
+    if (!hasScannedFolder) document.getElementById("folder-badge").textContent = "未扫描";
+    document.getElementById("match-badge").textContent = scanNeedsMatch
+        ? (pendingMatchIsIncremental ? "发现资料变化" : "待匹配")
+        : (hasMatchResult ? "✓ 已完成" : (hasScannedFolder ? "待匹配" : "待前置"));
 
-    const badgeText = hasMatchResult ? "匹配完成" : (hasScannedFolder ? "步骤 2 待匹配" : (hasTemplate ? "步骤 1 待扫描" : "步骤 0 待生成"));
+    const badgeText = hasMatchResult && !scanNeedsMatch
+        ? "请核对结果"
+        : (hasScannedFolder ? (pendingMatchIsIncremental ? "请匹配变化资料" : "请开始匹配")
+            : (hasTemplate ? "请选择并扫描资料" : "请准备清单"));
     document.getElementById("workflow-state-badge").textContent = badgeText;
+
+    const matchBtn = document.getElementById("match-btn");
+    matchBtn.disabled = !hasTemplate || !hasScannedFolder || (!scanNeedsMatch && hasMatchResult);
+    matchBtn.textContent = pendingMatchIsIncremental && scanNeedsMatch
+        ? "匹配变化资料"
+        : "开始匹配";
+
+    document.getElementById("template-next-action").textContent = hasTemplate
+        ? "清单已准备。下一步：选择并扫描客户资料文件夹。"
+        : "请选择科目创建标准清单，或导入现有 Excel 清单。";
+    document.getElementById("folder-next-action").textContent = hasScannedFolder
+        ? (scanNeedsMatch ? "扫描完成。下一步：开始智能匹配。" : "资料已扫描；有新资料时再次点击“扫描”。")
+        : "选择客户资料所在文件夹后扫描。";
+    document.getElementById("match-next-action").textContent = scanNeedsMatch && pendingMatchIsIncremental
+        ? `资料发生变化。点击“匹配变化资料”，已有结果和人工调整将保留。`
+        : (hasMatchResult ? "匹配已完成，请在下方核对工作台检查结果。" : "扫描完成后开始匹配。");
+
+    document.getElementById("select-folder-btn").disabled = !hasTemplate;
+    document.getElementById("scan-btn").disabled = !hasTemplate;
+    document.getElementById("scan-btn").textContent = hasScannedFolder ? "重新扫描" : "扫描";
 }
 
 function setWorkflowStep(id, state) {
@@ -3771,7 +3848,7 @@ function initLlmPanel() {
 
     updateBaseUrlHint();
     if (localStorage.getItem("llm_configured") === "true") {
-        enabled.checked = true;
+        enabled.checked = false;
         summary.classList.remove("hidden");
         loadForm();
     } else {
@@ -3869,10 +3946,7 @@ function initContentMatchPanel() {
     enabled.addEventListener("change", () => {
         if (enabled.checked) {
             loadForm();
-            // 如果还没配过OCR，弹出配置弹窗
-            if (localStorage.getItem("ocr_configured") !== "true") {
-                modal.classList.remove("hidden");
-            }
+            modal.classList.remove("hidden");
         }
     });
     tag.addEventListener("click", () => { loadForm(); modal.classList.remove("hidden"); });
@@ -3886,6 +3960,7 @@ function initContentMatchPanel() {
         tag.textContent = "OCR已配置";
         tag.style.color = "var(--success)";
         tag.classList.remove("ocr-config-tag");
+        enabled.checked = false;
     } else {
         enabled.checked = false;
         summary.classList.add("hidden");
@@ -4294,10 +4369,20 @@ function initProjectBar() {
     const btnSave = document.getElementById("btn-project-save");
     const btnSwitch = document.getElementById("btn-project-switch");
     const btnOpenInline = document.getElementById("btn-open-project-inline");
+    const btnCreateStart = document.getElementById("btn-project-create-start");
+    const btnOpenStart = document.getElementById("btn-project-open-start");
+    const btnTempStart = document.getElementById("btn-project-temp-start");
 
     if (btnSaveAs) btnSaveAs.addEventListener("click", showSaveProjectModal);
     if (btnOpen) btnOpen.addEventListener("click", showOpenProjectModal);
     if (btnOpenInline) btnOpenInline.addEventListener("click", showOpenProjectModal);
+    if (btnCreateStart) btnCreateStart.addEventListener("click", showSaveProjectModal);
+    if (btnOpenStart) btnOpenStart.addEventListener("click", showOpenProjectModal);
+    if (btnTempStart) btnTempStart.addEventListener("click", () => {
+        temporaryMode = true;
+        updateProjectStartPanel();
+        showToast("已进入临时模式；可随时点击顶部“保存项目”保存进度", "info");
+    });
     if (btnSave) btnSave.addEventListener("click", () => saveCurrentProject(false));
     if (btnSwitch) btnSwitch.addEventListener("click", showOpenProjectModal);
 
@@ -4314,6 +4399,11 @@ function initProjectBar() {
     checkCurrentProject();
 }
 
+function updateProjectStartPanel() {
+    const panel = document.getElementById("project-start-panel");
+    if (panel) panel.classList.toggle("hidden", Boolean(activeProject) || temporaryMode);
+}
+
 async function checkCurrentProject() {
     try {
         const r = await fetch(API.projectCurrent);
@@ -4322,6 +4412,7 @@ async function checkCurrentProject() {
             activeProject = { slug: data.active.slug, name: data.active.name, is_dirty: false };
             showProjectActiveState();
         }
+        updateProjectStartPanel();
     } catch (e) {
         // 忽略
     }
@@ -4332,11 +4423,13 @@ function showProjectActiveState() {
     document.getElementById("project-state-active").classList.remove("hidden");
     document.getElementById("project-name-display").textContent = activeProject.name;
     document.getElementById("project-dirty").classList.add("hidden");
+    updateProjectStartPanel();
 }
 
 function showProjectNoneState() {
     document.getElementById("project-state-none").classList.remove("hidden");
     document.getElementById("project-state-active").classList.add("hidden");
+    updateProjectStartPanel();
 }
 
 function collectFrontendState() {
@@ -4429,6 +4522,7 @@ async function createNewProject() {
         const data = await r.json();
         if (data.success) {
             activeProject = { slug: data.slug, name: name, is_dirty: false };
+            temporaryMode = false;
             showProjectActiveState();
             closeSaveProjectModal();
             showToast(data.message || "项目已保存", "success");
@@ -4539,10 +4633,14 @@ async function loadProject(slug) {
         }
         matchResults = data.match_results;
         scanRoot = data.scan_root || "";
+        scanNeedsMatch = Boolean(data.scan_needs_match);
+        pendingMatchIsIncremental = Boolean(matchResults && matchResults.length);
+        lastScanDiff = data.last_scan_diff || null;
         scannedCount = (data.scanned_files ? data.scanned_files.length : 0) +
                        (data.scanned_folders ? data.scanned_folders.length : 0);
         fileRenames = data.file_renames || {};
         activeProject = { slug: slug, name: data.project_name, is_dirty: false };
+        temporaryMode = false;
 
         devLogs = Array.isArray(data.dev_logs) ? data.dev_logs : [];
 
@@ -4559,6 +4657,7 @@ async function loadProject(slug) {
         if (scanRoot) {
             document.getElementById("folder-path").value = scanRoot;
             document.getElementById("folder-badge").textContent = "✓";
+            renderScanDiff(lastScanDiff);
         }
         if (matchResults && matchResults.length > 0) {
             document.getElementById("match-badge").textContent = "✓";
