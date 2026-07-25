@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件核对工具</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=7">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">
+                <div class="brand-mark">PBC</div>
+                <div class="brand-copy">
+                    <div class="brand-title">文件核对工具</div>
+                </div>
+            </div>
+            <!-- 项目栏 -->
+            <div class="project-bar" id="project-bar">
+                <div class="project-state no-project" id="project-state-none">
+                    <span class="project-icon">&#128193;</span>
+                    <span class="project-label">未保存的项目</span>
+                    <button class="btn btn-sm btn-outline-light" id="btn-project-save-as">保存项目</button>
+                    <button class="btn btn-sm btn-outline-light" id="btn-project-open">打开项目</button>
+                </div>
+                <div class="project-state has-project hidden" id="project-state-active">
+                    <span class="project-icon">&#128193;</span>
+                    <span class="project-label" id="project-name-display"></span>
+                    <span class="project-dirty-indicator hidden" id="project-dirty" title="有未保存的更改">&#9679; 未保存</span>
+                    <button class="btn btn-sm btn-outline-light" id="btn-project-save">保存</button>
+                    <button class="btn btn-sm btn-outline-light" id="btn-project-switch">切换项目</button>
+                </div>
+                <button class="btn btn-sm btn-outline-light dev-log-btn" id="dev-log-btn"
+                        type="button" title="查看本轮运行日志" aria-haspopup="dialog" aria-controls="dev-log-overlay">
+                    &#9776; <span>日志</span>
+                </button>
+            </div>
+        </div>
+        <div class="accent-line"></div>
+    </header>
+    <div class="container">
+        <!-- 主流程 -->
+        <div class="panel workflow-panel" id="workflow-panel">
+            <div class="workflow-title">
+                <div class="panel-title">
+                    <span>&#128203; 首屏主流程</span>
+                    <span class="badge" id="workflow-state-badge">待开始</span>
+                </div>
+            </div>
+            <div class="workflow-steps">
+                <!-- 步骤0：生成PBC需求清单 -->
+                <div class="panel workflow-step-card" id="workflow-step-0">
+                    <div class="panel-title">
+                        <span>步骤 0 · 生成清单</span>
+                        <span class="badge" id="template-badge">未开始</span>
+                    </div>
+                    <div class="template-section">
+                        <div class="template-gen-area" id="template-gen-area">
+                            <div class="subject-select-area" id="subject-select-area">
+                                <p class="section-hint">选择需要的科目，生成PBC需求清单</p>
+                                <div class="multi-select-wrap" id="subject-select-wrap">
+                                    <div class="multi-select-trigger" id="subject-select-trigger">请选择科目</div>
+                                    <div class="multi-select-dropdown hidden" id="subject-select-dropdown"></div>
+                                    <input type="hidden" id="subject-selected-values">
+                                </div>
+                                <div class="btn-group">
+                                    <button class="btn btn-primary btn-sm" id="gen-checklist-btn">生成PBC需求清单</button>
+                                </div>
+                            </div>
+                            <div class="upload-alternative">
+                                <span class="or-divider">或</span>
+                                <button class="btn btn-outline btn-sm" id="upload-filled-btn">上传已填写的清单</button>
+                                <input type="file" id="filled-checklist-input" accept=".xlsx" class="hidden">
+                            </div>
+                            <div class="upload-alternative">
+                                <span class="or-divider">或</span>
+                                <button class="btn btn-outline btn-sm" id="btn-open-project-inline">&#128193; 打开已有项目...</button>
+                            </div>
+                        </div>
+                        <div class="template-done hidden" id="template-done">
+                            <div class="upload-summary" id="template-summary"></div>
+                            <div class="template-actions">
+                                <button class="btn btn-outline btn-sm" id="download-template-btn">下载清单</button>
+                                <button class="btn btn-primary btn-sm" id="upload-filled-btn-2">更新清单</button>
+                                <button class="btn btn-outline btn-sm" id="re-gen-btn">重新生成</button>
+                            </div>
+                            <input type="file" id="filled-checklist-input-2" accept=".xlsx" class="hidden">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-arrow">&rarr;</div>
+
+                <!-- 步骤1：上传清单（原步骤1，改为可选或上传已填写的） -->
+                <div class="panel workflow-step-card" id="workflow-step-1">
+                    <div class="panel-title">
+                        <span>步骤 1 · 扫描文件夹</span>
+                        <span class="badge" id="folder-badge">未扫描</span>
+                    </div>
+                    <div class="folder-input-group">
+                        <input type="text" id="folder-path" placeholder="请输入文件夹路径，如: D:\客户资料\2024年度">
+                        <button class="btn btn-outline" id="select-folder-btn" type="button">&#128193; 选择文件夹</button>
+                        <button class="btn btn-primary" id="scan-btn">&#128270; 扫描</button>
+                    </div>
+                </div>
+
+                <div class="step-arrow">&rarr;</div>
+
+                <!-- 步骤2：匹配 -->
+                <div class="panel workflow-step-card" id="workflow-step-2">
+                    <div class="panel-title">
+                        <span>步骤 2 · 开始匹配</span>
+                        <span class="badge" id="match-badge">待匹配</span>
+                    </div>
+                    <div class="match-options">
+                        <label class="match-option">
+                            <input type="checkbox" id="smart-match-enabled" checked disabled>
+                            <span>智能模式匹配（推荐）</span>
+                        </label>
+                        <label class="match-option">
+                            <input type="checkbox" id="llm-enabled">
+                            <span>AI辅助匹配（可选）</span>
+                        </label>
+                        <label class="match-option">
+                            <input type="checkbox" id="content-match-enabled">
+                            <span>内容识别匹配（高级）</span>
+                        </label>
+                    </div>
+                    <div class="llm-config-summary hidden" id="llm-config-summary">
+                        <span class="llm-config-tag" id="llm-config-tag" title="点击修改配置">已配置</span>
+                    </div>
+                    <div class="llm-config-summary hidden" id="ocr-config-summary">
+                        <span class="llm-config-tag ocr-config-tag" id="ocr-config-tag" title="点击配置OCR">OCR未配置</span>
+                    </div>
+                    <button class="btn btn-success btn-match" id="match-btn">&#9889; 开始匹配</button>
+                    <span class="llm-status hidden" id="llm-status">正在匹配中...</span>
+                    <span class="hidden" id="content-status">正在读取文件内容…</span>
+                    <div class="progress-bar">
+                        <div class="fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats hidden" id="stats-section">
+            <div class="stats-scope" id="stats-scope">统计口径：清单</div>
+            <div class="stat-card total">
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label" id="stat-total-label">清单总数</div>
+            </div>
+            <div class="stat-card matched">
+                <div class="stat-value" id="stat-matched">0</div>
+                <div class="stat-label" id="stat-matched-label">已获取</div>
+            </div>
+            <div class="stat-card incomplete" id="stat-incomplete-card">
+                <div class="stat-value" id="stat-incomplete">0</div>
+                <div class="stat-label" id="stat-incomplete-label">不完整</div>
+            </div>
+            <div class="stat-card missing">
+                <div class="stat-value" id="stat-missing">0</div>
+                <div class="stat-label" id="stat-missing-label">未匹配</div>
+            </div>
+        </div>
+
+        <div class="panel hidden" id="diff-section">
+            <div class="panel-title">
+                <span>更新对比</span>
+                <span class="badge" id="diff-badge">本次扫描</span>
+            </div>
+            <div id="diff-content"></div>
+        </div>
+
+
+        <!-- 核对工作台区域 -->
+        <div class="panel hidden" id="preview-section">
+            <div class="panel-title">
+                <span>&#128203; 核对工作台</span>
+                <div class="panel-actions">
+                    <button class="btn btn-outline btn-sm hidden" id="toggle-manage-btn" title="编辑行模式">&#9998; 编辑行</button>
+                    <button class="btn btn-outline btn-sm hidden" id="add-row-btn" title="新增一行">+ 新增行</button>
+                    <div class="view-toggle" id="view-toggle">
+                        <button class="view-toggle-btn active" data-view="matrix">&#128203; 核对总览</button>
+                        <button class="view-toggle-btn" data-view="list">&#128205; 需求列表</button>
+                        <button class="view-toggle-btn" data-view="browse">&#128193; 文件浏览</button>
+                    </div>
+                    <button class="btn btn-outline btn-sm hidden" id="organize-files-btn">&#128230; 整理文件</button>
+                    <button class="btn btn-outline btn-sm hidden" id="export-checklist-btn">&#128202; 导出清单</button>
+                </div>
+            </div>
+
+            <!-- 核对总览 -->
+            <div class="result-table-wrapper" id="preview-table-wrapper">
+                <table class="result-table" id="preview-table">
+                    <thead id="preview-table-head"></thead>
+                    <tbody id="preview-table-body"></tbody>
+                </table>
+            </div>
+
+            <!-- 需求列表容器（表格 + 预览并排） -->
+            <div class="list-view-container" id="list-view-container">
+                <!-- 需求列表表格 -->
+                <div class="result-table-wrapper hidden" id="list-view-wrapper">
+                    <table class="result-table" id="list-view-table">
+                        <thead id="list-view-head"></thead>
+                        <tbody id="list-view-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 需求列表预览面板 -->
+                <div class="list-preview-pane hidden" id="list-preview-pane">
+                    <div class="list-preview-header">
+                        <span class="list-preview-title" id="list-preview-title"></span>
+                        <button type="button" class="list-preview-close" id="list-preview-close" data-preview-prefix="list" title="关闭预览" onclick="closeSidePreview('list')">&#10005;</button>
+                    </div>
+                    <div class="list-preview-content" id="list-preview-content">
+                        <div class="preview-empty">
+                            <div style="font-size:48px;color:#ccc;margin-bottom:12px;">&#128196;</div>
+                            <p style="color:#999;font-size:14px;">点击清单中的文件可在此预览</p>
+                    </div>
+                </div>
+            </div>
+
+
+            </div><!-- .list-view-container -->
+
+            <!-- 文件浏览容器（表格 + 预览并排） -->
+            <div class="browse-view-container hidden" id="browse-view-container">
+                <div class="result-table-wrapper hidden" id="browse-view-wrapper">
+                    <table class="result-table" id="browse-view-table">
+                        <thead id="browse-view-head"></thead>
+                        <tbody id="browse-view-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="browse-preview-pane hidden" id="browse-preview-pane">
+                    <div class="list-preview-header">
+                        <span class="list-preview-title" id="browse-preview-title"></span>
+                        <button type="button" class="list-preview-close" id="browse-preview-close" data-preview-prefix="browse" title="关闭预览" onclick="closeSidePreview('browse')">&#10005;</button>
+                    </div>
+                    <div class="list-preview-content" id="browse-preview-content">
+                        <div class="preview-empty">
+                            <div style="font-size:48px;color:#ccc;margin-bottom:12px;">&#128196;</div>
+                            <p style="color:#999;font-size:14px;">点击资料中的文件可在此预览</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- #preview-section -->
+
+    </div>
+
+    <!-- 提示消息 -->
+    <div class="llm-config-modal hidden" id="llm-config-modal">
+        <div class="llm-modal-content">
+            <h3>AI辅助匹配配置</h3>
+            <div class="llm-form-group">
+                <label>模型</label>
+                <select id="llm-provider">
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="openai-gpt4o-mini">OpenAI GPT-4o-mini</option>
+                    <option value="openai-gpt4o">OpenAI GPT-4o</option>
+                    <option value="qwen-flash">阿里 Qwen3.5-Flash </option>
+                    <option value="qwen-plus">阿里 Qwen3.5-Plus</option>
+                    <option value="kimi">月之暗面 Kimi K2.5</option>
+                    <option value="minimax">MiniMax M2.5</option>
+                    <option value="zhipu-glm4">智谱 GLM-4</option>
+                    <option value="dify-chat">Dify Chat App</option>
+                    <option value="ollama">Ollama (本地)</option>
+                </select>
+            </div>
+            <div class="llm-form-group">
+                <label>API Key</label>
+                <input type="password" id="llm-api-key" placeholder="输入API Key（Ollama可留空）">
+            </div>
+            <div class="llm-form-group">
+                <label>Base URL</label>
+                <input type="text" id="llm-base-url" placeholder="默认自动填充">
+                <span class="hint" id="llm-base-url-hint"></span>
+            </div>
+            <div class="llm-modal-actions">
+                <button class="btn btn-outline" id="llm-cancel-btn">取消</button>
+                <button class="btn btn-primary" id="llm-save-btn">保存配置</button>
+            </div>
+        </div>
+    </div>
+    <!-- OCR 识别配置弹窗 -->
+    <div class="llm-config-modal hidden" id="ocr-config-modal">
+        <div class="llm-modal-content">
+            <h3>百度OCR识别配置</h3>
+            <p style="font-size:13px;color:#666;margin-bottom:12px;">用于识别图片和扫描件中的文字（需联网，<a href="https://console.bce.baidu.com/ai" target="_blank" rel="noopener">获取密钥</a>）</p>
+            <div class="llm-form-group">
+                <label>API Key</label>
+                <input type="password" id="ocr-api-key" placeholder="输入百度OCR API Key">
+            </div>
+            <div class="llm-form-group">
+                <label>Secret Key</label>
+                <input type="password" id="ocr-secret-key" placeholder="输入百度OCR Secret Key">
+            </div>
+            <div class="llm-modal-actions">
+                <button class="btn btn-outline" id="ocr-cancel-btn">取消</button>
+                <button class="btn btn-primary" id="ocr-save-btn">保存配置</button>
+            </div>
+        </div>
+    </div>
+    <div class="status-context-menu hidden" id="preview-status-menu">
+        <button type="button" data-status="Y">&#10003; 已获取</button>
+        <button type="button" data-status="不完整">&#9888; 不完整</button>
+        <button type="button" data-status="N/A">&#8856; 不适用</button>
+        <button type="button" data-status="N">&#10007; 未匹配</button>
+    </div>
+
+    <!-- 行管理右键菜单 -->
+    <div class="row-context-menu hidden" id="row-context-menu">
+        <button type="button" onclick="insertRowAbove()">&#11014; 在上方插入</button>
+        <button type="button" onclick="insertRowBelow()">&#11015; 在下方插入</button>
+        <button type="button" class="danger" onclick="deleteRowViaMenu()">&#128465; 删除此行</button>
+    </div>
+
+    <!-- 分配公司弹窗 -->
+    <div class="assign-modal hidden" id="assign-modal">
+        <div class="assign-modal-content">
+            <h3>分配公司 - <span id="assign-modal-filename"></span></h3>
+            <div class="assign-modal-actions-top">
+                <button class="btn btn-outline btn-sm" id="assign-select-all">全选</button>
+                <button class="btn btn-outline btn-sm" id="assign-deselect-all">取消全选</button>
+            </div>
+            <div class="assign-company-list" id="assign-company-list">
+                <!-- 动态生成 -->
+            </div>
+            <div class="assign-modal-actions">
+                <button class="btn btn-outline" id="assign-cancel-btn">取消</button>
+                <button class="btn btn-primary" id="assign-confirm-btn">确认分配</button>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <!-- 本轮运行日志：仅保存在当前页面内存中，刷新即清空 -->
+    <div class="dev-log-overlay hidden" id="dev-log-overlay" role="dialog" aria-modal="true"
+         aria-labelledby="dev-log-title">
+        <section class="dev-log-panel">
+            <header class="dev-log-header">
+                <div>
+                    <h2 id="dev-log-title">运行日志</h2>
+                    <span id="dev-log-summary">暂无日志</span>
+                </div>
+                <button class="dev-log-close" id="dev-log-close" type="button" aria-label="关闭运行日志">&times;</button>
+            </header>
+            <div class="dev-log-toolbar">
+                <input id="dev-log-search" type="search" placeholder="搜索文件或清单项" aria-label="搜索运行日志">
+                <select id="dev-log-stage" aria-label="筛选阶段">
+                    <option value="">全部阶段</option>
+                    <option value="l1">L1 关键词</option>
+                    <option value="l2">L2 文件名 AI</option>
+                    <option value="extract">内容提取</option>
+                    <option value="l3">L3 内容 AI</option>
+                </select>
+                <select id="dev-log-status" aria-label="筛选状态">
+                    <option value="">全部状态</option>
+                    <option value="success">成功</option>
+                    <option value="warning">需关注</option>
+                    <option value="error">失败</option>
+                </select>
+                <button class="btn btn-sm btn-outline" id="dev-log-clear" type="button">清空</button>
+            </div>
+            <div class="dev-log-stats" id="dev-log-stats"></div>
+            <div class="dev-log-body" id="dev-log-body">
+                <div class="dev-log-empty">暂无日志，执行匹配后将在此显示</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- AI 内容分类建议确认 -->
+    <div class="suggestion-overlay hidden" id="suggestion-overlay" role="dialog" aria-modal="true"
+         aria-labelledby="suggestion-title">
+        <section class="suggestion-panel">
+            <header class="suggestion-header">
+                <div>
+                    <h2 id="suggestion-title">建议确认</h2>
+                    <span id="suggestion-summary">待确认文件</span>
+                </div>
+                <button type="button" id="suggestion-close" aria-label="关闭建议确认">&times;</button>
+            </header>
+            <div class="suggestion-layout">
+                <div class="suggestion-list" id="suggestion-list"></div>
+                <div class="suggestion-preview">
+                    <div class="suggestion-preview-title" id="suggestion-preview-title">文件预览</div>
+                    <div class="suggestion-preview-empty" id="suggestion-preview-empty">点击“预览”查看文件</div>
+                    <iframe class="hidden" id="suggestion-preview-frame" title="建议文件预览"></iframe>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal-overlay hidden" id="checklist-merge-overlay" role="dialog" aria-modal="true">
+        <div class="modal checklist-merge-modal">
+            <div class="modal-header">
+                <h3>更新清单</h3>
+                <button class="modal-close" id="checklist-merge-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="section-hint">批量新增或更新需求、公司，并保留当前文件匹配、公司归属和运行日志。</p>
+                <label class="merge-mode-option">
+                    <input type="radio" name="checklist-merge-mode" value="full" checked>
+                    <span><strong>修改当前清单后上传（推荐）</strong><small>支持新增需求、修改已有需求和新增公司。</small></span>
+                </label>
+                <label class="merge-mode-option">
+                    <input type="radio" name="checklist-merge-mode" value="append">
+                    <span><strong>仅上传新增内容</strong><small>只追加新需求和公司，不修改已有内容。</small></span>
+                </label>
+                <div class="merge-actions">
+                    <button class="btn btn-outline btn-sm" id="checklist-merge-download">下载当前清单</button>
+                    <label class="btn btn-primary btn-sm" for="checklist-merge-file">选择修改后的 Excel</label>
+                    <input type="file" id="checklist-merge-file" accept=".xlsx" class="hidden">
+                </div>
+                <div class="checklist-merge-preview hidden" id="checklist-merge-preview"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="checklist-merge-cancel">取消</button>
+                <button class="btn btn-primary" id="checklist-merge-confirm" disabled>确认合并</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 项目管理弹窗 -->
+    <div class="project-modal hidden" id="project-manage-modal">
+        <div class="project-modal-content">
+            <div class="project-modal-header">
+                <h3 id="project-modal-title">打开项目</h3>
+                <button class="project-modal-close" id="project-modal-close">&times;</button>
+            </div>
+            <div class="project-modal-body">
+                <!-- 项目列表 -->
+                <div class="project-list-section" id="project-list-section">
+                    <div class="project-list-empty hidden" id="project-list-empty">
+                        <p style="color:#999;text-align:center;padding:32px 0;">暂无已保存的项目<br><small>完成工作后点击"保存项目"即可</small></p>
+                    </div>
+                    <div class="project-list" id="project-list">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </div>
+            <div class="project-modal-footer">
+                <button class="btn btn-outline" id="project-modal-cancel">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 保存项目弹窗 -->
+    <div class="project-modal hidden" id="project-save-modal">
+        <div class="project-modal-content project-save-content">
+            <div class="project-modal-header">
+                <h3>保存项目</h3>
+                <button class="project-modal-close" id="project-save-close">&times;</button>
+            </div>
+            <div class="project-modal-body">
+                <div class="project-form-group">
+                    <label>项目名称</label>
+                    <input type="text" id="project-save-name" placeholder="例如：XX公司2024年度审计">
+                </div>
+                <div class="project-save-summary" id="project-save-summary">
+                    <!-- 动态填充当前进度 -->
+                </div>
+            </div>
+            <div class="project-modal-footer">
+                <button class="btn btn-outline" id="project-save-cancel">取消</button>
+                <button class="btn btn-primary" id="project-save-confirm">保存项目</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="/static/js/main.js?v=12"></script>
+</body>
+</html>

@@ -1,0 +1,3174 @@
+{
+  "version": 1,
+  "updated_at": "2026-06-26T21:45:02.506428",
+  "checklist": {
+    "headers": [
+      "序号",
+      "科目",
+      "所需PBC",
+      "需求资料",
+      "CN02",
+      "CN03",
+      "CN04",
+      "CN05",
+      "CN06",
+      "CN07",
+      "CN08",
+      "CN10",
+      "CN13",
+      "CN14",
+      "CN15",
+      "CN18",
+      "CN19",
+      "CN22",
+      "CN23",
+      "CN23",
+      "CN24",
+      "CN28",
+      "CN32",
+      "CN33",
+      "CN34",
+      "CN54",
+      "CN57",
+      "CN59",
+      "CN61",
+      "CN62",
+      "CN63",
+      "CN64",
+      "CN67",
+      "CN72",
+      "CN83",
+      "CN86",
+      "CN87",
+      "CN88"
+    ],
+    "data": [],
+    "name_col_index": 3,
+    "items": [
+      {
+        "name": "PRC Report",
+        "pbc_name": "科目余额表",
+        "source_key": "prc report",
+        "row_uid": ""
+      },
+      {
+        "name": "序时账",
+        "pbc_name": "序时账",
+        "source_key": "序时账",
+        "row_uid": ""
+      },
+      {
+        "name": "PRC Report",
+        "pbc_name": "财务报表",
+        "source_key": "prc report",
+        "row_uid": ""
+      },
+      {
+        "name": "2025年12月银行存款明细表（Bank balance check）",
+        "pbc_name": "货币资金科目明细账",
+        "source_key": "2025年12月银行存款明细表（bank balance check）",
+        "row_uid": ""
+      },
+      {
+        "name": "2025年12月和2026年1月的银行对账单PDF版本（均为全月）",
+        "pbc_name": "截止性测试期间的银行流水",
+        "source_key": "2025年12月和2026年1月的银行对账单pdf版本（均为全月）",
+        "row_uid": ""
+      },
+      {
+        "name": "银行余额调节表",
+        "pbc_name": "对于期末账面余额和对账单不符,获得银行存款余额调节表",
+        "source_key": "银行余额调节表",
+        "row_uid": ""
+      },
+      {
+        "name": "2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）",
+        "pbc_name": "本期新开户的账号的开户证明（如有）",
+        "source_key": "2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）",
+        "row_uid": ""
+      },
+      {
+        "name": "2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）",
+        "pbc_name": "本期销户的账号的销户证明（如有）",
+        "source_key": "2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）",
+        "row_uid": ""
+      },
+      {
+        "name": "本期定期存款开户证实书",
+        "pbc_name": "本期定期存款开户证实书",
+        "source_key": "本期定期存款开户证实书",
+        "row_uid": ""
+      },
+      {
+        "name": "定期存款质押合同",
+        "pbc_name": "定期存款质押合同",
+        "source_key": "定期存款质押合同",
+        "row_uid": ""
+      },
+      {
+        "name": "2025年1-12月新增资金池准入协议",
+        "pbc_name": "公司资金池业务协议",
+        "source_key": "2025年1-12月新增资金池准入协议",
+        "row_uid": ""
+      },
+      {
+        "name": "第三方平台余额证明",
+        "pbc_name": "第三方平台余额证明",
+        "source_key": "第三方平台余额证明",
+        "row_uid": ""
+      },
+      {
+        "name": "固定资产后推表",
+        "pbc_name": "固定资产后推表",
+        "source_key": "固定资产后推表",
+        "row_uid": ""
+      },
+      {
+        "name": "FA PRC",
+        "pbc_name": "固定资产清单",
+        "source_key": "fa prc",
+        "row_uid": ""
+      },
+      {
+        "name": "FA PRC",
+        "pbc_name": "固定资产处置清单",
+        "source_key": "fa prc",
+        "row_uid": ""
+      },
+      {
+        "name": "FA PRC",
+        "pbc_name": "固定资产新增清单",
+        "source_key": "fa prc",
+        "row_uid": ""
+      },
+      {
+        "name": "FA PRC",
+        "pbc_name": "固定资产公司折旧政策",
+        "source_key": "fa prc",
+        "row_uid": ""
+      }
+    ],
+    "has_previous_results": false
+  },
+  "scanned_files": [
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.10 CFS -Accounting GL- Bank reconciliation -202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.15&1.22 预提费用&CIT&DTA-20251231 update.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.15&1.22 预提费用&CIT&DTA-20251231.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.16 Export Lease Contracts 2025.12.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.17_ROU、Lease liability计算表（整个租赁期间的摊销测算表）.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.2 Customer master data.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.21 F101 202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.24 坏账准备计算信用组合 + Movement（by Aging by Customer)- MAF 202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.24 坏账准备计算信用组合 + Movement（by Aging by Customer)- PRC 202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.3 PRC-S details.XLSX.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.5- Y2025 EY Audit - IC Disclosure Information.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\2.62 All CN FA Timing Difference 41 Area 202512.XLSX.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.1 SAP Vendor code-name\\vendor list-CN63.XLSX.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.1 SAP Vendor code-name\\vendor list-P08.XLSX.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.61 税务稽查报告\\CN08\\2025 CN08 徐汇税务局评估所核查 2024.zip",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.63 应交税金变动汇总表\\2.63 CN05 应交税金变动汇总表.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.63 应交税金变动汇总表\\2.63 CN08 应交税金变动汇总表.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.63 应交税金变动汇总表\\2.63 CN10 应交税金变动汇总表.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.63 应交税金变动汇总表\\2.63 CN15 应交税金变动汇总表.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.63 应交税金变动汇总表\\2.63 CN18 应交税金变动汇总表.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.63 应交税金变动汇总表\\2.63 CN61 应交税金变动汇总表.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.63 应交税金变动汇总表\\2.63 CN63 应交税金变动汇总表.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.63 应交税金变动汇总表\\2.63 CN88 应交税金变动汇总表.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN05L15\\Q4 CIT.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN05L15\\Q4 CIT完税凭证.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN05L82\\Q4 CIT.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN05L82\\Q4 CIT完税凭证.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN08NJ\\Q4 CIT.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN08NJ\\Q4 CIT完税凭证.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN08SH\\Q4 CIT.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN08SH\\Q4 CIT完税凭证.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN10\\Q4 CIT.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN10\\Q4 CIT完税凭证.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN15\\L98 2025Q4 CIT Tax  Payment Certificate.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN15\\L98 2025Q4 CIT Tax Return.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN18\\Q4 CIT.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN18\\Q4 CIT完税凭证.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN61\\2025年第四季度企业所得税完税证明.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN61\\2025年第四季度企业所得税申报表.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN63\\Q4 CIT.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN63\\Q4 CIT完税凭证.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN88\\L96 2025Q4 CIT Tax Return（零申报）.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN05L15\\CN05L15 12月份VAT.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN05L15\\CN05L15 12月份VAT完税凭证.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN05L82\\CN05L82 12月份VAT.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN05L82\\CN05L82 12月份VAT完税凭证.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN08NJ\\CN08NJ 12月份VAT.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN08NJ\\CN08NJ 12月份VAT完税凭证.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN08SH\\CN08SH 12月份VAT(留抵）.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN10\\VAT-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN15\\CN15 12月份VAT.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN15\\CN15 12月份VAT完税凭证.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN18\\增值税及附加税费申报表（一般纳税人适用）202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN18\\税收完税证明202512VAT.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN18\\税收完税证明附加税202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN61\\CN61 12月份VAT.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN61\\CN61 12月份VAT完税证明.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN63\\VAT完税证明.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN63\\增值税及附加税费申报（一般纳税人适用） (20).pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN88\\L96 202512 VAT&UMC Tax Return.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\CN83WH花旗资金池协议扫描件 (1).pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）\\2025 销户清单 (1).xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）\\CN07\\CN07-HSBC-166005272012 关户证明.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）\\CN62\\CN62-M36 ZZ ICBC 1702100209200029061CNY 关户证明.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）\\CN62\\CN62M36ZZ BNPP 0007300324100109CNY 关户证明.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）\\CN63\\CN85 CITI CNY 1745643252 关户证明20250912.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）\\CN72\\CN72 CCB 43001540069050000061 CNY 关户证明 2025.4.28.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）\\CN72\\CN72 CCB 43001540869049500251 CNY定期 销户 2025.4.16.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）\\CN72\\CN72 CCB 43001541069049222222 CNY定期 销户 2025.4.16.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）\\CN72\\CN72 CCB 43014698600220002145 USD 关户证明 2025.4.28.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）\\2025 开户清单 (1).xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）\\CN02\\CN02 W08 CACIB 23021190144300 CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）\\CN67\\CN67--23021189144300-CNY 开户证明.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）\\CN83WH\\CN83 ICBC 开立账户申请书.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）\\CN83WH\\CN83-51215081-1860547224-CNY 开户证明.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）\\CN83WH\\CN83-51221081-3202008709200853137-CNY 开户证明.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）\\CN87\\CN87-51221081-1001266319300344240-CNY 开户证明.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.13 Valeo Group Cash pool monthly report\\Cash pool report 202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_BNP_CN29_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_CITI_CN02_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_CITI_CN03_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_CITI_CN05_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_CITI_CN06_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_CITI_CN19_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_CITI_CN29_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_CITI_CN54_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_CITI_CN59_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_CITI_CN61_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_JPM_CN19_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_MUFG_CN03_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_MUFG_CN05_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_MUFG_CN59_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细\\MTM_MUFG_CN64_202512 FX.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.19 应付票据明细表（包括出票人、出票日期、承兑号、银行承兑汇票号、汇票到期日、汇票金额、收款人名称、收款人账号、承兑银行）\\Dec BAD Payable-20251231.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.23 应收票据台账（包括出票人、承兑银行、贴现、背书等信息）\\12月 BAD receivable - new.xlsm.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN03\\税收完税证明202511 FR20.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN03\\税收完税证明202511 IE01.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN03\\股利支付水单.PDF",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN04\\CN02 支付 CN04 股利 (1).pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN04\\CN04 收CN02 CN19 股利 (1).pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN04\\CN19 支付CN04 股利 (1).pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN04\\注资 CNY 210,000,000.00.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN05\\CNY 294435000.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN05\\CNY1761157500.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN05\\税收完税证明-日本-202511.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN05\\税收完税证明-荷兰-202511.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN06\\2025年分配股利代扣代缴所得税 完税证明 CN06.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN06\\CN06 Dividends Paid.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN07\\-121155859.17 平和.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN07\\-42510827.78 东华.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN07\\5.2 2025年分配股利代扣代缴所得税 完税证明 CN07.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN15\\14,848,875.48 股利水单.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN15\\CN15--股利支付备案表 2025-11-18 Update.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN15\\CN15-税收完税证明 2025-11-18.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN57\\Payment slip 202506.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN57\\Payment slip.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN57\\税收完税证明2025-06-03 16ː35ː18.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN57\\税收完税证明2025-09-30 13ː35ː54.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN59\\CN59税收完税证明.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN59\\CN59股利水单.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN64\\代扣代缴企业所得税完税证明.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN64\\股利水单.PDF",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN72\\CN72 1,559,580.00CNY 股利支付 Loudi Municipality.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN72\\CN72 1,857,735.00CNY 股利支付 JP06.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN72\\CN72 915,106.50CNY 股利支付 FR54.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN72\\Valeo Japan 股利支付代扣企业所得税完税凭证.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN72\\Valeo Management 股利支付代扣企业所得税完税凭证.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN02\\CN02-51211080-23021190144300-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN02\\CN02-51215081-1804254222-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN02\\CN02-51215082-1746925235-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN02\\CN02-51221020-1207041109814008861-USD.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN02\\CN02-51221080-1207041109041000454-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN03\\CN03-51212080-0007300172600174-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN03\\CN03-51212082-0007300323500164-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN03\\CN03-51212083-0007300323600171-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN03\\CN03-51212085-0007300323800185-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN03\\CN03-51212086-0007300352700171-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN03\\CN03-51215080-1783176218-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN03\\CN03-51220080-157229661347-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN03\\CN03-51221080-1813021109033002480-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN03\\CN03-51221083-0200012709200055253-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN03\\CN03-51221085-1813021109035032452-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN03\\CN03-51221087-4301021109100499908-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN03\\CN03-51232020-6550236266-USD.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN04\\CN04-51215081-1784514222-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN04\\CN04-51220080-444259220881-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN05\\CN05 -51220081-BOC-684757748423-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN05\\CN05-51221080-ICBC-3202008709000057268-CNY-2512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN05\\CN05-L15-51212080-BNPP-0007300171900125-CNY-2512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN05\\CN05-L15-51215080-CITI-1783042203-CNY-2512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN05\\CN05-L82-51215081-CITI-1804270228-CNY-2512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN06\\CN06-51212080-BNPP-0007300198700158-CNY 20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN06\\CN06-51215080-CITI-1742311216-CNY 20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN06\\CN06-51221080-ICBC-4301021119100173009-CNY 20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN07\\CN07-0007300174100182-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN07\\CN07-0007300355800194-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN07\\CN07-1783170201-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN07\\CN07-301283066984-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN07\\CN07-4301021119100154595-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN08\\CN08-51215080-1777547204-CNY-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN08\\CN08-51220080-436461229513-CNY 20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN08\\CN08NJ-51215081-1804272239-CNY-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN08\\CN08NJ-ICBC-4301021119100367209-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN08\\CN08SH-CITI- EUR-1777547425-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN08\\CN08SH-CITI-CNY-1777547247-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN10\\CN10-51215081-1754308229-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN10\\CN10-51220080-561257526768-CNY 余额对账单.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN13\\CN13-0007300324400130-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN13\\CN13-312963536304-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN14\\CN14-51215081-1754287221-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN14\\CN14-51221080-1001700819300442958-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN15\\CN15-51215081-1784974223-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN15\\CN15-51221080-ICBC-2013021909200032938-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN18\\CN18-51215080-1783173219-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN18\\CN18-51220080-290861149953-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN19\\CN19-51215081-1754305238-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN19\\CN19-51220080-462468363840-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN23\\CN23-1817032229-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN24\\CN24-51215010-1817029023-EUR.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN24\\CN24-51215080-1817029236-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN24\\CN24-51220080-485871315126-CNY明细.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN24\\CN24-51220081-501471806624-CNY明细.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN28\\CN28-51212081-BNPP-0007300267300110-CNY 20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN28\\CN28-51215080-CITI-1778179209-CNY 20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN28\\CN28-51221080-ICBC-4301021109100342130-CNY 20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 0007300264900233 CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 1745643228.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 1745643309.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 1745643317.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 1745643325.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 1745643333.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 51212011 0007200264900238.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 51212021 0007200264900141.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 51212082 0007300264900136CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 51215082 1745643236.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 51217010 583251.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 51217020 583235.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 51217030 583243.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 51232010 3907166783.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29\\CN29 51232020 3907166775.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN32\\CN32-51215080-1817030226-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN32\\CN32-ICBC-0302085609100055432-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN34\\CN34-51212080-BNPP-0007300286300179-CNY 20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN34\\CN34-51215080-1778811207-CNY 20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN34\\CN34-51221080-ICBC-4301021119100513194-CNY 20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN54\\CN54-51212080-0007300262900190-CNY2.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN54\\CN54-51215080-1742310201-CNY1.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN54\\CN54-51221080-4200223209200095187-CNY1.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN57\\CN57-51212080-0007300171500194-CNY-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN57\\CN57-51215080-1754288201-CNY-20251231.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN59\\CN59-51215081-1783175238-CNY .pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN59\\CN59-51215082-1820111229-CNY .pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN59\\CN59-51221080-4000022729200444336-CNY .pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN59\\CN59-51221082-3202008709200677380-CNY .pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN61\\CN61-51215080-1783171208-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN61\\CN61-51220080-712057758149-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN63\\CN63-51215010-1745643007-EUR-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN63\\CN63-51215020-1745643015-USD-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN63\\CN63-51215080-1745643201-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN63\\CN63-51221081-1001266319300278452-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN64\\CN64-51212080-0007300257900131-CNY1.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN64\\CN64-51212081-0007300324200116-CNY1.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN64\\CN64-51212082-0007300369100155-CNY1.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN64\\CN64-51215080-1783174207-CNY1.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN64\\CN64-51221080-1606030309200014702-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN64\\CN64-51221081-2013077919100013967-CNY2.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN64\\CN64-51221082-4200001909000055688-CNY1.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN67\\CN67-51211080-23021189144300-CNY last page.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN67\\CN67-51215081-1783178229-CNY last page.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN67\\CN67-51220081-634058368039-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN72\\CN72-51215080-1849487228-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN72\\CN72-51220080-587257356204-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN83\\CN83-51215080-1810987223-CNY 余额.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN83\\CN83-51215081-1860547224-CNY 余额.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN83\\CN83-51221080-4000022719202171109-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN83\\CN83-51221081-3202008709200853137-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN87\\CN87-51215010-1840049538-EUR.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN87\\CN87-51215080-1840049228-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN87\\CN87-51215081-1840049821-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN87\\CN87-51221081-1001266319300344240-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN88\\CN88-CITI-51215020-1845346565-USD.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN88\\CN88-CITI-51215080-1845346255-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN88\\CN88-CITI-51215081-1845346859-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN88\\CN88-ICBC-51221080-1102025509200738644-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\申    请.docx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN02\\CN02-51211080-23021190144300-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN02\\CN02-51215081-1804254222-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN02\\CN02-51215082-1746925235-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN02\\CN02-51221020-1207041109814008861-USD.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN02\\CN02-51221080-1207041109041000454-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51212080-0007300172600174-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51212082-0007300323500164-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51212083-0007300323600171-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51212085-0007300323800185-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51212086-0007300352700171-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51215080-1783176218-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51220080-157229661347-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51221080-1813021109033002480-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51221083-0200012709200055253-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51221084-0302099609100018555-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51221085-1813021109035032452-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51221087-4301021109100499908-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51232020-6550236266-USD.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN04\\CN04-51215081-1784514222-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN04\\CN04-51220080-444259220881-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN05\\CN05 -51220081-BOC-684757748423-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN05\\CN05-51221080-ICBC-3202008709000057268-CNY-2512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN05\\CN05-L15-51215080-CITI-1783042203-CNY-2512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN05\\CN05-L82-51215081-CITI-1804270228-CNY-2512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN06\\CN06-51212080-BNPP-0007300198700158-CNY 202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN06\\CN06-51215080-CITI-1742311216-CNY 202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN06\\CN06-51221080-ICBC-4301021119100173009-CNY 202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN07\\CN07-51212080-0007300174100182-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN07\\CN07-51212081-0007300355800194-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN07\\CN07-51215080-1783170201-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN07\\CN07-51220080-301283066984-CNY 202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN07\\CN07-51221080-4301021119100154595-CNY202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN08\\CN08-51215080-1777547204-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN08\\CN08-51220080-436461229513-CNY 202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN08\\CN08NJ-51215081-1804272239-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN08\\CN08NJ-ICBC-4301021119100367209-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN08\\CN08SH-CITI- EUR-1777547425-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN08\\CN08SH-CITI-CNY-1777547247-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN10\\CN10-51215081-1754308229-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN10\\CN10-51220080-561257526768-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN13\\CN13-51212080-BNP-0007300324400130-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN13\\CN13-51220080-BOC-312963536304 CNY 202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN14\\CN14-51215081-1754287221-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN14\\CN14-51221080-1001700819300442958-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN15\\CN15-51215081-1784974223-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN15\\CN15-51221080-ICBC-2013021909200032938-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN18\\CN18-51215080-1783173219-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN18\\CN18-51220080-290861149953-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN19\\CN19-51215081-1754305238-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN19\\CN19-51220080-462468363840-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN23\\CN23-51215080-1817032229 - CNY 202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN24\\CN24-51215010-1817029023-EUR.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN24\\CN24-51215080-1817029236-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN24\\CN24-51220080-485871315126-CNY明细.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN24\\CN24-51220081-501471806624-CNY明细.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN28\\CN28-51212081-BNPP-0007300267300110-CNY 202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN28\\CN28-51215080-CITI-1778179209-CNY 202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN28\\CN28-51221080-ICBC-4301021109100342130-CNY 202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 0007300264900233 CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 1745643228.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 1745643309.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 1745643317.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 1745643325.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 1745643333.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 51212011 0007200264900238.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 51212021 0007200264900141.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 51212082 0007300264900136CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 51215082 1745643236.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 51217010 583251.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 51217020 583235.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 51217030 583243.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 51232010 3907166783.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29\\CN29 51232020 3907166775.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN32\\CN32-51215080-1817030226-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN32\\CN32-ICBC-0302085609100055432-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN34\\CN34-51212080-BNPP-0007300286300179-CNY 202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN34\\CN34-51215080-1778811207-CNY 202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN34\\CN34-51221080-ICBC-4301021119100513194-CNY 202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN54\\CN54-51212080-0007300262900190-CNY1.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN54\\CN54-51215080-1742310201-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN54\\CN54-51221080-4200223209200095187-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN57\\CN57-51212080-0007300171500194-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN57\\CN57-51215080-1754288201-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN59\\CN59-51215081-1783175238-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN59\\CN59-51215082-1820111229-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN59\\CN59-51221080-4000022729200444336-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN59\\CN59-51221082-3202008709200677380-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN61\\CN61-51215080-1783171208-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN61\\CN61-51220080-712057758149-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN63\\CN63-51215010-1745643007-EUR-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN63\\CN63-51215020-1745643015-USD-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN63\\CN63-51215080-1745643201-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN63\\CN63-51221081-1001266319300278452-CNY-202512.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51212080-0007300257900131-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51212081-0007300324200116-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51212082-0007300369100155-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51215080-1783174207-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51221080-1606030309200014702-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51221081-2013077919100013967-CNY1.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51221082-4200001909000055688-CNY1.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN67\\202512 CN67-51211080-23021189144300-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN67\\202512 CN67-51215081-1783178229-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN67\\202512 CN67-51220081-634058368039-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN72\\CN72-51215080-1849487228-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN72\\CN72-51220080-587257356204-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN83\\CN83-51215080-1810987223-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN83\\CN83-51215081-1860547224-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN83\\CN83-51221080-4000022719202171109-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN83\\CN83-51221081-3202008709200853137-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN87\\CN87-51215010-1840049538-EUR.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN87\\CN87-51215080-1840049228-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN87\\CN87-51215081-1840049821-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN87\\CN87-51221081-1001266319300344240-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN88\\CN88-CITI-51215020-1845346565-USD.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN88\\CN88-CITI-51215080-1845346255-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN88\\CN88-CITI-51215081-1845346859-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN88\\CN88-ICBC-51221080-1102025509200738644-CNY.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.9 2025年12月 银行存款明细表（Bank balance check）\\Bank balance Check - Dec 20251231.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.9 2025年12月 银行存款明细表（Bank balance check）\\Bank check CN29-Dec 2025.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.19 EY PBC List -六大往来-CN02-202512-update120.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.20 CN02 FA_PRC_Final-202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.25 存货清单——模具 202512 CN02.XLSX",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.29 CN02 material mapping.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.30 2.31 2.32 2.48.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.33 & 2.34   研发&样件收入+成本明细 CN02.XLSX",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.35 模具收入+成本.XLSX",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.39 Price provision by customer movement 202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.40 price provision calculation 202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.54 AFS diclosure_ AR Aging report - CN02 202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.55 AFS_应收账款_预期信用损失 CN02 202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.56 Bad debt Amount calculate 202512 CN02.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.56 SAS202512134 Bad debit accumulate 0100223746CN022025.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.56 SAS202512134 Bad debit accumulate.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.59 社保公积金计提基数.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.60 RS_Tax Package_CN02 202512 -0120 -no link.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.7&2.8&2.9&2.11 CN02- PRC Report - 202512- New GAAP.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.21 MB51 20251226-1231.XLSX.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.22 MC.9  库存明细202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.28 2025年12月31日前后16天采购入库和销售出库的出入库明细（需含连续的出库单编号、客商代码、数量及金额）.XLSX.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.30 2.31 2.32 2.48.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.36 资本化的Quicksaving项目清单.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.58 职工人数.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.37\\2.37 本年新增Quicksaving的项目的集团审批的提名信、CAA\\Damiler C174 C178 X244 X248\\20211118 ATC ZST Daimler MMA FWS CAA-AQB(7_ Un-heat)-WO pack cost-C174&178(CLA)_QS update.xlsm.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.37\\2.37 本年新增Quicksaving的项目的集团审批的提名信、CAA\\Damiler C174 C178 X244 X248\\20211118 ATC ZST Daimler MMA FWS CAA-AQB(93_ heat)-WO pack cost-C174&178(CLA) - QS update.xlsm.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.37\\2.37 本年新增Quicksaving的项目的集团审批的提名信、CAA\\Damiler C174 C178 X244 X248\\20231008 ATC ZST Daimler MMA FWS CAA-AQB(100_ heat)-WO pack cost- X 248&244 GLB class_PRKFV2.xlsm.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.37\\2.37 本年新增Quicksaving的项目的集团审批的提名信、CAA\\Damiler C174 C178 X244 X248\\Daimler C174 C178 X244 X248 前雨刮刮杆刮臂 定点信.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.37\\2.37 本年新增Quicksaving的项目的集团审批的提名信、CAA\\Damiler C174 C178 X244 X248\\Daimler C174 C178 X244 X248 前雨刮系统-电机连杆 定点信.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.4 2025年更新的营业执照， 公司章程等\\CM02章程202412 (1).pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.4 2025年更新的营业执照， 公司章程等\\营业执照20250109 (1).pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.43\\2.43 RD.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\2.63 CN02 应交税金变动汇总表（2025.12）.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\CIT\\居民企业（查账征收）企业所得税月（季）度申报 -3.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\CIT\\居民企业（查账征收）企业所得税月（季）度申报-1.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\CIT\\居民企业（查账征收）企业所得税月（季）度申报-2.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\CIT\\居民企业（查账征收）企业所得税月（季）度申报-4.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\免抵退税申报汇总表_20250715.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\增值税及附加税费申报表（一般纳税人适用）2025.01.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\增值税及附加税费申报表（一般纳税人适用）2025.02.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\增值税及附加税费申报表（一般纳税人适用）2025.03.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\增值税及附加税费申报表（一般纳税人适用）2025.04.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\增值税及附加税费申报表（一般纳税人适用）2025.05.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\增值税及附加税费申报表（一般纳税人适用）2025.06.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\增值税及附加税费申报表（一般纳税人适用）2025.07.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202508\\免抵退税申报数据打印_所属期【202508】.zip",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202508\\增值税及附加税费申报表（一般纳税人适用） 2025.08.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202509\\免抵退税申报数据打印_所属期【202509】.zip",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202509\\增值税及附加税费申报表（一般纳税人适用） (5).pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202510\\《代扣代缴税收通用缴款书抵扣清单》(2025-10-01-2025-10-31).pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202510\\《增值税及附加税费申报表附列资料四（税额抵减情况表）》(2025-10-01-2025-10-31).pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202510\\增值税及附加税费申报表（一般纳税人适用） (5).pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202511\\增值税及附加税费申报表（一般纳税人适用）.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202511\\免抵退税申报数据打印_所属期【202511】 (1)\\免抵退税申报汇总表（审核反馈）_所属期【202511】.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202511\\免抵退税申报数据打印_所属期【202511】 (1)\\免抵退税申报汇总表（申报）_所属期【202511】.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202511\\免抵退税申报数据打印_所属期【202511】 (1)\\生产企业出口货物劳务免抵退税申报明细表_所属期【202511】.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202512\\代扣代缴、代收代缴税款报告表.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202512\\增值税及附加税费申报表（一般纳税人适用）2025.12.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202512\\税收完税证明2026-01-19 10ː24ː49.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.19 EY PBC List -六大往来-CN03-202512-New Template.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.20 CN03 FA_PRC_Final-202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.20 FA Reconciliation Report CN03_202512.zip",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.5  GPS Consolidation(PDF)- 合并抵消后的.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.60   RS_Tax Package_CN03 202512 - no link.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.7&2.8&2.9 CN03- PRC Report- 202512( 1月15日更新).xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.12\\CN03 F.01.XLSX.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.12\\M95 F.01.XLSX.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.12\\N04 F.01.XLSX.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.12\\N13 F.01.XLSX.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.12\\T13 F.01.XLSX.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.11 CN04 F.01.XLSX.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.19 EY PBC List -六大往来-CN04-202512 update.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.20 CN04 FA _PRC_Final-202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.60 RS_Tax Package_CN04 202512 - no link.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.7&2.8&2.9 CN04- PRC Report -202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.12 CN05  F.01-MAF 202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.19 EY PBC List -六大往来-CN05-202512-NEW.7z",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.20 CN05 FA _PRC_Final-202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.20 FA Reconciliation Report CN05 _202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.5 CN05 GPS 202512 -NEW.pdf",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.57 CN05-L82 Payroll for AFS - Y202512.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.60 RS_Tax Package_CN05 202512_.xlsx",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.7&2.8&2.9 CN05-PRC Report-202512 old GAAP.xlsx"
+  ],
+  "scanned_folders": [
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.1 SAP Vendor code-name",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.61 税务稽查报告",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.63 应交税金变动汇总表",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.61 税务稽查报告\\CN08",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN05L15",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN05L82",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN08NJ",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN08SH",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN10",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN15",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN18",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN61",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN63",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.65 & 2.67  2025年第四季度所得税纳税申报表 & 完税凭证\\CN88",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN05L15",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN05L82",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN08NJ",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN08SH",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN10",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN15",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN18",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN61",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN63",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-Tax-SD\\2.66 & 2.67 2025年12月增值税纳税申报表 & 完税凭证\\CN88",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.13 Valeo Group Cash pool monthly report",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.18 截止至资产负债表日未到期的合约明细",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.19 应付票据明细表（包括出票人、出票日期、承兑号、银行承兑汇票号、汇票到期日、汇票金额、收款人名称、收款人账号、承兑银行）",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.23 应收票据台账（包括出票人、承兑银行、贴现、背书等信息）",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.9 2025年12月 银行存款明细表（Bank balance check）",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）\\CN07",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）\\CN62",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）\\CN63",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）\\CN72",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）\\CN02",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）\\CN67",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）\\CN83WH",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）\\CN87",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN03",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN04",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN05",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN06",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN07",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN15",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN57",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN59",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN64",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.26 股利分配水单及完税证明(如有分配)\\CN72",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN02",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN03",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN04",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN05",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN06",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN07",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN08",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN10",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN13",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN14",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN15",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN18",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN19",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN23",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN24",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN28",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN29",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN32",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN34",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN54",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN57",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN59",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN61",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN63",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN64",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN67",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN72",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN83",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN87",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.6 各银行账户显示2025年12月31日余额的对账单（显示期末余额的那一页即可）\\CN88",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN02",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN04",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN05",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN06",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN07",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN08",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN10",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN13",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN14",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN15",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN18",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN19",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN23",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN24",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN28",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN29",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN32",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN34",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN54",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN57",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN59",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN61",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN63",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN67",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN72",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN83",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN87",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN88",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.37",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.4 2025年更新的营业执照， 公司章程等",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.43",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.37\\2.37 本年新增Quicksaving的项目的集团审批的提名信、CAA",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\site\\2.37\\2.37 本年新增Quicksaving的项目的集团审批的提名信、CAA\\Damiler C174 C178 X244 X248",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\CIT",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202508",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202509",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202510",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202511",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202512",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\SSC TAX\\VAT\\202511\\免抵退税申报数据打印_所属期【202511】 (1)",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.12",
+    "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL"
+  ],
+  "match_results": [
+    {
+      "index": 1,
+      "checklist_name": "PRC Report",
+      "pbc_name": "科目余额表",
+      "row_uid": "",
+      "source_key": "prc report",
+      "status": "已获取",
+      "matched_files": [
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.7&2.8&2.9&2.11 CN02- PRC Report - 202512- New GAAP.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.7&2.8&2.9 CN03- PRC Report- 202512( 1月15日更新).xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.7&2.8&2.9 CN04- PRC Report -202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.7&2.8&2.9 CN05-PRC Report-202512 old GAAP.xlsx"
+      ],
+      "matched_names": [
+        "2.7&2.8&2.9&2.11 CN02- PRC Report - 202512- New GAAP.xlsx",
+        "2.7&2.8&2.9 CN03- PRC Report- 202512( 1月15日更新).xlsx",
+        "2.7&2.8&2.9 CN04- PRC Report -202512.xlsx",
+        "2.7&2.8&2.9 CN05-PRC Report-202512 old GAAP.xlsx"
+      ],
+      "matched_types": [
+        "文件",
+        "文件",
+        "文件",
+        "文件"
+      ],
+      "match_count": 4,
+      "required_count": 1,
+      "company_coverage": {
+        "CN02": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.7&2.8&2.9&2.11 CN02- PRC Report - 202512- New GAAP.xlsx"
+          ],
+          "folders": []
+        },
+        "CN03": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.7&2.8&2.9 CN03- PRC Report- 202512( 1月15日更新).xlsx"
+          ],
+          "folders": []
+        },
+        "CN04": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.7&2.8&2.9 CN04- PRC Report -202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN05": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.7&2.8&2.9 CN05-PRC Report-202512 old GAAP.xlsx"
+          ],
+          "folders": []
+        }
+      }
+    },
+    {
+      "index": 2,
+      "checklist_name": "序时账",
+      "pbc_name": "序时账",
+      "row_uid": "",
+      "source_key": "序时账",
+      "status": "未匹配",
+      "matched_files": [],
+      "matched_names": [],
+      "matched_types": [],
+      "match_count": 0,
+      "required_count": 1,
+      "company_coverage": {}
+    },
+    {
+      "index": 3,
+      "checklist_name": "PRC Report",
+      "pbc_name": "财务报表",
+      "row_uid": "",
+      "source_key": "prc report",
+      "status": "已获取",
+      "matched_files": [
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.7&2.8&2.9&2.11 CN02- PRC Report - 202512- New GAAP.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.7&2.8&2.9 CN03- PRC Report- 202512( 1月15日更新).xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.7&2.8&2.9 CN04- PRC Report -202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.7&2.8&2.9 CN05-PRC Report-202512 old GAAP.xlsx"
+      ],
+      "matched_names": [
+        "2.7&2.8&2.9&2.11 CN02- PRC Report - 202512- New GAAP.xlsx",
+        "2.7&2.8&2.9 CN03- PRC Report- 202512( 1月15日更新).xlsx",
+        "2.7&2.8&2.9 CN04- PRC Report -202512.xlsx",
+        "2.7&2.8&2.9 CN05-PRC Report-202512 old GAAP.xlsx"
+      ],
+      "matched_types": [
+        "文件",
+        "文件",
+        "文件",
+        "文件"
+      ],
+      "match_count": 4,
+      "required_count": 1,
+      "company_coverage": {
+        "CN02": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.7&2.8&2.9&2.11 CN02- PRC Report - 202512- New GAAP.xlsx"
+          ],
+          "folders": []
+        },
+        "CN03": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.7&2.8&2.9 CN03- PRC Report- 202512( 1月15日更新).xlsx"
+          ],
+          "folders": []
+        },
+        "CN04": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.7&2.8&2.9 CN04- PRC Report -202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN05": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.7&2.8&2.9 CN05-PRC Report-202512 old GAAP.xlsx"
+          ],
+          "folders": []
+        }
+      }
+    },
+    {
+      "index": 4,
+      "checklist_name": "2025年12月银行存款明细表（Bank balance check）",
+      "pbc_name": "货币资金科目明细账",
+      "row_uid": "",
+      "source_key": "2025年12月银行存款明细表（bank balance check）",
+      "status": "已获取",
+      "matched_files": [
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.9 2025年12月 银行存款明细表（Bank balance check）\\Bank balance Check - Dec 20251231.xlsx"
+      ],
+      "matched_names": [
+        "Bank balance Check - Dec 20251231.xlsx"
+      ],
+      "matched_types": [
+        "文件"
+      ],
+      "match_count": 1,
+      "required_count": 1,
+      "company_coverage": {},
+      "llm_confidence": 1.0
+    },
+    {
+      "index": 5,
+      "checklist_name": "2025年12月和2026年1月的银行对账单PDF版本（均为全月）",
+      "pbc_name": "截止性测试期间的银行流水",
+      "row_uid": "",
+      "source_key": "2025年12月和2026年1月的银行对账单pdf版本（均为全月）",
+      "status": "已获取",
+      "matched_files": [
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）"
+      ],
+      "matched_names": [
+        "1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）"
+      ],
+      "matched_types": [
+        "文件夹"
+      ],
+      "match_count": 1,
+      "required_count": 1,
+      "company_coverage": {
+        "CN02": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN02\\CN02-51211080-23021190144300-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN02\\CN02-51215081-1804254222-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN02\\CN02-51215082-1746925235-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN02\\CN02-51221020-1207041109814008861-USD.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN02\\CN02-51221080-1207041109041000454-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN03": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51212080-0007300172600174-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51212082-0007300323500164-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51212083-0007300323600171-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51212085-0007300323800185-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51212086-0007300352700171-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51215080-1783176218-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51220080-157229661347-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51221080-1813021109033002480-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51221083-0200012709200055253-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51221084-0302099609100018555-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51221085-1813021109035032452-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51221087-4301021109100499908-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN03\\CN03-51232020-6550236266-USD.pdf"
+          ],
+          "folders": []
+        },
+        "CN04": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN04\\CN04-51215081-1784514222-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN04\\CN04-51220080-444259220881-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN05": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN05\\CN05 -51220081-BOC-684757748423-CNY-202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN05\\CN05-51221080-ICBC-3202008709000057268-CNY-2512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN05\\CN05-L15-51215080-CITI-1783042203-CNY-2512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN05\\CN05-L82-51215081-CITI-1804270228-CNY-2512.pdf"
+          ],
+          "folders": []
+        },
+        "CN06": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN06\\CN06-51212080-BNPP-0007300198700158-CNY 202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN06\\CN06-51215080-CITI-1742311216-CNY 202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN06\\CN06-51221080-ICBC-4301021119100173009-CNY 202512.pdf"
+          ],
+          "folders": []
+        },
+        "CN07": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN07\\CN07-51212080-0007300174100182-CNY-202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN07\\CN07-51212081-0007300355800194-CNY-202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN07\\CN07-51215080-1783170201-CNY-202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN07\\CN07-51220080-301283066984-CNY 202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN07\\CN07-51221080-4301021119100154595-CNY202512.pdf"
+          ],
+          "folders": []
+        },
+        "CN08": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN08\\CN08-51215080-1777547204-CNY-202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN08\\CN08-51220080-436461229513-CNY 202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN08\\CN08NJ-51215081-1804272239-CNY-202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN08\\CN08NJ-ICBC-4301021119100367209-202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN08\\CN08SH-CITI- EUR-1777547425-202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN08\\CN08SH-CITI-CNY-1777547247-202512.pdf"
+          ],
+          "folders": []
+        },
+        "CN10": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN10\\CN10-51215081-1754308229-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN10\\CN10-51220080-561257526768-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN13": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN13\\CN13-51212080-BNP-0007300324400130-CNY-202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN13\\CN13-51220080-BOC-312963536304 CNY 202512.pdf"
+          ],
+          "folders": []
+        },
+        "CN14": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN14\\CN14-51215081-1754287221-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN14\\CN14-51221080-1001700819300442958-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN15": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN15\\CN15-51215081-1784974223-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN15\\CN15-51221080-ICBC-2013021909200032938-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN18": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN18\\CN18-51215080-1783173219-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN18\\CN18-51220080-290861149953-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN19": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN19\\CN19-51215081-1754305238-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN19\\CN19-51220080-462468363840-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN23": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN23\\CN23-51215080-1817032229 - CNY 202512.pdf"
+          ],
+          "folders": []
+        },
+        "CN24": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN24\\CN24-51215010-1817029023-EUR.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN24\\CN24-51215080-1817029236-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN24\\CN24-51220080-485871315126-CNY明细.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN24\\CN24-51220081-501471806624-CNY明细.pdf"
+          ],
+          "folders": []
+        },
+        "CN28": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN28\\CN28-51212081-BNPP-0007300267300110-CNY 202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN28\\CN28-51215080-CITI-1778179209-CNY 202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN28\\CN28-51221080-ICBC-4301021109100342130-CNY 202512.pdf"
+          ],
+          "folders": []
+        },
+        "CN32": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN32\\CN32-51215080-1817030226-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN32\\CN32-ICBC-0302085609100055432-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN34": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN34\\CN34-51212080-BNPP-0007300286300179-CNY 202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN34\\CN34-51215080-1778811207-CNY 202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN34\\CN34-51221080-ICBC-4301021119100513194-CNY 202512.pdf"
+          ],
+          "folders": []
+        },
+        "CN54": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN54\\CN54-51212080-0007300262900190-CNY1.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN54\\CN54-51215080-1742310201-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN54\\CN54-51221080-4200223209200095187-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN57": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN57\\CN57-51212080-0007300171500194-CNY-202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN57\\CN57-51215080-1754288201-CNY-202512.pdf"
+          ],
+          "folders": []
+        },
+        "CN59": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN59\\CN59-51215081-1783175238-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN59\\CN59-51215082-1820111229-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN59\\CN59-51221080-4000022729200444336-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN59\\CN59-51221082-3202008709200677380-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN61": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN61\\CN61-51215080-1783171208-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN61\\CN61-51220080-712057758149-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN63": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN63\\CN63-51215010-1745643007-EUR-202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN63\\CN63-51215020-1745643015-USD-202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN63\\CN63-51215080-1745643201-CNY-202512.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN63\\CN63-51221081-1001266319300278452-CNY-202512.pdf"
+          ],
+          "folders": []
+        },
+        "CN64": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51212080-0007300257900131-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51212081-0007300324200116-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51212082-0007300369100155-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51215080-1783174207-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51221080-1606030309200014702-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51221081-2013077919100013967-CNY1.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN64\\CN64-51221082-4200001909000055688-CNY1.pdf"
+          ],
+          "folders": []
+        },
+        "CN67": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN67\\202512 CN67-51211080-23021189144300-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN67\\202512 CN67-51215081-1783178229-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN67\\202512 CN67-51220081-634058368039-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN72": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN72\\CN72-51215080-1849487228-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN72\\CN72-51220080-587257356204-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN83": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN83\\CN83-51215080-1810987223-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN83\\CN83-51215081-1860547224-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN83\\CN83-51221080-4000022719202171109-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN83\\CN83-51221081-3202008709200853137-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN87": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN87\\CN87-51215010-1840049538-EUR.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN87\\CN87-51215080-1840049228-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN87\\CN87-51215081-1840049821-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN87\\CN87-51221081-1001266319300344240-CNY.pdf"
+          ],
+          "folders": []
+        },
+        "CN88": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN88\\CN88-CITI-51215020-1845346565-USD.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN88\\CN88-CITI-51215080-1845346255-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN88\\CN88-CITI-51215081-1845346859-CNY.pdf",
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.7 2025年12月和2026年1月的银行对账单PDF版本（均为全月）\\2025年12月\\CN88\\CN88-ICBC-51221080-1102025509200738644-CNY.pdf"
+          ],
+          "folders": []
+        }
+      }
+    },
+    {
+      "index": 6,
+      "checklist_name": "银行余额调节表",
+      "pbc_name": "对于期末账面余额和对账单不符,获得银行存款余额调节表",
+      "row_uid": "",
+      "source_key": "银行余额调节表",
+      "status": "已获取",
+      "matched_files": [
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-AP&AR&GL-SD\\1.10 CFS -Accounting GL- Bank reconciliation -202512.xlsx"
+      ],
+      "matched_names": [
+        "1.10 CFS -Accounting GL- Bank reconciliation -202512.xlsx"
+      ],
+      "matched_types": [
+        "文件"
+      ],
+      "match_count": 1,
+      "required_count": 1,
+      "company_coverage": {},
+      "llm_confidence": 0.9
+    },
+    {
+      "index": 7,
+      "checklist_name": "2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）",
+      "pbc_name": "本期新开户的账号的开户证明（如有）",
+      "row_uid": "",
+      "source_key": "2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）",
+      "status": "已获取",
+      "matched_files": [
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）"
+      ],
+      "matched_names": [
+        "1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）"
+      ],
+      "matched_types": [
+        "文件夹"
+      ],
+      "match_count": 1,
+      "required_count": 1,
+      "company_coverage": {
+        "CN02": {
+          "files": [],
+          "folders": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）"
+          ]
+        },
+        "CN67": {
+          "files": [],
+          "folders": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）"
+          ]
+        },
+        "CN87": {
+          "files": [],
+          "folders": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.12 2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）"
+          ]
+        }
+      }
+    },
+    {
+      "index": 8,
+      "checklist_name": "2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）",
+      "pbc_name": "本期销户的账号的销户证明（如有）",
+      "row_uid": "",
+      "source_key": "2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）",
+      "status": "已获取",
+      "matched_files": [
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）"
+      ],
+      "matched_names": [
+        "1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）"
+      ],
+      "matched_types": [
+        "文件夹"
+      ],
+      "match_count": 1,
+      "required_count": 1,
+      "company_coverage": {
+        "CN07": {
+          "files": [],
+          "folders": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）"
+          ]
+        },
+        "CN62": {
+          "files": [],
+          "folders": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）"
+          ]
+        },
+        "CN63": {
+          "files": [],
+          "folders": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）"
+          ]
+        },
+        "CN72": {
+          "files": [],
+          "folders": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\1.11 2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）"
+          ]
+        }
+      }
+    },
+    {
+      "index": 9,
+      "checklist_name": "本期定期存款开户证实书",
+      "pbc_name": "本期定期存款开户证实书",
+      "row_uid": "",
+      "source_key": "本期定期存款开户证实书",
+      "status": "未匹配",
+      "matched_files": [],
+      "matched_names": [],
+      "matched_types": [],
+      "match_count": 0,
+      "required_count": 1,
+      "company_coverage": {}
+    },
+    {
+      "index": 10,
+      "checklist_name": "定期存款质押合同",
+      "pbc_name": "定期存款质押合同",
+      "row_uid": "",
+      "source_key": "定期存款质押合同",
+      "status": "未匹配",
+      "matched_files": [],
+      "matched_names": [],
+      "matched_types": [],
+      "match_count": 0,
+      "required_count": 1,
+      "company_coverage": {}
+    },
+    {
+      "index": 11,
+      "checklist_name": "2025年1-12月新增资金池准入协议",
+      "pbc_name": "公司资金池业务协议",
+      "row_uid": "",
+      "source_key": "2025年1-12月新增资金池准入协议",
+      "status": "已获取",
+      "matched_files": [
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\CN83WH花旗资金池协议扫描件 (1).pdf"
+      ],
+      "matched_names": [
+        "CN83WH花旗资金池协议扫描件 (1).pdf"
+      ],
+      "matched_types": [
+        "文件"
+      ],
+      "match_count": 1,
+      "required_count": 1,
+      "company_coverage": {
+        "CN83": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\1.Centralize-TR-SD\\CN83WH花旗资金池协议扫描件 (1).pdf"
+          ],
+          "folders": []
+        }
+      },
+      "llm_confidence": 0.85
+    },
+    {
+      "index": 12,
+      "checklist_name": "第三方平台余额证明",
+      "pbc_name": "第三方平台余额证明",
+      "row_uid": "",
+      "source_key": "第三方平台余额证明",
+      "status": "未匹配",
+      "matched_files": [],
+      "matched_names": [],
+      "matched_types": [],
+      "match_count": 0,
+      "required_count": 1,
+      "company_coverage": {}
+    },
+    {
+      "index": 13,
+      "checklist_name": "固定资产后推表",
+      "pbc_name": "固定资产后推表",
+      "row_uid": "",
+      "source_key": "固定资产后推表",
+      "status": "已获取",
+      "matched_files": [
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.20 FA Reconciliation Report CN03_202512.zip"
+      ],
+      "matched_names": [
+        "2.20 FA Reconciliation Report CN03_202512.zip"
+      ],
+      "matched_types": [
+        "文件"
+      ],
+      "match_count": 1,
+      "required_count": 1,
+      "company_coverage": {
+        "CN03": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.20 FA Reconciliation Report CN03_202512.zip"
+          ],
+          "folders": []
+        }
+      },
+      "llm_confidence": 0.6
+    },
+    {
+      "index": 14,
+      "checklist_name": "FA PRC",
+      "pbc_name": "固定资产清单",
+      "row_uid": "",
+      "source_key": "fa prc",
+      "status": "已获取",
+      "matched_files": [
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.20 CN02 FA_PRC_Final-202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.20 CN03 FA_PRC_Final-202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.20 CN04 FA _PRC_Final-202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.20 CN05 FA _PRC_Final-202512.xlsx"
+      ],
+      "matched_names": [
+        "2.20 CN02 FA_PRC_Final-202512.xlsx",
+        "2.20 CN03 FA_PRC_Final-202512.xlsx",
+        "2.20 CN04 FA _PRC_Final-202512.xlsx",
+        "2.20 CN05 FA _PRC_Final-202512.xlsx"
+      ],
+      "matched_types": [
+        "文件",
+        "文件",
+        "文件",
+        "文件"
+      ],
+      "match_count": 4,
+      "required_count": 1,
+      "company_coverage": {
+        "CN02": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.20 CN02 FA_PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN03": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.20 CN03 FA_PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN04": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.20 CN04 FA _PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN05": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.20 CN05 FA _PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        }
+      }
+    },
+    {
+      "index": 15,
+      "checklist_name": "FA PRC",
+      "pbc_name": "固定资产处置清单",
+      "row_uid": "",
+      "source_key": "fa prc",
+      "status": "已获取",
+      "matched_files": [
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.20 CN02 FA_PRC_Final-202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.20 CN03 FA_PRC_Final-202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.20 CN04 FA _PRC_Final-202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.20 CN05 FA _PRC_Final-202512.xlsx"
+      ],
+      "matched_names": [
+        "2.20 CN02 FA_PRC_Final-202512.xlsx",
+        "2.20 CN03 FA_PRC_Final-202512.xlsx",
+        "2.20 CN04 FA _PRC_Final-202512.xlsx",
+        "2.20 CN05 FA _PRC_Final-202512.xlsx"
+      ],
+      "matched_types": [
+        "文件",
+        "文件",
+        "文件",
+        "文件"
+      ],
+      "match_count": 4,
+      "required_count": 1,
+      "company_coverage": {
+        "CN02": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.20 CN02 FA_PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN03": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.20 CN03 FA_PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN04": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.20 CN04 FA _PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN05": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.20 CN05 FA _PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        }
+      }
+    },
+    {
+      "index": 16,
+      "checklist_name": "FA PRC",
+      "pbc_name": "固定资产新增清单",
+      "row_uid": "",
+      "source_key": "fa prc",
+      "status": "已获取",
+      "matched_files": [
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.20 CN02 FA_PRC_Final-202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.20 CN03 FA_PRC_Final-202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.20 CN04 FA _PRC_Final-202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.20 CN05 FA _PRC_Final-202512.xlsx"
+      ],
+      "matched_names": [
+        "2.20 CN02 FA_PRC_Final-202512.xlsx",
+        "2.20 CN03 FA_PRC_Final-202512.xlsx",
+        "2.20 CN04 FA _PRC_Final-202512.xlsx",
+        "2.20 CN05 FA _PRC_Final-202512.xlsx"
+      ],
+      "matched_types": [
+        "文件",
+        "文件",
+        "文件",
+        "文件"
+      ],
+      "match_count": 4,
+      "required_count": 1,
+      "company_coverage": {
+        "CN02": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.20 CN02 FA_PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN03": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.20 CN03 FA_PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN04": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.20 CN04 FA _PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN05": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.20 CN05 FA _PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        }
+      }
+    },
+    {
+      "index": 17,
+      "checklist_name": "FA PRC",
+      "pbc_name": "固定资产公司折旧政策",
+      "row_uid": "",
+      "source_key": "fa prc",
+      "status": "已获取",
+      "matched_files": [
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.20 CN02 FA_PRC_Final-202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.20 CN03 FA_PRC_Final-202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.20 CN04 FA _PRC_Final-202512.xlsx",
+        "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.20 CN05 FA _PRC_Final-202512.xlsx"
+      ],
+      "matched_names": [
+        "2.20 CN02 FA_PRC_Final-202512.xlsx",
+        "2.20 CN03 FA_PRC_Final-202512.xlsx",
+        "2.20 CN04 FA _PRC_Final-202512.xlsx",
+        "2.20 CN05 FA _PRC_Final-202512.xlsx"
+      ],
+      "matched_types": [
+        "文件",
+        "文件",
+        "文件",
+        "文件"
+      ],
+      "match_count": 4,
+      "required_count": 1,
+      "company_coverage": {
+        "CN02": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN02\\2.20 CN02 FA_PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN03": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN03\\SSC GL\\2.20 CN03 FA_PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN04": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\CN04\\GL\\2.20 CN04 FA _PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        },
+        "CN05": {
+          "files": [
+            "C:\\Users\\Lenovo\\Desktop\\测试V2\\SSC GL\\2.20 CN05 FA _PRC_Final-202512.xlsx"
+          ],
+          "folders": []
+        }
+      }
+    }
+  ],
+  "scan_root": "C:\\Users\\Lenovo\\Desktop\\测试V2",
+  "new_items": [],
+  "existing_items": [],
+  "previous_scanned_files": [],
+  "previous_scanned_folders": [],
+  "checklist_template": {
+    "companies": [
+      {
+        "full_name": "台州法雷奥温岭汽车零部件有限公司",
+        "short_name": "CN02"
+      },
+      {
+        "full_name": "法雷奥汽车空调湖北有限公司",
+        "short_name": "CN03"
+      },
+      {
+        "full_name": "上海法雷奥汽车电机雨刮系统有限公司",
+        "short_name": "CN04"
+      },
+      {
+        "full_name": "法雷奥市光（中国）车灯有限公司",
+        "short_name": "CN05"
+      },
+      {
+        "full_name": "法雷奥凯佩科液力变矩器（南京）有限公司",
+        "short_name": "CN06"
+      },
+      {
+        "full_name": "南京法雷奥离合器有限公司",
+        "short_name": "CN07"
+      },
+      {
+        "full_name": "法雷奥企业管理（上海）有限公司",
+        "short_name": "CN08"
+      },
+      {
+        "full_name": "法雷奥照明湖北技术中心有限公司",
+        "short_name": "CN10"
+      },
+      {
+        "full_name": "沈阳平和法雷奥汽车传动系统有限公司",
+        "short_name": "CN13"
+      },
+      {
+        "full_name": "法雷奥汽车内部控制（上海）有限公司",
+        "short_name": "CN14"
+      },
+      {
+        "full_name": "佛山市法雷奥汽车电子零部件有限公司",
+        "short_name": "CN15"
+      },
+      {
+        "full_name": "沈阳法雷奥车灯有限公司",
+        "short_name": "CN18"
+      },
+      {
+        "full_name": "常熟法雷奥汽车雨刮系统有限公司",
+        "short_name": "CN19"
+      },
+      {
+        "full_name": "法雷奥新能源汽车（深圳）有限公司",
+        "short_name": "CN22"
+      },
+      {
+        "full_name": "法雷奥汽车动力系统（上海）有限公司",
+        "short_name": "CN23"
+      },
+      {
+        "full_name": "法雷奥汽车动力系统（上海）有限公司",
+        "short_name": "CN23"
+      },
+      {
+        "full_name": "法雷奥蓝谷新能源动力系统（常州）有限公司",
+        "short_name": "CN24"
+      },
+      {
+        "full_name": "法雷奥动力系统（南京）有限公司",
+        "short_name": "CN28"
+      },
+      {
+        "full_name": "法雷奥电动汽车动力总成（天津）有限公司",
+        "short_name": "CN32"
+      },
+      {
+        "full_name": "法雷奥新能源汽车（常熟）有限公司",
+        "short_name": "CN33"
+      },
+      {
+        "full_name": "法雷奥动力技术（南京）有限公司",
+        "short_name": "CN34"
+      },
+      {
+        "full_name": "法雷奥压缩机（长春）有限公司",
+        "short_name": "CN54"
+      },
+      {
+        "full_name": "无锡法雷奥汽车零配件系统有限公司",
+        "short_name": "CN57"
+      },
+      {
+        "full_name": "法雷奥汽车内部控制（深圳）有限公司",
+        "short_name": "CN59"
+      },
+      {
+        "full_name": "市光法雷奥（佛山）汽车照明系统有限公司",
+        "short_name": "CN61"
+      },
+      {
+        "full_name": "广州法雷奥发动机冷却有限公司",
+        "short_name": "CN62"
+      },
+      {
+        "full_name": "法雷奥汽车零部件贸易（上海）有限公司",
+        "short_name": "CN63"
+      },
+      {
+        "full_name": "法雷奥发动机冷却（佛山）有限公司",
+        "short_name": "CN64"
+      },
+      {
+        "full_name": "法雷奥舒适驾驶辅助系统（广州）有限公司",
+        "short_name": "CN67"
+      },
+      {
+        "full_name": "华达汽车空调（湖南）有限公司",
+        "short_name": "CN72"
+      },
+      {
+        "full_name": "法雷奥探测系统（深圳）有限公司",
+        "short_name": "CN83"
+      },
+      {
+        "full_name": "智汇法雷奥（浙江）汽车零部件有限公司",
+        "short_name": "CN86"
+      },
+      {
+        "full_name": "法雷奥智能交通系统（上海）有限公司",
+        "short_name": "CN87"
+      },
+      {
+        "full_name": "法雷奥新能源照明（常熟）有限公司",
+        "short_name": "CN88"
+      }
+    ],
+    "company_names": [
+      "CN02",
+      "CN03",
+      "CN04",
+      "CN05",
+      "CN06",
+      "CN07",
+      "CN08",
+      "CN10",
+      "CN13",
+      "CN14",
+      "CN15",
+      "CN18",
+      "CN19",
+      "CN22",
+      "CN23",
+      "CN23",
+      "CN24",
+      "CN28",
+      "CN32",
+      "CN33",
+      "CN34",
+      "CN54",
+      "CN57",
+      "CN59",
+      "CN61",
+      "CN62",
+      "CN63",
+      "CN64",
+      "CN67",
+      "CN72",
+      "CN83",
+      "CN86",
+      "CN87",
+      "CN88"
+    ],
+    "items": [
+      {
+        "row_index": 1,
+        "seq": 1,
+        "subject": "通用",
+        "pbc_name": "科目余额表",
+        "demand_name": "PRC Report",
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 2,
+        "seq": 2,
+        "subject": "通用",
+        "pbc_name": "序时账",
+        "demand_name": "序时账",
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 3,
+        "seq": 3,
+        "subject": "通用",
+        "pbc_name": "财务报表",
+        "demand_name": "PRC Report",
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 4,
+        "seq": 4,
+        "subject": "货币资金",
+        "pbc_name": "货币资金科目明细账",
+        "demand_name": "2025年12月银行存款明细表（Bank balance check）",
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 5,
+        "seq": 5,
+        "subject": "货币资金",
+        "pbc_name": "截止性测试期间的银行流水",
+        "demand_name": "2025年12月和2026年1月的银行对账单PDF版本（均为全月）",
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "Y",
+          "CN07": "Y",
+          "CN08": "Y",
+          "CN10": "Y",
+          "CN13": "Y",
+          "CN14": "Y",
+          "CN15": "Y",
+          "CN18": "Y",
+          "CN19": "Y",
+          "CN22": "N",
+          "CN23": "Y",
+          "CN24": "Y",
+          "CN28": "Y",
+          "CN32": "Y",
+          "CN33": "N",
+          "CN34": "Y",
+          "CN54": "Y",
+          "CN57": "Y",
+          "CN59": "Y",
+          "CN61": "Y",
+          "CN62": "N",
+          "CN63": "Y",
+          "CN64": "Y",
+          "CN67": "Y",
+          "CN72": "Y",
+          "CN83": "Y",
+          "CN86": "N",
+          "CN87": "Y",
+          "CN88": "Y"
+        }
+      },
+      {
+        "row_index": 6,
+        "seq": 6,
+        "subject": "货币资金",
+        "pbc_name": "对于期末账面余额和对账单不符,获得银行存款余额调节表",
+        "demand_name": "银行余额调节表",
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 7,
+        "seq": 7,
+        "subject": "货币资金",
+        "pbc_name": "本期新开户的账号的开户证明（如有）",
+        "demand_name": "2025年1-12月新增开户清单 、开户时的银行开户证明（含开户日期）",
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "Y",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "Y",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 8,
+        "seq": 8,
+        "subject": "货币资金",
+        "pbc_name": "本期销户的账号的销户证明（如有）",
+        "demand_name": "2025年1-12月销户清单 、销户时的银行销户证明（含销户日期）",
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "Y",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "Y",
+          "CN63": "Y",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "Y",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 9,
+        "seq": 9,
+        "subject": "货币资金",
+        "pbc_name": "本期定期存款开户证实书",
+        "demand_name": "本期定期存款开户证实书",
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 10,
+        "seq": 10,
+        "subject": "货币资金",
+        "pbc_name": "定期存款质押合同",
+        "demand_name": "定期存款质押合同",
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 11,
+        "seq": 11,
+        "subject": "货币资金",
+        "pbc_name": "公司资金池业务协议",
+        "demand_name": "2025年1-12月新增资金池准入协议",
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "Y",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 12,
+        "seq": 12,
+        "subject": "货币资金",
+        "pbc_name": "第三方平台余额证明",
+        "demand_name": "第三方平台余额证明",
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 13,
+        "seq": 13,
+        "subject": "固定资产",
+        "pbc_name": "固定资产后推表",
+        "demand_name": "固定资产后推表",
+        "company_status": {
+          "CN02": "N",
+          "CN03": "Y",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 14,
+        "seq": 14,
+        "subject": "固定资产",
+        "pbc_name": "固定资产清单",
+        "demand_name": "FA PRC",
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 15,
+        "seq": 15,
+        "subject": "固定资产",
+        "pbc_name": "固定资产处置清单",
+        "demand_name": "FA PRC",
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 16,
+        "seq": 16,
+        "subject": "固定资产",
+        "pbc_name": "固定资产新增清单",
+        "demand_name": "FA PRC",
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 17,
+        "seq": 17,
+        "subject": "固定资产",
+        "pbc_name": "固定资产公司折旧政策",
+        "demand_name": "FA PRC",
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      }
+    ],
+    "headers": [
+      "序号",
+      "科目",
+      "所需PBC",
+      "需求资料",
+      "CN02",
+      "CN03",
+      "CN04",
+      "CN05",
+      "CN06",
+      "CN07",
+      "CN08",
+      "CN10",
+      "CN13",
+      "CN14",
+      "CN15",
+      "CN18",
+      "CN19",
+      "CN22",
+      "CN23",
+      "CN23",
+      "CN24",
+      "CN28",
+      "CN32",
+      "CN33",
+      "CN34",
+      "CN54",
+      "CN57",
+      "CN59",
+      "CN61",
+      "CN62",
+      "CN63",
+      "CN64",
+      "CN67",
+      "CN72",
+      "CN83",
+      "CN86",
+      "CN87",
+      "CN88"
+    ]
+  },
+  "checklist_file_path": "uploads\\PBC需求清单_待填写.xlsx",
+  "file_renames": {},
+  "frontend_view_state": {
+    "file_renames": {},
+    "current_view": "matrix",
+    "manage_mode": false,
+    "col_filters": {},
+    "preview_items": [
+      {
+        "row_index": 1,
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 2,
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 3,
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 4,
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 5,
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "Y",
+          "CN07": "Y",
+          "CN08": "Y",
+          "CN10": "Y",
+          "CN13": "Y",
+          "CN14": "Y",
+          "CN15": "Y",
+          "CN18": "Y",
+          "CN19": "Y",
+          "CN22": "N",
+          "CN23": "Y",
+          "CN24": "Y",
+          "CN28": "Y",
+          "CN32": "Y",
+          "CN33": "N",
+          "CN34": "Y",
+          "CN54": "Y",
+          "CN57": "Y",
+          "CN59": "Y",
+          "CN61": "Y",
+          "CN62": "N",
+          "CN63": "Y",
+          "CN64": "Y",
+          "CN67": "Y",
+          "CN72": "Y",
+          "CN83": "Y",
+          "CN86": "N",
+          "CN87": "Y",
+          "CN88": "Y"
+        }
+      },
+      {
+        "row_index": 6,
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 7,
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "Y",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "Y",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 8,
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "Y",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "Y",
+          "CN63": "Y",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "Y",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 9,
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 10,
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 11,
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "Y",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 12,
+        "company_status": {
+          "CN02": "N",
+          "CN03": "N",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 13,
+        "company_status": {
+          "CN02": "N",
+          "CN03": "Y",
+          "CN04": "N",
+          "CN05": "N",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 14,
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 15,
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 16,
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      },
+      {
+        "row_index": 17,
+        "company_status": {
+          "CN02": "Y",
+          "CN03": "Y",
+          "CN04": "Y",
+          "CN05": "Y",
+          "CN06": "N",
+          "CN07": "N",
+          "CN08": "N",
+          "CN10": "N",
+          "CN13": "N",
+          "CN14": "N",
+          "CN15": "N",
+          "CN18": "N",
+          "CN19": "N",
+          "CN22": "N",
+          "CN23": "N",
+          "CN24": "N",
+          "CN28": "N",
+          "CN32": "N",
+          "CN33": "N",
+          "CN34": "N",
+          "CN54": "N",
+          "CN57": "N",
+          "CN59": "N",
+          "CN61": "N",
+          "CN62": "N",
+          "CN63": "N",
+          "CN64": "N",
+          "CN67": "N",
+          "CN72": "N",
+          "CN83": "N",
+          "CN86": "N",
+          "CN87": "N",
+          "CN88": "N"
+        }
+      }
+    ]
+  },
+  "project_name": "A项目1",
+  "created_at": "2026-06-26T21:45:02.506439",
+  "active_project": {
+    "slug": "A项目1",
+    "name": "A项目1"
+  }
+}
