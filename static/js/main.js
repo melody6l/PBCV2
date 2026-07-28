@@ -21,13 +21,20 @@ const API = {
     generateChecklist: "/api/generate-checklist",
     downloadChecklist: "/api/download-checklist",
     uploadChecklistV2: "/api/upload-checklist-v2",
+    checklistMergePreview: "/api/checklist-merge/preview",
+    checklistMergeCommit: "/api/checklist-merge/commit",
     updateCellStatus: "/api/update-cell-status",
     exportChecklist: "/api/export-checklist",
     scanFolder: "/api/scan-folder",
     match: "/api/match",
     manualMatch: "/api/manual-match",
     llmMatch: "/api/llm-match",
+    contentMatch: "/api/content-match",
+    contentMatchProgress: "/api/content-match/progress",
+    contentSuggestions: "/api/content-suggestions",
+    resolveContentSuggestion: "/api/content-suggestions/resolve",
     browseDirs: "/api/browse-dirs",
+    selectFolder: "/api/select-folder",
     createFolder: "/api/create-folder",
     resetState: "/api/reset-state",
     assignCompany: "/api/assign-company",
@@ -54,6 +61,9 @@ let companyNames = [];           // 公司简称列表
 let matchResults = null;
 let scannedCount = 0;
 let scanRoot = "";
+let scanNeedsMatch = false;
+let pendingMatchIsIncremental = false;
+let lastScanDiff = null;
 let showCols = null;
 let colFilters = {};
 let previewStatusCell = null;   // 预览区当前右键的状态单元格
@@ -63,9 +73,20 @@ let fileRenames = {};  // {原始路径: 重命名后的文件名称}
 let manageMode = false;          // 行管理模式开关
 let contextMenuTargetRow = null; // 右键菜单目标行
 let insertPosition = null;       // 插入位置: "top" | "bottom" | null(末尾)
+let devLogs = [];                // 仅当前页面有效的运行诊断事件
+const MAX_DEV_LOGS = 2000;
+let selectedDevLogFile = "";
+const DEV_LOG_STAGE_LABELS = { l1: "L1 关键词", l2: "L2 文件名 AI", extract: "内容提取", l3: "L3 内容 AI" };
+const DEV_LOG_EVENT_LABELS = {
+    match_accepted: "匹配成功", match_rejected: "未采纳", file_unmatched: "文件未匹配",
+    checklist_unmatched: "清单项未匹配", path_ambiguous: "同名文件冲突",
+    path_unresolved: "文件路径未找到", extract_completed: "提取完成", extract_failed: "提取失败",
+    match_suggested: "建议归属", file_unassigned: "保持未归属",
+};
 
 // ====== 项目管理 ======
 let activeProject = null;        // {slug, name, is_dirty: bool}
+let temporaryMode = false;
 let autoSaveTimer = null;
 const AUTO_SAVE_DELAY = 3000;    // 3秒防抖
 
@@ -78,6 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initMatchControls();
     initPreviewStatusMenu();
     initLlmPanel();
+    initContentMatchPanel();
     initColumnResize('#preview-table');
     initColumnFilters();
     initViewToggle();
@@ -85,9 +107,432 @@ document.addEventListener("DOMContentLoaded", () => {
     initListPreviewPane();
     initBrowsePreviewPane();
     initProjectBar();
+    initDevLogPanel();
+    initSuggestionPanel();
     updateWorkflowState();
     console.log("[DEBUG] DOMContentLoaded: 所有初始化完成");
 });
+
+// ====== 本轮运行日志 ======
+function appendDevLogs(logs) {
+    if (!Array.isArray(logs)) return;
+    const receivedAt = new Date().toLocaleTimeString();
+    for (const log of logs) {
+        devLogs.push({ ...log, receivedAt, seq: devLogs.length + 1 });
+    }
+    if (devLogs.length > MAX_DEV_LOGS) devLogs.splice(0, devLogs.length - MAX_DEV_LOGS);
+}
+
+function devLogText(log) {
+    const detail = log.detail && typeof log.detail === "object" ? JSON.stringify(log.detail) : String(log.detail || "");
+    return [log.file_name, log.relative_path, log.checklist_name, log.event, log.strategy, detail]
+        .filter(Boolean).join(" ").toLowerCase();
+}
+
+function groupDevLogsByFile(logs) {
+    const groups = new Map();
+    for (const log of logs) {
+        const key = log.relative_path || log.file_name;
+        if (!key) continue;
+        if (!groups.has(key)) groups.set(key, { key, name: log.file_name || key, path: key, events: [] });
+        groups.get(key).events.push(log);
+    }
+    return Array.from(groups.values()).sort((a, b) => a.path.localeCompare(b.path, "zh-CN"));
+}
+
+function fileLogOutcome(group) {
+    const events = group.events;
+    const last = events[events.length - 1] || {};
+    const errors = events.filter(e => e.status === "error");
+    const accepted = [...events].reverse().find(e => e.event === "match_accepted" && e.stage === "l3")
+        || [...events].reverse().find(e => e.event === "match_accepted");
+    const suggested = [...events].reverse().find(e => e.event === "match_suggested");
+    const unassigned = [...events].reverse().find(e => e.event === "file_unassigned" || e.event === "match_rejected");
+    if (errors.length) return { status: "error", label: "处理失败", log: errors[errors.length - 1] };
+    if (accepted) return { status: "success", label: "自动归属", log: accepted };
+    if (suggested) return { status: "warning", label: "建议确认", log: suggested };
+    if (unassigned || last.event === "file_unmatched") return { status: "warning", label: "未归属", log: unassigned || last };
+    return { status: last.status || "warning", label: DEV_LOG_EVENT_LABELS[last.event] || "处理中", log: last };
+}
+
+function stageCell(group, stage) {
+    const log = [...group.events].reverse().find(event => event.stage === stage);
+    if (!log) return { text: "—", className: "dev-log-cell-muted" };
+    let text = DEV_LOG_EVENT_LABELS[log.event] || log.event;
+    if (stage === "extract" && log.detail?.content_type === "ocr") text = log.status === "error" ? "OCR失败" : "OCR成功";
+    const className = log.status === "success" ? "dev-log-cell-success"
+        : log.status === "error" ? "dev-log-cell-error" : "dev-log-cell-warning";
+    return { text, className };
+}
+
+function renderDevLogFileDetail(container, group) {
+    container.replaceChildren();
+    if (!group) {
+        const empty = document.createElement("div");
+        empty.className = "dev-log-empty";
+        empty.textContent = "选择一个文件查看完整识别路径";
+        container.appendChild(empty);
+        return;
+    }
+    const outcome = fileLogOutcome(group);
+    const title = document.createElement("h3");
+    title.textContent = group.name;
+    const path = document.createElement("div");
+    path.className = "dev-log-file-detail-sub";
+    path.textContent = group.path;
+    const final = document.createElement("div");
+    final.className = "dev-log-final";
+    const target = outcome.log?.checklist_name ? ` → ${outcome.log.checklist_name}` : "";
+    const confidence = outcome.log?.confidence == null ? "" : `（${Math.round(outcome.log.confidence * 100)}%）`;
+    final.textContent = `${outcome.label}${target}${confidence}`;
+    const timeline = document.createElement("ol");
+    timeline.className = "dev-log-timeline";
+    for (const log of group.events) {
+        const item = document.createElement("li");
+        item.className = ["success", "warning", "error"].includes(log.status) ? log.status : "warning";
+        const heading = document.createElement("div");
+        heading.className = "dev-log-timeline-stage";
+        heading.textContent = `${DEV_LOG_STAGE_LABELS[log.stage] || log.stage || "事件"} · ${DEV_LOG_EVENT_LABELS[log.event] || log.event}`;
+        const details = [];
+        if (log.checklist_name) details.push(`清单项：${log.checklist_name}`);
+        if (log.strategy) details.push(`策略：${log.strategy}`);
+        if (log.confidence != null) details.push(`置信度：${Math.round(log.confidence * 100)}%`);
+        const data = log.detail && typeof log.detail === "object" ? log.detail : {};
+        if (data.content_label) details.push(`内容：${data.content_label}`);
+        if (Array.isArray(data.matched_keywords) && data.matched_keywords.length) details.push(`关键词：${data.matched_keywords.join("、")}`);
+        if (data.reason) details.push(`原因：${data.reason}`);
+        if (data.detected_company_name) details.push(`识别主体：${data.detected_company_name}`);
+        if (data.company_name) details.push(`映射公司：${data.company_name}`);
+        if (data.company_confidence != null) details.push(`公司置信度：${Math.round(data.company_confidence * 100)}%`);
+        if (Array.isArray(data.company_evidence) && data.company_evidence.length) details.push(`公司证据：${data.company_evidence.join("；")}`);
+        if (data.error) details.push(`错误：${data.error}`);
+        const detail = document.createElement("div");
+        detail.className = "dev-log-timeline-detail";
+        detail.textContent = details.join("；") || log.receivedAt || "";
+        item.append(heading, detail);
+        timeline.appendChild(item);
+    }
+    container.append(title, path, final, timeline);
+}
+
+function renderDevLogFileTable(container, groups) {
+    const layout = document.createElement("div");
+    layout.className = "dev-log-file-layout";
+    const tableWrap = document.createElement("div");
+    tableWrap.className = "dev-log-table-wrap";
+    const table = document.createElement("table");
+    table.className = "dev-log-table";
+    const head = document.createElement("thead");
+    const headRow = document.createElement("tr");
+    for (const label of ["状态", "文件", "L1", "L2", "提取/OCR", "L3", "最终归属", "置信度"]) {
+        const th = document.createElement("th"); th.textContent = label; headRow.appendChild(th);
+    }
+    head.appendChild(headRow);
+    const tbody = document.createElement("tbody");
+    const detailPanel = document.createElement("aside");
+    detailPanel.className = "dev-log-file-detail";
+
+    if (!groups.some(group => group.key === selectedDevLogFile)) selectedDevLogFile = groups[0]?.key || "";
+    const selectGroup = group => {
+        selectedDevLogFile = group.key;
+        for (const row of tbody.querySelectorAll("tr")) row.classList.toggle("selected", row.dataset.fileKey === group.key);
+        renderDevLogFileDetail(detailPanel, group);
+    };
+    groups.forEach((group, index) => {
+        const outcome = fileLogOutcome(group);
+        const row = document.createElement("tr");
+        row.tabIndex = 0;
+        row.dataset.fileKey = group.key;
+        row.classList.toggle("selected", group.key === selectedDevLogFile);
+        const status = document.createElement("td");
+        status.className = outcome.status === "success" ? "dev-log-cell-success"
+            : outcome.status === "error" ? "dev-log-cell-error" : "dev-log-cell-warning";
+        status.textContent = outcome.status === "success" ? "✓" : outcome.status === "error" ? "×" : "!";
+        const file = document.createElement("td"); file.className = "dev-log-file-name"; file.textContent = group.path;
+        row.append(status, file);
+        for (const stage of ["l1", "l2", "extract", "l3"]) {
+            const value = stageCell(group, stage);
+            const td = document.createElement("td"); td.className = value.className; td.textContent = value.text; row.appendChild(td);
+        }
+        const final = document.createElement("td"); final.textContent = outcome.log?.checklist_name || outcome.label;
+        const confidence = document.createElement("td");
+        confidence.textContent = outcome.log?.confidence == null ? "—" : `${Math.round(outcome.log.confidence * 100)}%`;
+        row.append(final, confidence);
+        row.addEventListener("click", () => selectGroup(group));
+        row.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectGroup(group); }
+            if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                event.preventDefault();
+                const next = Math.max(0, Math.min(groups.length - 1, index + (event.key === "ArrowDown" ? 1 : -1)));
+                const rows = tbody.querySelectorAll("tr");
+                rows[next]?.focus();
+                selectGroup(groups[next]);
+            }
+        });
+        tbody.appendChild(row);
+    });
+    table.append(head, tbody);
+    tableWrap.appendChild(table);
+    layout.append(tableWrap, detailPanel);
+    container.appendChild(layout);
+    renderDevLogFileDetail(detailPanel, groups.find(group => group.key === selectedDevLogFile));
+}
+
+function renderDevLogStats(groups) {
+    const stats = document.getElementById("dev-log-stats");
+    stats.replaceChildren();
+    const counts = { total: groups.length, success: 0, suggested: 0, unassigned: 0, error: 0, ocr: 0 };
+    for (const group of groups) {
+        const outcome = fileLogOutcome(group);
+        if (outcome.status === "error") counts.error++;
+        else if (outcome.label === "建议确认") counts.suggested++;
+        else if (outcome.label === "未归属") counts.unassigned++;
+        else if (outcome.status === "success") counts.success++;
+        if (group.events.some(log => log.stage === "extract" && log.detail?.content_type === "ocr")) counts.ocr++;
+    }
+    for (const [label, value, filter, tone] of [
+        ["文件", counts.total, "", ""], ["自动归属", counts.success, "success", ""],
+        ["建议", counts.suggested, "warning", "warning"], ["未归属", counts.unassigned, "warning", "warning"],
+        ["失败", counts.error, "error", "error"], ["OCR", counts.ocr, "extract", ""],
+    ]) {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = `dev-log-stat ${tone}`.trim();
+        chip.append(document.createTextNode(label));
+        const strong = document.createElement("strong"); strong.textContent = value; chip.appendChild(strong);
+        chip.addEventListener("click", () => {
+            if (filter === "extract") document.getElementById("dev-log-stage").value = "extract";
+            else document.getElementById("dev-log-status").value = filter;
+            renderDevLogs();
+        });
+        stats.appendChild(chip);
+    }
+}
+
+function renderDevLogs() {
+    const body = document.getElementById("dev-log-body");
+    const summary = document.getElementById("dev-log-summary");
+    if (!body || !summary) return;
+    const query = document.getElementById("dev-log-search").value.trim().toLowerCase();
+    const stage = document.getElementById("dev-log-stage").value;
+    const status = document.getElementById("dev-log-status").value;
+    const filtered = devLogs.filter(log =>
+        (!stage || log.stage === stage) && (!status || log.status === status) && (!query || devLogText(log).includes(query))
+    );
+    const allGroups = groupDevLogsByFile(devLogs);
+    const visibleFileKeys = new Set(groupDevLogsByFile(filtered).map(group => group.key));
+    // 筛选决定显示哪些文件，但表格和详情仍使用该文件的完整事件链。
+    const groups = allGroups.filter(group => visibleFileKeys.has(group.key));
+    summary.textContent = devLogs.length ? `本轮 ${allGroups.length} 个文件 · ${devLogs.length} 个事件` : "暂无日志";
+    renderDevLogStats(allGroups);
+    body.replaceChildren();
+    if (!filtered.length || !groups.length) {
+        const empty = document.createElement("div");
+        empty.className = "dev-log-empty";
+        empty.textContent = devLogs.length
+            ? (filtered.length ? "当前筛选结果中没有文件" : "没有符合筛选条件的日志")
+            : "暂无日志，执行匹配后将在此显示";
+        body.appendChild(empty);
+        return;
+    }
+    renderDevLogFileTable(body, groups);
+}
+
+function initDevLogPanel() {
+    const btn = document.getElementById("dev-log-btn");
+    const overlay = document.getElementById("dev-log-overlay");
+    const closeBtn = document.getElementById("dev-log-close");
+    if (!btn || !overlay || !closeBtn) return;
+    let previouslyFocused = null;
+    const close = () => {
+        overlay.classList.add("hidden");
+        if (previouslyFocused) previouslyFocused.focus();
+    };
+    btn.addEventListener("click", () => {
+        previouslyFocused = document.activeElement;
+        renderDevLogs();
+        overlay.classList.remove("hidden");
+        closeBtn.focus();
+    });
+    closeBtn.addEventListener("click", close);
+    overlay.addEventListener("click", e => { if (e.target === overlay) close(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && !overlay.classList.contains("hidden")) close(); });
+    for (const id of ["dev-log-search", "dev-log-stage", "dev-log-status"]) {
+        document.getElementById(id).addEventListener("input", renderDevLogs);
+    }
+    document.getElementById("dev-log-clear").addEventListener("click", () => {
+        devLogs = [];
+        selectedDevLogFile = "";
+        renderDevLogs();
+    });
+}
+
+// ====== AI 内容分类建议确认 ======
+function initSuggestionPanel() {
+    const overlay = document.getElementById("suggestion-overlay");
+    const closeBtn = document.getElementById("suggestion-close");
+    const card = document.getElementById("stat-incomplete-card");
+    if (!overlay || !closeBtn || !card) return;
+    const close = () => {
+        overlay.classList.add("hidden");
+        const frame = document.getElementById("suggestion-preview-frame");
+        frame.src = "about:blank";
+    };
+    const open = () => {
+        if (currentView !== "browse") return;
+        overlay.classList.remove("hidden");
+        closeBtn.focus();
+        loadContentSuggestions();
+    };
+    card.addEventListener("click", open);
+    card.addEventListener("keydown", event => {
+        if ((event.key === "Enter" || event.key === " ") && currentView === "browse") {
+            event.preventDefault();
+            open();
+        }
+    });
+    closeBtn.addEventListener("click", close);
+    overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !overlay.classList.contains("hidden")) close();
+    });
+}
+
+async function loadContentSuggestions() {
+    const list = document.getElementById("suggestion-list");
+    const summary = document.getElementById("suggestion-summary");
+    list.replaceChildren();
+    const loading = document.createElement("div");
+    loading.className = "dev-log-empty";
+    loading.textContent = "正在加载建议…";
+    list.appendChild(loading);
+    try {
+        const response = await fetch(API.contentSuggestions);
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+        list.replaceChildren();
+        const suggestions = data.suggestions || [];
+        summary.textContent = `待确认 ${suggestions.length} 个文件`;
+        if (!suggestions.length) {
+            const empty = document.createElement("div");
+            empty.className = "dev-log-empty";
+            empty.textContent = "暂无待确认建议";
+            list.appendChild(empty);
+            return;
+        }
+        for (const suggestion of suggestions) {
+            list.appendChild(buildSuggestionCard(suggestion, data.checklist_items || [], data.companies || []));
+        }
+    } catch (error) {
+        list.replaceChildren();
+        const failed = document.createElement("div");
+        failed.className = "dev-log-empty";
+        failed.textContent = `加载失败：${error.message}`;
+        list.appendChild(failed);
+    }
+}
+
+function buildSuggestionCard(suggestion, checklistItems, companies) {
+    const card = document.createElement("article");
+    card.className = "suggestion-card";
+    const file = document.createElement("div");
+    file.className = "suggestion-file";
+    file.textContent = suggestion.relative_path || suggestion.file_name;
+    const meta = document.createElement("div");
+    meta.className = "suggestion-meta";
+    const suggestedCompany = suggestion.company_name || "待确认";
+    meta.textContent = `清单项：${suggestion.checklist_name}（${Math.round((suggestion.confidence || 0) * 100)}%） · 公司：${suggestedCompany}（${Math.round((suggestion.company_confidence || 0) * 100)}%）`;
+    const reason = document.createElement("div");
+    reason.className = "suggestion-reason";
+    const evidence = (suggestion.company_evidence || []).join("；");
+    reason.textContent = `${suggestion.reason || "模型未提供清单项判断原因"}${evidence ? `\n公司证据：${evidence}` : "\n公司证据：未发现明确主体证据"}`;
+    const select = document.createElement("select");
+    select.className = "suggestion-select";
+    select.setAttribute("aria-label", `${suggestion.file_name} 的归属清单项`);
+    for (const item of checklistItems) {
+        const option = document.createElement("option");
+        option.value = item.index;
+        option.textContent = `#${item.index} ${item.name}`;
+        option.selected = String(item.index) === String(suggestion.checklist_index);
+        select.appendChild(option);
+    }
+    const companySelect = document.createElement("select");
+    companySelect.className = "suggestion-select";
+    companySelect.setAttribute("aria-label", `${suggestion.file_name} 的所属公司`);
+    const pendingOption = document.createElement("option");
+    pendingOption.value = "";
+    pendingOption.textContent = "公司暂不确认";
+    companySelect.appendChild(pendingOption);
+    for (const company of companies) {
+        const companyName = company.short_name || company.full_name;
+        if (!companyName) continue;
+        const option = document.createElement("option");
+        option.value = companyName;
+        option.textContent = company.full_name && company.full_name !== companyName
+            ? `${companyName}（${company.full_name}）` : companyName;
+        option.selected = companyName === suggestion.company_name;
+        companySelect.appendChild(option);
+    }
+    const actions = document.createElement("div");
+    actions.className = "suggestion-actions";
+    const preview = document.createElement("button");
+    preview.type = "button";
+    preview.className = "btn btn-outline btn-sm";
+    preview.textContent = "预览";
+    preview.addEventListener("click", () => previewSuggestedFile(suggestion));
+    const assign = document.createElement("button");
+    assign.type = "button";
+    assign.className = "btn btn-primary btn-sm";
+    assign.textContent = "确认归属";
+    assign.addEventListener("click", () => resolveContentSuggestion(
+        suggestion, "assign", select.value, companySelect.value, assign
+    ));
+    const dismiss = document.createElement("button");
+    dismiss.type = "button";
+    dismiss.className = "btn btn-outline btn-sm";
+    dismiss.textContent = "保持未归属";
+    dismiss.addEventListener("click", () => resolveContentSuggestion(suggestion, "dismiss", null, null, dismiss));
+    actions.append(preview, assign, dismiss);
+    card.append(file, meta, reason, select, companySelect, actions);
+    return card;
+}
+
+function previewSuggestedFile(suggestion) {
+    const title = document.getElementById("suggestion-preview-title");
+    const empty = document.getElementById("suggestion-preview-empty");
+    const frame = document.getElementById("suggestion-preview-frame");
+    title.textContent = suggestion.file_name || "文件预览";
+    empty.classList.add("hidden");
+    frame.classList.remove("hidden");
+    frame.src = "/api/open?path=" + encodeURIComponent(suggestion.file_path);
+}
+
+async function resolveContentSuggestion(suggestion, action, checklistIndex, companyName, button) {
+    button.disabled = true;
+    try {
+        const response = await fetch(API.resolveContentSuggestion, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                file_path: suggestion.file_path,
+                action,
+                checklist_index: checklistIndex,
+                company_name: companyName,
+            }),
+        });
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+        matchResults = data.match_results || matchResults;
+        syncMatchToPreview();
+        renderPreviewTable();
+        await loadContentSuggestions();
+        showToast(action === "assign" ? "已确认文件归属" : "已保持文件未归属", "success");
+        markProjectDirty();
+    } catch (error) {
+        showToast("处理建议失败: " + error.message, "error");
+        button.disabled = false;
+    }
+}
 
 // ====== 步骤0：模板面板 ======
 function initTemplatePanel() {
@@ -101,6 +546,14 @@ function initTemplatePanel() {
         dropdown.classList.toggle("hidden");
     });
     dropdown.addEventListener("change", () => updateSubjectTriggerText());
+    dropdown.addEventListener("click", event => {
+        const action = event.target.closest("[data-subject-action]")?.dataset.subjectAction;
+        if (!action) return;
+        event.stopPropagation();
+        const checked = action === "all";
+        dropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = checked; });
+        updateSubjectTriggerText();
+    });
     document.addEventListener("click", (e) => {
         if (!dropdown.contains(e.target) && e.target !== trigger) dropdown.classList.add("hidden");
     });
@@ -118,10 +571,110 @@ function initTemplatePanel() {
 
     const uploadBtn2 = document.getElementById("upload-filled-btn-2");
     const fileInput2 = document.getElementById("filled-checklist-input-2");
-    uploadBtn2.addEventListener("click", () => fileInput2.click());
-    fileInput2.addEventListener("change", () => {
-        if (fileInput2.files.length) uploadFilledChecklist(fileInput2.files[0]);
+    uploadBtn2.addEventListener("click", openChecklistMergeModal);
+    initChecklistMergeModal();
+}
+
+function initChecklistMergeModal() {
+    const overlay = document.getElementById("checklist-merge-overlay");
+    if (!overlay) return;
+    const close = () => overlay.classList.add("hidden");
+    document.getElementById("checklist-merge-close").addEventListener("click", close);
+    document.getElementById("checklist-merge-cancel").addEventListener("click", close);
+    overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
+    document.getElementById("checklist-merge-download").addEventListener("click", downloadChecklist);
+    document.getElementById("checklist-merge-file").addEventListener("change", previewChecklistMerge);
+    document.getElementById("checklist-merge-confirm").addEventListener("click", commitChecklistMerge);
+    document.querySelectorAll('input[name="checklist-merge-mode"]').forEach(input => {
+        input.addEventListener("change", () => {
+            document.getElementById("checklist-merge-file").value = "";
+            document.getElementById("checklist-merge-preview").classList.add("hidden");
+            document.getElementById("checklist-merge-confirm").disabled = true;
+            window._checklistMergeToken = "";
+        });
     });
+}
+
+function openChecklistMergeModal() {
+    document.getElementById("checklist-merge-overlay").classList.remove("hidden");
+    document.getElementById("checklist-merge-file").value = "";
+    document.getElementById("checklist-merge-preview").classList.add("hidden");
+    document.getElementById("checklist-merge-confirm").disabled = true;
+    window._checklistMergeToken = "";
+}
+
+async function previewChecklistMerge(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const mode = document.querySelector('input[name="checklist-merge-mode"]:checked')?.value || "full";
+    const form = new FormData();
+    form.append("file", file);
+    form.append("mode", mode);
+    const preview = document.getElementById("checklist-merge-preview");
+    preview.classList.remove("hidden");
+    preview.textContent = "正在分析清单变化…";
+    try {
+        const response = await fetch(API.checklistMergePreview, { method: "POST", body: form });
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+        window._checklistMergeToken = data.token;
+        const summary = data.summary || {};
+        const lines = [
+            ["新增需求", summary.new_items || 0],
+            ["更新需求", summary.updated_items || 0],
+            ["新增公司", summary.new_companies || 0],
+            ["重复跳过", summary.duplicates || 0],
+            ["冲突跳过", summary.conflicts || 0],
+        ];
+        preview.replaceChildren();
+        const grid = document.createElement("div");
+        grid.className = "merge-summary-grid";
+        for (const [label, value] of lines) {
+            const item = document.createElement("div");
+            item.innerHTML = `<strong>${value}</strong><span>${label}</span>`;
+            grid.appendChild(item);
+        }
+        preview.appendChild(grid);
+        if ((data.conflicts || []).length) {
+            const warning = document.createElement("div");
+            warning.className = "merge-conflict-list";
+            warning.textContent = "冲突不会自动合并：" + data.conflicts.map(item => `${item.name}（${item.reason}）`).join("；");
+            preview.appendChild(warning);
+        }
+        document.getElementById("checklist-merge-confirm").disabled = false;
+    } catch (error) {
+        preview.textContent = `分析失败：${error.message}`;
+        document.getElementById("checklist-merge-confirm").disabled = true;
+    }
+}
+
+async function commitChecklistMerge() {
+    const button = document.getElementById("checklist-merge-confirm");
+    if (!window._checklistMergeToken) return;
+    button.disabled = true;
+    try {
+        const response = await fetch(API.checklistMergeCommit, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: window._checklistMergeToken }),
+        });
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+        previewItems = data.items || previewItems;
+        previewCompanies = data.companies || previewCompanies;
+        companyNames = data.company_names || companyNames;
+        matchResults = data.match_results || matchResults;
+        renderTemplateSummary(data.total, companyNames.length, true);
+        syncMatchToPreview();
+        renderPreviewTable();
+        updateWorkflowState();
+        document.getElementById("checklist-merge-overlay").classList.add("hidden");
+        showToast(data.message || "清单更新完成", "success");
+        markProjectDirty();
+    } catch (error) {
+        showToast("合并失败：" + error.message, "error");
+        button.disabled = false;
+    }
 }
 
 function loadTemplateInfo() {
@@ -145,7 +698,7 @@ function loadTemplateInfo() {
 }
 
 function renderSubjectCheckboxes(subjects) {
-    const dropdown = document.getElementById("subject-select-dropdown");
+    const dropdown = document.getElementById("subject-select-options");
     dropdown.innerHTML = "";
     subjects.forEach(s => {
         const label = document.createElement("label");
@@ -153,7 +706,7 @@ function renderSubjectCheckboxes(subjects) {
         const cb = document.createElement("input");
         cb.type = "checkbox";
         cb.value = s;
-        cb.checked = true;
+        cb.checked = false;
         label.appendChild(cb);
         label.appendChild(document.createTextNode(s));
         dropdown.appendChild(label);
@@ -163,7 +716,7 @@ function renderSubjectCheckboxes(subjects) {
 
 function updateSubjectTriggerText() {
     const trigger = document.getElementById("subject-select-trigger");
-    const cbs = document.querySelectorAll("#subject-select-dropdown input[type=checkbox]:checked");
+    const cbs = document.querySelectorAll("#subject-select-options input[type=checkbox]:checked");
     const names = Array.from(cbs).map(cb => cb.value);
     if (names.length === 0) trigger.textContent = "请选择科目";
     else if (names.length <= 2) trigger.textContent = names.join("、");
@@ -171,7 +724,7 @@ function updateSubjectTriggerText() {
 }
 
 function getSelectedSubjects() {
-    const cbs = document.querySelectorAll("#subject-select-dropdown input[type=checkbox]:checked");
+    const cbs = document.querySelectorAll("#subject-select-options input[type=checkbox]:checked");
     return Array.from(cbs).map(cb => cb.value);
 }
 
@@ -206,17 +759,36 @@ function onChecklistGenerated(data, isNew) {
     previewItems = data.items;
     previewCompanies = data.companies || [];
     companyNames = data.company_names || [];
+    matchResults = null;
+    scanNeedsMatch = scannedCount > 0;
+    pendingMatchIsIncremental = false;
 
     document.getElementById("template-gen-area").classList.add("hidden");
     document.getElementById("template-done").classList.remove("hidden");
-    document.getElementById("template-summary").textContent =
-        `清单已生成 · ${data.total} 项资料 · ${companyNames.length || 0} 家公司`;
+    renderTemplateSummary(data.total, companyNames.length || 0, false);
     document.getElementById("template-badge").textContent = "✓ 已生成";
 
     renderPreviewTable();
     document.getElementById("preview-section").classList.remove("hidden");
     document.getElementById("export-checklist-btn").classList.remove("hidden");
+    updateWorkflowState();
     markProjectDirty();
+}
+
+function renderTemplateSummary(itemCount, companyCount, loaded) {
+    const summary = document.getElementById("template-summary");
+    summary.replaceChildren();
+    const check = document.createElement("span");
+    check.className = "template-summary-check";
+    check.textContent = "✓";
+    const prefix = document.createTextNode(loaded ? "已加载清单 · " : "清单已生成 · ");
+    const items = document.createElement("span");
+    items.className = "template-summary-number";
+    items.textContent = itemCount;
+    const companies = document.createElement("span");
+    companies.className = "template-summary-number";
+    companies.textContent = companyCount;
+    summary.append(check, prefix, items, document.createTextNode(" 项资料 · "), companies, document.createTextNode(" 家公司"));
 }
 
 async function downloadChecklist() {
@@ -251,6 +823,10 @@ function resetTemplate() {
     previewItems = [];
     previewCompanies = [];
     companyNames = [];
+    matchResults = null;
+    scanNeedsMatch = false;
+    pendingMatchIsIncremental = false;
+    updateWorkflowState();
 }
 
 function uploadFilledChecklist(file) {
@@ -345,9 +921,21 @@ function collectUnassignedItems() {
         matchResults.forEach(r => {
             if (r.status === "已获取") {
                 const companyCoverage = r.company_coverage || {};
-                if (Object.keys(companyCoverage).length === 0 && r.matched_files && r.matched_files.length > 0) {
-                    unassignedItems.push(r);
-                }
+                const assignedPaths = new Set();
+                Object.values(companyCoverage).forEach(info => {
+                    (info.files || []).forEach(path => assignedPaths.add(path));
+                    (info.folders || []).forEach(path => assignedPaths.add(path));
+                });
+                (r.matched_files || []).forEach((filePath, position) => {
+                    if (assignedPaths.has(filePath)) return;
+                    unassignedItems.push({
+                        ...r,
+                        matched_files: [filePath],
+                        matched_names: [(r.matched_names || [])[position] || filePath.split(/[\\/]/).pop()],
+                        matched_types: [(r.matched_types || [])[position] || "文件"],
+                        unassigned_file_path: filePath,
+                    });
+                });
             }
         });
     }
@@ -691,6 +1279,7 @@ async function renderBrowseView() {
         document.getElementById("list-view-container").classList.add("hidden");
         document.getElementById("browse-view-container").classList.remove("hidden");
         wrapper.classList.remove("hidden");
+        updateFileStats(data);
 
         thead.innerHTML = "";
         tbody.innerHTML = "";
@@ -1405,12 +1994,74 @@ function initPreviewStatusMenu() {
 // ====== 文件夹扫描 ======
 function initFolderInput() {
     document.getElementById("scan-btn").addEventListener("click", scanFolder);
+    document.getElementById("select-folder-btn").addEventListener("click", chooseScanFolder);
+}
+
+function renderScanDiff(diff) {
+    const section = document.getElementById("diff-section");
+    const content = document.getElementById("diff-content");
+    if (!diff || diff.mode === "full_scan") {
+        section.classList.add("hidden");
+        return;
+    }
+    section.classList.remove("hidden");
+    document.getElementById("diff-badge").textContent = "本次扫描";
+    const added = diff.total_added || 0;
+    const removed = diff.total_removed || 0;
+    content.innerHTML = `
+        <div class="scan-diff-summary">
+            <span class="${added ? 'has-change' : ''}">新增 ${added} 项</span>
+            <span class="${removed ? 'has-change' : ''}">移除 ${removed} 项</span>
+            <span>${added || removed ? '已有匹配将保留，仅处理变化内容。' : '资料没有变化，无需再次匹配。'}</span>
+        </div>`;
+}
+
+async function selectSystemFolder(title, initialPath) {
+    const response = await fetch(API.selectFolder, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, initial_path: initialPath || "" }),
+    });
+    const data = await response.json();
+    if (!response.ok || data.error) {
+        const error = new Error(data.error || "无法打开系统文件夹选择窗口");
+        error.allowFallback = Boolean(data.fallback);
+        throw error;
+    }
+    return data.cancelled ? "" : (data.path || "");
+}
+
+async function chooseScanFolder() {
+    const input = document.getElementById("folder-path");
+    const button = document.getElementById("select-folder-btn");
+    button.disabled = true;
+    try {
+        const selectedPath = await selectSystemFolder("选择需要扫描的客户资料文件夹", input.value.trim());
+        if (selectedPath) {
+            input.value = selectedPath;
+            input.focus();
+        }
+    } catch (error) {
+        showToast("系统窗口不可用，已切换到内置文件夹选择器", "info");
+        showDirectoryPicker(path => {
+            if (path) {
+                input.value = path;
+            }
+        }, input.value.trim());
+    } finally {
+        button.disabled = false;
+    }
 }
 
 function scanFolder() {
     const folderPath = document.getElementById("folder-path").value.trim();
     if (!folderPath) { showToast("请输入文件夹路径", "error"); return; }
-    fetch(API.scanFolder, {
+    const scanBtn = document.getElementById("scan-btn");
+    const selectBtn = document.getElementById("select-folder-btn");
+    scanBtn.disabled = true;
+    selectBtn.disabled = true;
+    scanBtn.textContent = "扫描中...";
+    return fetch(API.scanFolder, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ folder_path: folderPath }),
@@ -1420,20 +2071,23 @@ function scanFolder() {
         if (data.error) { showToast(data.error, "error"); return; }
         scannedCount = data.scanned_count;
         scanRoot = data.root_path || folderPath;
-        document.getElementById("folder-badge").textContent = `✓ ${data.scanned_count}个文件`;
-
-        if (data.results && data.results.length) {
-            matchResults = data.results;
-            syncMatchToPreview();
-            renderPreviewTable();
-            document.getElementById("export-checklist-btn").classList.remove("hidden");
-            document.getElementById("organize-files-btn")?.classList.remove("hidden");
-        }
+        scanNeedsMatch = Boolean(data.match_required);
+        pendingMatchIsIncremental = Boolean(data.has_previous_results);
+        lastScanDiff = data.diff || null;
+        document.getElementById("folder-badge").textContent = `✓ ${data.file_count ?? data.scanned_count} 个文件`;
+        renderScanDiff(data.diff);
         updateWorkflowState();
-        showToast(`已扫描 ${data.scanned_count} 个文件`, "success");
+        if (data.diff?.mode === "incremental" && !data.match_required) {
+            showToast("扫描完成，资料没有变化，无需再次匹配", "success");
+        } else if (data.has_previous_results) {
+            showToast(`扫描完成，发现 ${data.diff?.total_added || 0} 项新增、${data.diff?.total_removed || 0} 项移除；下一步请匹配变化资料`, "success");
+        } else {
+            showToast(`扫描完成，共发现 ${data.file_count ?? data.scanned_count} 个文件；下一步请开始匹配`, "success");
+        }
         markProjectDirty();
     })
-    .catch(err => showToast("扫描失败: " + err.message, "error"));
+    .catch(err => showToast("扫描失败: " + err.message, "error"))
+    .finally(() => updateWorkflowState());
 }
 
 // 将匹配结果同步到预览区
@@ -1517,21 +2171,25 @@ async function doMatch() {
     matchBtn.disabled = true;
     matchBtn.style.opacity = "0.6";
 
+    devLogs = [];
     try {
         const r = await fetch(API.match, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ incremental: false }),
+            body: JSON.stringify({ incremental: pendingMatchIsIncremental }),
         });
         const data = await r.json();
         if (data.error) {
             statusEl.classList.add("hidden");
-            matchBtn.disabled = false;
             matchBtn.style.opacity = "1";
+            updateWorkflowState();
             showToast(data.error, "error");
             return;
         }
         matchResults = data.results;
+        scanNeedsMatch = false;
+        pendingMatchIsIncremental = true;
+        appendDevLogs(data.dev_logs);
         scanRoot = data.root_path || scanRoot;
         syncMatchToPreview();
         renderPreviewTable();
@@ -1542,17 +2200,22 @@ async function doMatch() {
 
         if (document.getElementById("llm-enabled").checked) {
             await runLlmMatch();
-        } else {
-            statusEl.classList.add("hidden");
-            matchBtn.disabled = false;
-            matchBtn.style.opacity = "1";
-            showToast(`匹配完成: ${data.matched_count}/${data.total} 已获取`, "success");
         }
+        // L3: 内容识别匹配（含OCR）
+        if (document.getElementById("content-match-enabled").checked) {
+            await runContentMatch();
+        }
+        // 如果没有勾选任何AI选项，在这里恢复按钮
+        statusEl.classList.add("hidden");
+        matchBtn.style.opacity = "1";
+        updateWorkflowState();
+        const unmatched = Math.max(0, data.total - data.matched_count);
+        showToast(`匹配完成，已获取 ${data.matched_count}/${data.total} 项；${unmatched ? `下一步请核对 ${unmatched} 项未匹配资料` : "下一步请核对结果"}`, "success");
         markProjectDirty();
     } catch (err) {
         statusEl.classList.add("hidden");
-        matchBtn.disabled = false;
         matchBtn.style.opacity = "1";
+        updateWorkflowState();
         showToast("匹配失败: " + err.message, "error");
     }
 }
@@ -1599,9 +2262,8 @@ async function exportChecklist() {
 
 // ====== 文件整理 ======
 async function organizeFiles() {
-    showDirectoryPicker(async (targetPath) => {
+    const handleTargetPath = async (targetPath) => {
         if (!targetPath) {
-            showToast("已取消整理", "info");
             return;
         }
 
@@ -1633,7 +2295,16 @@ async function organizeFiles() {
         } catch (err) {
             showToast("整理失败: " + err.message, "error");
         }
-    }, "");
+    };
+
+    try {
+        const initialPath = scanRoot ? scanRoot.replace(/[\\/]?$/, "") : "";
+        const targetPath = await selectSystemFolder("选择整理后文件的保存位置", initialPath);
+        await handleTargetPath(targetPath);
+    } catch (error) {
+        showToast("系统窗口不可用，已切换到内置文件夹选择器", "info");
+        showDirectoryPicker(handleTargetPath, scanRoot || "");
+    }
 }
 
 // ====== Windows 风格文件夹选择对话框 ======
@@ -1948,12 +2619,36 @@ function escapeHtml(str) {
 function updateStats(matched, total, partial) {
     partial = partial || 0;
     document.getElementById("stats-section").classList.remove("hidden");
+    setStatsLabels("清单", "清单总数", "已获取", "不完整", "未匹配");
     animateNumber("stat-total", total);
     animateNumber("stat-matched", matched);
     animateNumber("stat-incomplete", partial);
     animateNumber("stat-missing", total - matched - partial);
     const percent = total > 0 ? ((matched + partial * 0.5) / total) * 100 : 0;
     document.getElementById("progress-fill").style.width = percent + "%";
+}
+
+function setStatsLabels(scope, total, matched, incomplete, missing) {
+    document.getElementById("stats-scope").textContent = `统计口径：${scope}`;
+    document.getElementById("stat-total-label").textContent = total;
+    document.getElementById("stat-matched-label").textContent = matched;
+    document.getElementById("stat-incomplete-label").textContent = incomplete;
+    document.getElementById("stat-missing-label").textContent = missing;
+    const suggestionCard = document.getElementById("stat-incomplete-card");
+    const clickable = scope === "文件";
+    suggestionCard.classList.toggle("stat-clickable", clickable);
+    suggestionCard.tabIndex = clickable ? 0 : -1;
+    suggestionCard.setAttribute("role", clickable ? "button" : "group");
+    suggestionCard.title = clickable ? "点击处理待确认的文件归属" : "";
+}
+
+function updateFileStats(data) {
+    document.getElementById("stats-section").classList.remove("hidden");
+    setStatsLabels("文件", "文件总数", "已归属", "建议确认", "未归属");
+    animateNumber("stat-total", data.total || 0);
+    animateNumber("stat-matched", data.matched_count || 0);
+    animateNumber("stat-incomplete", data.suggested_count || 0);
+    animateNumber("stat-missing", data.unmatched_count || 0);
 }
 
 function animateNumber(id, target) {
@@ -1977,17 +2672,41 @@ function updateWorkflowState() {
     const hasScannedFolder = scannedCount > 0;
     const hasMatchResult = Boolean(matchResults && matchResults.length);
 
-    setWorkflowStep("workflow-step-0", hasTemplate ? "completed" : "active");
-    setWorkflowStep("workflow-step-1", hasScannedFolder ? "completed" : (hasTemplate ? "active" : "pending"));
-    setWorkflowStep("workflow-step-2", hasMatchResult ? "completed" : (hasScannedFolder ? "active" : "pending"));
+    setWorkflowStep("workflow-step-1", hasTemplate ? "completed" : "active");
+    setWorkflowStep("workflow-step-2", hasScannedFolder ? "completed" : (hasTemplate ? "active" : "pending"));
+    setWorkflowStep("workflow-step-3", hasMatchResult && !scanNeedsMatch ? "completed" : (hasScannedFolder ? "active" : "pending"));
 
-    // 已完成步骤badge轻量化：仅显示 ✓；待操作步骤保留提示文字
-    document.getElementById("template-badge").textContent = hasTemplate ? "✓" : "未开始";
-    document.getElementById("folder-badge").textContent = hasScannedFolder ? "✓" : "未扫描";
-    document.getElementById("match-badge").textContent = hasMatchResult ? "✓" : (hasScannedFolder ? "待匹配" : "待前置");
+    document.getElementById("template-badge").textContent = hasTemplate ? "✓ 已准备" : "未开始";
+    if (!hasScannedFolder) document.getElementById("folder-badge").textContent = "未扫描";
+    document.getElementById("match-badge").textContent = scanNeedsMatch
+        ? (pendingMatchIsIncremental ? "发现资料变化" : "待匹配")
+        : (hasMatchResult ? "✓ 已完成" : (hasScannedFolder ? "待匹配" : "待前置"));
 
-    const badgeText = hasMatchResult ? "匹配完成" : (hasScannedFolder ? "步骤 2 待匹配" : (hasTemplate ? "步骤 1 待扫描" : "步骤 0 待生成"));
+    const badgeText = hasMatchResult && !scanNeedsMatch
+        ? "请核对结果"
+        : (hasScannedFolder ? (pendingMatchIsIncremental ? "请匹配变化资料" : "请开始匹配")
+            : (hasTemplate ? "请选择并扫描资料" : "请准备清单"));
     document.getElementById("workflow-state-badge").textContent = badgeText;
+
+    const matchBtn = document.getElementById("match-btn");
+    matchBtn.disabled = !hasTemplate || !hasScannedFolder || (!scanNeedsMatch && hasMatchResult);
+    matchBtn.textContent = pendingMatchIsIncremental && scanNeedsMatch
+        ? "匹配变化资料"
+        : "开始匹配";
+
+    document.getElementById("template-next-action").textContent = hasTemplate
+        ? "清单已准备。下一步：选择并扫描客户资料文件夹。"
+        : "请选择科目创建标准清单，或导入现有 Excel 清单。";
+    document.getElementById("folder-next-action").textContent = hasScannedFolder
+        ? (scanNeedsMatch ? "扫描完成。下一步：开始智能匹配。" : "资料已扫描；有新资料时再次点击“扫描”。")
+        : "选择客户资料所在文件夹后扫描。";
+    document.getElementById("match-next-action").textContent = scanNeedsMatch && pendingMatchIsIncremental
+        ? `资料发生变化。点击“匹配变化资料”，已有结果和人工调整将保留。`
+        : (hasMatchResult ? "匹配已完成，请在下方核对工作台检查结果。" : "扫描完成后开始匹配。");
+
+    document.getElementById("select-folder-btn").disabled = !hasTemplate;
+    document.getElementById("scan-btn").disabled = !hasTemplate;
+    document.getElementById("scan-btn").textContent = hasScannedFolder ? "重新扫描" : "扫描";
 }
 
 function setWorkflowStep(id, state) {
@@ -2099,7 +2818,7 @@ function showUnassignedModal() {
                     </a>
                 </div>
             </div>
-            <div class="company-select-wrap" data-index="${r.index}">
+            <div class="company-select-wrap" data-index="${r.index}" data-file-path="${escapeHtml(filePath)}">
                 <div class="company-select-trigger">
                     <span class="select-label">请选择公司</span>
                     <span class="arrow">▼</span>
@@ -2217,8 +2936,9 @@ function showUnassignedModal() {
             e.stopPropagation();
             const wrap = btn.closest('.company-select-wrap');
             const index = parseInt(wrap.dataset.index);
+            const filePath = wrap.dataset.filePath;
             const checked = Array.from(wrap.querySelectorAll('input[type=checkbox]:checked')).map(cb => cb.value);
-            saveCompanyAssignment(index, checked, wrap, modal);
+            saveCompanyAssignment(index, filePath, checked, wrap, modal);
         });
     });
 }
@@ -2490,7 +3210,7 @@ function setupExcelPreview(wb, containerEl) {
 }
 
 // 保存公司归属分配
-function saveCompanyAssignment(index, companyList, wrapEl, modalEl) {
+function saveCompanyAssignment(index, filePath, companyList, wrapEl, modalEl) {
     const isMatchError = companyList.includes('__MATCH_ERROR__');
 
     if (isMatchError) {
@@ -2510,7 +3230,9 @@ function saveCompanyAssignment(index, companyList, wrapEl, modalEl) {
         }
 
         // 从 _unassignedItems 中移除该项
-        window._unassignedItems = (window._unassignedItems || []).filter(r => r.index !== index);
+        window._unassignedItems = (window._unassignedItems || []).filter(
+            r => !(r.index === index && r.unassigned_file_path === filePath)
+        );
 
         // 更新UI
         const trigger = wrapEl.querySelector('.company-select-trigger');
@@ -2528,7 +3250,7 @@ function saveCompanyAssignment(index, companyList, wrapEl, modalEl) {
     fetch(API.assignCompany, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ index, company_names: companyList }),
+        body: JSON.stringify({ index, file_path: filePath, company_names: companyList }),
     })
     .then(r => r.json())
     .then(data => {
@@ -2555,7 +3277,9 @@ function saveCompanyAssignment(index, companyList, wrapEl, modalEl) {
         }
 
         // 从 _unassignedItems 中移除该项
-        window._unassignedItems = (window._unassignedItems || []).filter(r => r.index !== index);
+        window._unassignedItems = (window._unassignedItems || []).filter(
+            r => !(r.index === index && r.unassigned_file_path === filePath)
+        );
 
         // 更新下拉触发器显示文字，并标记为已确认
         const trigger = wrapEl.querySelector('.company-select-trigger');
@@ -3054,6 +3778,7 @@ const LLM_PRESETS = {
     "zhipu-glm4": { model: "glm-4", base_url: "https://open.bigmodel.cn/api/paas/v4" },
     "qwen": { model: "qwen-plus", base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1" },
     "ollama": { model: "qwen2.5:7b", base_url: "http://localhost:11434/v1" },
+    "dify-chat": { model: "", base_url: "" },
 };
 
 function initLlmPanel() {
@@ -3071,8 +3796,12 @@ function initLlmPanel() {
     function updateBaseUrlHint() {
         const preset = LLM_PRESETS[provider.value];
         if (preset) {
-            baseUrlInput.placeholder = preset.base_url;
-            hint.textContent = provider.value === "ollama" ? "请确认 Ollama 已启动" : "留空则使用默认地址";
+            baseUrlInput.placeholder = provider.value === "dify-chat"
+                ? "例如 https://your-dify.example.com/v1"
+                : preset.base_url;
+            if (provider.value === "ollama") hint.textContent = "请确认 Ollama 已启动";
+            else if (provider.value === "dify-chat") hint.textContent = "填写 Chat App API Base URL；无需模型名";
+            else hint.textContent = "留空则使用默认地址";
         }
     }
 
@@ -3095,6 +3824,9 @@ function initLlmPanel() {
         if (provider.value !== "ollama" && !apiKeyInput.value.trim()) {
             showToast("请输入API Key", "error"); return;
         }
+        if (provider.value === "dify-chat" && !baseUrlInput.value.trim()) {
+            showToast("请输入 Dify Chat App Base URL", "error"); return;
+        }
         localStorage.setItem("llm_provider", provider.value);
         localStorage.setItem("llm_api_key", apiKeyInput.value.trim());
         localStorage.setItem("llm_base_url", baseUrlInput.value.trim());
@@ -3116,7 +3848,7 @@ function initLlmPanel() {
 
     updateBaseUrlHint();
     if (localStorage.getItem("llm_configured") === "true") {
-        enabled.checked = true;
+        enabled.checked = false;
         summary.classList.remove("hidden");
         loadForm();
     } else {
@@ -3151,6 +3883,7 @@ async function runLlmMatch() {
         });
         const data = await r.json();
         if (data.error) { showToast(data.error, "error"); return false; }
+        appendDevLogs(data.dev_logs);
         if (data.match_results) matchResults = data.match_results;
         syncMatchToPreview();
         renderPreviewTable();
@@ -3164,6 +3897,157 @@ async function runLlmMatch() {
         showToast("AI匹配失败: " + err.message, "error");
         return false;
     } finally {
+        statusEl.classList.add("hidden");
+        matchBtn.disabled = false;
+        matchBtn.style.opacity = "1";
+    }
+}
+
+// ====== L3 内容识别匹配 ======
+function initContentMatchPanel() {
+    const enabled = document.getElementById("content-match-enabled");
+    const modal = document.getElementById("ocr-config-modal");
+    const summary = document.getElementById("ocr-config-summary");
+    const tag = document.getElementById("ocr-config-tag");
+    const apiKeyInput = document.getElementById("ocr-api-key");
+    const secretKeyInput = document.getElementById("ocr-secret-key");
+    const cancelBtn = document.getElementById("ocr-cancel-btn");
+    const saveBtn = document.getElementById("ocr-save-btn");
+
+    function loadForm() {
+        apiKeyInput.value = localStorage.getItem("ocr_api_key") || "";
+        secretKeyInput.value = localStorage.getItem("ocr_secret_key") || "";
+    }
+
+    function closeModal() {
+        modal.classList.add("hidden");
+        if (localStorage.getItem("ocr_configured") !== "true") {
+            enabled.checked = false;
+            summary.classList.add("hidden");
+        }
+    }
+
+    function saveConfig() {
+        if (!apiKeyInput.value.trim() || !secretKeyInput.value.trim()) {
+            showToast("请输入百度OCR API Key和Secret Key", "error"); return;
+        }
+        localStorage.setItem("ocr_api_key", apiKeyInput.value.trim());
+        localStorage.setItem("ocr_secret_key", secretKeyInput.value.trim());
+        localStorage.setItem("ocr_configured", "true");
+        summary.classList.remove("hidden");
+        tag.textContent = "OCR已配置";
+        tag.style.color = "var(--success)";
+        tag.classList.remove("ocr-config-tag");
+        enabled.checked = true;
+        modal.classList.add("hidden");
+        showToast("OCR配置已保存", "success");
+    }
+
+    enabled.addEventListener("change", () => {
+        if (enabled.checked) {
+            loadForm();
+            modal.classList.remove("hidden");
+        }
+    });
+    tag.addEventListener("click", () => { loadForm(); modal.classList.remove("hidden"); });
+    cancelBtn.addEventListener("click", closeModal);
+    saveBtn.addEventListener("click", saveConfig);
+    modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+
+    if (localStorage.getItem("ocr_configured") === "true") {
+        loadForm();
+        summary.classList.remove("hidden");
+        tag.textContent = "OCR已配置";
+        tag.style.color = "var(--success)";
+        tag.classList.remove("ocr-config-tag");
+        enabled.checked = false;
+    } else {
+        enabled.checked = false;
+        summary.classList.add("hidden");
+    }
+}
+
+async function runContentMatch() {
+    if (!matchResults) { showToast("请先执行规则匹配", "error"); return false; }
+
+    const provider = localStorage.getItem("llm_provider") || "deepseek";
+    const apiKey = localStorage.getItem("llm_api_key") || "";
+    const baseUrl = localStorage.getItem("llm_base_url") || "";
+    const ocrApiKey = localStorage.getItem("ocr_api_key") || "";
+    const ocrSecretKey = localStorage.getItem("ocr_secret_key") || "";
+
+    const statusEl = document.getElementById("content-status");
+    const matchBtn = document.getElementById("match-btn");
+    statusEl.classList.remove("hidden");
+    statusEl.textContent = "正在读取文件内容… (0/0)";
+    matchBtn.disabled = true;
+    matchBtn.style.opacity = "0.6";
+
+    // 轮询只更新进度条上方的状态文字。
+    let pollTimer = null;
+    function startPolling() {
+        pollTimer = setInterval(async () => {
+            try {
+                const r = await fetch(API.contentMatchProgress);
+                const p = await r.json();
+                if (p.running) {
+                    if (p.total > 0) {
+                        let text = `${p.current}/${p.total}`;
+                        if (p.current_file) text += ` ${p.current_file}`;
+                        if (p.current_status) text += ` (${p.current_status})`;
+                        statusEl.textContent = text;
+                    } else {
+                        statusEl.textContent = "正在准备…";
+                    }
+                } else if (p.done) {
+                    statusEl.textContent = "内容提取完成，正在进行AI匹配…";
+                }
+            } catch (_) {}
+        }, 500);
+    }
+    function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+
+    startPolling();
+
+    try {
+        const r = await fetch(API.contentMatch, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                provider,
+                api_key: apiKey,
+                base_url: baseUrl,
+                ocr_api_key: ocrApiKey,
+                ocr_secret_key: ocrSecretKey,
+            }),
+        });
+        stopPolling();
+        const data = await r.json();
+        if (data.error) { showToast(data.error, "error"); return false; }
+        appendDevLogs(data.dev_logs);
+        if (data.match_results) matchResults = data.match_results;
+
+        syncMatchToPreview();
+        renderPreviewTable();
+        updateStats(data.matched_count, data.total);
+        updateWorkflowState();
+
+        const stats = data.content_stats || {};
+        const msgParts = [`内容分类完成: 自动归属${stats.auto_assigned || 0}个文件`];
+        if (stats.suggested) msgParts.push(`建议归属${stats.suggested}个`);
+        if (stats.company_rechecked) msgParts.push(`补充公司归属${stats.company_rechecked}个`);
+        if (stats.unassigned) msgParts.push(`未归属${stats.unassigned}个`);
+        if (stats.files_processed) msgParts.push(`读取${stats.files_processed}个文件`);
+        if (stats.ocr_processed) msgParts.push(`OCR识别${stats.ocr_processed}个文件`);
+        showToast(msgParts.join("，"), "success");
+        markProjectDirty();
+        return true;
+    } catch (err) {
+        stopPolling();
+        showToast("内容匹配失败: " + err.message, "error");
+        return false;
+    } finally {
+        stopPolling();
         statusEl.classList.add("hidden");
         matchBtn.disabled = false;
         matchBtn.style.opacity = "1";
@@ -3485,10 +4369,20 @@ function initProjectBar() {
     const btnSave = document.getElementById("btn-project-save");
     const btnSwitch = document.getElementById("btn-project-switch");
     const btnOpenInline = document.getElementById("btn-open-project-inline");
+    const btnCreateStart = document.getElementById("btn-project-create-start");
+    const btnOpenStart = document.getElementById("btn-project-open-start");
+    const btnTempStart = document.getElementById("btn-project-temp-start");
 
     if (btnSaveAs) btnSaveAs.addEventListener("click", showSaveProjectModal);
     if (btnOpen) btnOpen.addEventListener("click", showOpenProjectModal);
     if (btnOpenInline) btnOpenInline.addEventListener("click", showOpenProjectModal);
+    if (btnCreateStart) btnCreateStart.addEventListener("click", showSaveProjectModal);
+    if (btnOpenStart) btnOpenStart.addEventListener("click", showOpenProjectModal);
+    if (btnTempStart) btnTempStart.addEventListener("click", () => {
+        temporaryMode = true;
+        updateProjectStartPanel();
+        showToast("已进入临时模式；可随时点击顶部“保存项目”保存进度", "info");
+    });
     if (btnSave) btnSave.addEventListener("click", () => saveCurrentProject(false));
     if (btnSwitch) btnSwitch.addEventListener("click", showOpenProjectModal);
 
@@ -3505,6 +4399,11 @@ function initProjectBar() {
     checkCurrentProject();
 }
 
+function updateProjectStartPanel() {
+    const panel = document.getElementById("project-start-panel");
+    if (panel) panel.classList.toggle("hidden", Boolean(activeProject) || temporaryMode);
+}
+
 async function checkCurrentProject() {
     try {
         const r = await fetch(API.projectCurrent);
@@ -3513,6 +4412,7 @@ async function checkCurrentProject() {
             activeProject = { slug: data.active.slug, name: data.active.name, is_dirty: false };
             showProjectActiveState();
         }
+        updateProjectStartPanel();
     } catch (e) {
         // 忽略
     }
@@ -3523,11 +4423,13 @@ function showProjectActiveState() {
     document.getElementById("project-state-active").classList.remove("hidden");
     document.getElementById("project-name-display").textContent = activeProject.name;
     document.getElementById("project-dirty").classList.add("hidden");
+    updateProjectStartPanel();
 }
 
 function showProjectNoneState() {
     document.getElementById("project-state-none").classList.remove("hidden");
     document.getElementById("project-state-active").classList.add("hidden");
+    updateProjectStartPanel();
 }
 
 function collectFrontendState() {
@@ -3542,6 +4444,7 @@ function collectFrontendState() {
         manage_mode: manageMode,
         col_filters: colFilters,
         preview_items: previewData,
+        dev_logs: devLogs,
     };
 }
 
@@ -3559,6 +4462,7 @@ function restoreFrontendState(viewState) {
     }
     if (viewState.manage_mode !== undefined) manageMode = viewState.manage_mode;
     if (viewState.col_filters) colFilters = viewState.col_filters;
+    if (Array.isArray(viewState.dev_logs)) devLogs = viewState.dev_logs;
 }
 
 function markProjectDirty() {
@@ -3618,6 +4522,7 @@ async function createNewProject() {
         const data = await r.json();
         if (data.success) {
             activeProject = { slug: data.slug, name: name, is_dirty: false };
+            temporaryMode = false;
             showProjectActiveState();
             closeSaveProjectModal();
             showToast(data.message || "项目已保存", "success");
@@ -3728,10 +4633,16 @@ async function loadProject(slug) {
         }
         matchResults = data.match_results;
         scanRoot = data.scan_root || "";
+        scanNeedsMatch = Boolean(data.scan_needs_match);
+        pendingMatchIsIncremental = Boolean(matchResults && matchResults.length);
+        lastScanDiff = data.last_scan_diff || null;
         scannedCount = (data.scanned_files ? data.scanned_files.length : 0) +
                        (data.scanned_folders ? data.scanned_folders.length : 0);
         fileRenames = data.file_renames || {};
         activeProject = { slug: slug, name: data.project_name, is_dirty: false };
+        temporaryMode = false;
+
+        devLogs = Array.isArray(data.dev_logs) ? data.dev_logs : [];
 
         // 恢复前端视图状态
         restoreFrontendState(data.view_state);
@@ -3740,13 +4651,13 @@ async function loadProject(slug) {
         if (previewItems.length > 0) {
             document.getElementById("template-done").classList.remove("hidden");
             document.getElementById("template-gen-area").classList.add("hidden");
-            document.getElementById("template-summary").innerHTML =
-                `已加载清单：<strong>${previewItems.length}</strong> 条需求，<strong>${companyNames.length}</strong> 家公司`;
+            renderTemplateSummary(previewItems.length, companyNames.length, true);
             document.getElementById("template-badge").textContent = "✓";
         }
         if (scanRoot) {
             document.getElementById("folder-path").value = scanRoot;
             document.getElementById("folder-badge").textContent = "✓";
+            renderScanDiff(lastScanDiff);
         }
         if (matchResults && matchResults.length > 0) {
             document.getElementById("match-badge").textContent = "✓";

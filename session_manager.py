@@ -29,9 +29,17 @@ def create_fresh_state():
         "existing_items": [],
         "previous_scanned_files": [],
         "previous_scanned_folders": [],
+        "pending_match_files": [],
+        "pending_match_folders": [],
+        "scan_needs_match": False,
+        "last_scan_diff": None,
         "checklist_template": None,
         "checklist_file_path": None,
         "active_project": None,
+        "file_content_cache": {},
+        "content_suggestions": [],
+        "content_ignored_files": [],
+        "dev_logs": [],
     }
 
 

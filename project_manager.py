@@ -51,10 +51,18 @@ def _serialize_state(state, file_renames=None, view_state=None):
         "existing_items": state.get("existing_items", []),
         "previous_scanned_files": state.get("previous_scanned_files", []),
         "previous_scanned_folders": state.get("previous_scanned_folders", []),
+        "pending_match_files": state.get("pending_match_files", []),
+        "pending_match_folders": state.get("pending_match_folders", []),
+        "scan_needs_match": state.get("scan_needs_match", False),
+        "last_scan_diff": state.get("last_scan_diff"),
         "checklist_template": state.get("checklist_template"),
         "checklist_file_path": state.get("checklist_file_path"),
         "file_renames": file_renames or {},
         "frontend_view_state": view_state or {},
+        "file_content_cache": state.get("file_content_cache", {}),
+        "content_suggestions": state.get("content_suggestions", []),
+        "content_ignored_files": state.get("content_ignored_files", []),
+        "dev_logs": state.get("dev_logs", []),
     }
     return project_data
 
@@ -71,9 +79,17 @@ def _deserialize_state(project_data):
         "existing_items": project_data.get("existing_items", []),
         "previous_scanned_files": project_data.get("previous_scanned_files", []),
         "previous_scanned_folders": project_data.get("previous_scanned_folders", []),
+        "pending_match_files": project_data.get("pending_match_files", []),
+        "pending_match_folders": project_data.get("pending_match_folders", []),
+        "scan_needs_match": project_data.get("scan_needs_match", False),
+        "last_scan_diff": project_data.get("last_scan_diff"),
         "checklist_template": project_data.get("checklist_template"),
         "checklist_file_path": project_data.get("checklist_file_path"),
         "active_project": project_data.get("active_project"),
+        "file_content_cache": project_data.get("file_content_cache", {}),
+        "content_suggestions": project_data.get("content_suggestions", []),
+        "content_ignored_files": project_data.get("content_ignored_files", []),
+        "dev_logs": project_data.get("dev_logs", []),
     }
     return state
 

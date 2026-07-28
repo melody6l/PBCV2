@@ -97,6 +97,27 @@ def fuzzy_match(checklist_name, scanned_files, scanned_folders):
     return file_matches + folder_matches
 
 
+def explain_fuzzy_match(checklist_name, path, is_folder=False):
+    """说明单个路径为何命中规则，供开发诊断日志使用。
+
+    返回 None 表示未命中；否则返回实际采用的匹配策略和关键词。
+    该函数与 ``fuzzy_match`` 保持相同的精确优先、核心词回退语义。
+    """
+    core_keywords, optional_keywords = extract_keywords(checklist_name)
+    if not core_keywords:
+        return None
+
+    name = os.path.basename(path) if is_folder else os.path.splitext(os.path.basename(path))[0]
+    lowered = name.lower()
+    all_keywords = core_keywords + optional_keywords
+
+    if all(kw.lower() in lowered for kw in all_keywords):
+        return {"strategy": "exact", "matched_keywords": all_keywords}
+    if optional_keywords and all(kw.lower() in lowered for kw in core_keywords):
+        return {"strategy": "core_fallback", "matched_keywords": core_keywords}
+    return None
+
+
 def _item_name(item):
     if isinstance(item, dict):
         return item.get("name") or item.get("checklist_name") or ""

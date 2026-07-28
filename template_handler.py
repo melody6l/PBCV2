@@ -210,9 +210,15 @@ def read_user_checklist(file_path):
             continue
 
         company_status = {}
+        company_names_from_sheet = {
+            c.get("short_name") or c.get("full_name") for c in companies
+            if c.get("short_name") or c.get("full_name")
+        }
         for ci in range(4, len(raw_vals)):
             val = raw_vals[ci]
             col_header = headers[ci] if ci < len(headers) else ""
+            if col_header not in company_names_from_sheet:
+                continue
             if col_header and val is not None:
                 sv = str(val).strip().upper()
                 if sv in ("Y", "YES", "1", "TRUE"):
@@ -235,6 +241,12 @@ def read_user_checklist(file_path):
             "pbc_name": str(raw_vals[2]).strip() if len(raw_vals) > 2 and raw_vals[2] else "",
             "demand_name": str(raw_vals[3]).strip() if len(raw_vals) > 3 and raw_vals[3] else "",
             "company_status": company_status,
+            "row_uid": str(raw_vals[headers.index("row_uid")]).strip()
+                if "row_uid" in headers and headers.index("row_uid") < len(raw_vals)
+                and raw_vals[headers.index("row_uid")] else "",
+            "source_key": str(raw_vals[headers.index("source_key")]).strip()
+                if "source_key" in headers and headers.index("source_key") < len(raw_vals)
+                and raw_vals[headers.index("source_key")] else "",
         })
 
     wb.close()
@@ -345,7 +357,7 @@ def generate_checklist_from_memory(tpl_data):
 
     # 表头: 序号 | 科目 | 所需PBC | 需求资料 | 公司1 | 公司2 | ...
     base_headers = ["序号", "科目", "所需PBC", "需求资料"]
-    headers = base_headers + company_names
+    headers = base_headers + company_names + ["row_uid", "source_key"]
     for col_idx, h in enumerate(headers, 1):
         cell = ws.cell(row=1, column=col_idx, value=h)
         cell.fill = header_fill
@@ -381,6 +393,12 @@ def generate_checklist_from_memory(tpl_data):
                 cell.fill = gray_fill
             elif status == "N":
                 cell.fill = red_fill
+        meta_col = 5 + len(company_names)
+        ws.cell(row=row_idx, column=meta_col, value=item.get("row_uid", ""))
+        ws.cell(
+            row=row_idx, column=meta_col + 1,
+            value=item.get("source_key") or normalize_item_name(demand_name),
+        )
 
     # 列宽
     ws.column_dimensions["A"].width = 14
@@ -390,6 +408,8 @@ def generate_checklist_from_memory(tpl_data):
     for ci in range(len(company_names)):
         col_letter = get_column_letter(5 + ci)
         ws.column_dimensions[col_letter].width = 14
+    ws.column_dimensions[get_column_letter(5 + len(company_names))].hidden = True
+    ws.column_dimensions[get_column_letter(6 + len(company_names))].hidden = True
 
     # 公司名称 sheet
     ws_company = wb.create_sheet("公司名称")
