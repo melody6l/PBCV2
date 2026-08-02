@@ -40,13 +40,16 @@ def _project_path(slug):
 def _serialize_state(state, file_renames=None, view_state=None):
     """将运行时 state 序列化为可 JSON 存储的字典。"""
     project_data = {
-        "version": 1,
+        "version": 2,
         "updated_at": datetime.now().isoformat(),
         "checklist": state.get("checklist"),
         "scanned_files": state.get("scanned_files"),
         "scanned_folders": state.get("scanned_folders"),
         "match_results": state.get("match_results"),
         "scan_root": state.get("scan_root"),
+        "scan_source": state.get("scan_source", "local"),
+        "scan_display_root": state.get("scan_display_root"),
+        "cloud_source_url": state.get("cloud_source_url"),
         "new_items": state.get("new_items", []),
         "existing_items": state.get("existing_items", []),
         "previous_scanned_files": state.get("previous_scanned_files", []),
@@ -63,6 +66,13 @@ def _serialize_state(state, file_renames=None, view_state=None):
         "content_suggestions": state.get("content_suggestions", []),
         "content_ignored_files": state.get("content_ignored_files", []),
         "dev_logs": state.get("dev_logs", []),
+        "scan_sources": state.get("scan_sources", []),
+        "documents": state.get("documents", {}),
+        "scan_snapshots": state.get("scan_snapshots", {}),
+        "source_folders": state.get("source_folders", {}),
+        "folder_requirement_mappings": state.get("folder_requirement_mappings", []),
+        "organize_mappings": state.get("organize_mappings", []),
+        "scan_file_statuses": state.get("scan_file_statuses", []),
     }
     return project_data
 
@@ -75,6 +85,9 @@ def _deserialize_state(project_data):
         "scanned_folders": project_data.get("scanned_folders"),
         "match_results": project_data.get("match_results"),
         "scan_root": project_data.get("scan_root"),
+        "scan_source": project_data.get("scan_source", "local"),
+        "scan_display_root": project_data.get("scan_display_root"),
+        "cloud_source_url": project_data.get("cloud_source_url"),
         "new_items": project_data.get("new_items", []),
         "existing_items": project_data.get("existing_items", []),
         "previous_scanned_files": project_data.get("previous_scanned_files", []),
@@ -90,6 +103,13 @@ def _deserialize_state(project_data):
         "content_suggestions": project_data.get("content_suggestions", []),
         "content_ignored_files": project_data.get("content_ignored_files", []),
         "dev_logs": project_data.get("dev_logs", []),
+        "scan_sources": project_data.get("scan_sources", []),
+        "documents": project_data.get("documents", {}),
+        "scan_snapshots": project_data.get("scan_snapshots", {}),
+        "source_folders": project_data.get("source_folders", {}),
+        "folder_requirement_mappings": project_data.get("folder_requirement_mappings", []),
+        "organize_mappings": project_data.get("organize_mappings", []),
+        "scan_file_statuses": project_data.get("scan_file_statuses", []),
     }
     return state
 

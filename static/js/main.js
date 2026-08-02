@@ -26,6 +26,10 @@ const API = {
     updateCellStatus: "/api/update-cell-status",
     exportChecklist: "/api/export-checklist",
     scanFolder: "/api/scan-folder",
+    scanCloudFolder: "/api/scan-cloud-folder",
+    microsoftAuthStatus: "/api/microsoft/auth/status",
+    microsoftAuthStart: "/api/microsoft/auth/start",
+    microsoftAuthComplete: "/api/microsoft/auth/complete",
     match: "/api/match",
     manualMatch: "/api/manual-match",
     llmMatch: "/api/llm-match",
@@ -41,6 +45,7 @@ const API = {
     unmatchFile: "/api/unmatch-file",
     organizeFiles: "/api/organize-files",
     browseViewData: "/api/browse-view-data",
+    documentChange: "/api/document-change",
     addRow: "/api/add-row",
     editRow: "/api/edit-row",
     deleteRow: "/api/delete-row",
@@ -60,6 +65,7 @@ let previewCompanies = [];       // 公司列表 [{full_name, short_name}]
 let companyNames = [];           // 公司简称列表
 let matchResults = null;
 let scannedCount = 0;
+let folderScanDetail = "";
 let scanRoot = "";
 let scanNeedsMatch = false;
 let pendingMatchIsIncremental = false;
@@ -1344,10 +1350,37 @@ async function renderBrowseView() {
                 previewFile(item.path, false);
             });
             filenameCell.appendChild(fileLink);
+            if (item.change_status === "content_updated") {
+                const changeButton = document.createElement("button");
+                changeButton.type = "button";
+                changeButton.className = "browse-view-assign-btn";
+                changeButton.textContent = "查看变化";
+                changeButton.addEventListener("click", async () => {
+                    try {
+                        const response = await fetch(
+                            API.documentChange + "?path=" + encodeURIComponent(item.path)
+                        );
+                        const detail = await response.json();
+                        if (!response.ok || detail.error) throw new Error(detail.error || "无法读取变化");
+                        const lines = detail.changes?.length
+                            ? detail.changes
+                            : [detail.message || "检测到文件内容变化，但没有可展示的结构差异。"];
+                        window.alert(`${item.filename}\n\n${lines.join("\n")}`);
+                    } catch (error) {
+                        showToast(error.message, "error");
+                    }
+                });
+                filenameCell.appendChild(changeButton);
+            }
             row.appendChild(filenameCell);
 
             const statusCell = document.createElement("td");
-            statusCell.textContent = item.is_matched ? "已匹配" : "未匹配";
+            const statusParts = [item.is_matched ? "已匹配" : "未匹配"];
+            if (item.change_status === "content_updated") statusParts.push("内容已更新");
+            if (item.version_count > 1) statusParts.push(`${item.version_count}个版本`);
+            if (item.location_count > 1) statusParts.push(`${item.location_count}个位置`);
+            if (item.needs_confirmation) statusParts.push("待确认");
+            statusCell.textContent = statusParts.join(" · ");
             row.appendChild(statusCell);
 
             const requirementCell = document.createElement("td");
@@ -1959,13 +1992,20 @@ function setCellStatus(rowIndex, companyName, cell, newStatus) {
         fetch(API.updateCellStatus, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ row_index: idx, company_name: companyName, status: newStatus }),
+            body: JSON.stringify({
+                row_index: idx,
+                company_name: companyName,
+                status: newStatus,
+                manual: true,
+            }),
         }).catch(err => showToast("更新失败: " + err.message, "error"));
 
         const item = previewItems.find(it => it.row_index === idx);
         if (item) {
             if (!item.company_status) item.company_status = {};
             item.company_status[companyName] = newStatus;
+            if (!item.manual_company_status) item.manual_company_status = {};
+            item.manual_company_status[companyName] = true;
         }
     });
 
@@ -1993,7 +2033,7 @@ function initPreviewStatusMenu() {
 
 // ====== 文件夹扫描 ======
 function initFolderInput() {
-    document.getElementById("scan-btn").addEventListener("click", scanFolder);
+    document.getElementById("scan-btn").addEventListener("click", () => scanFolder());
     document.getElementById("select-folder-btn").addEventListener("click", chooseScanFolder);
 }
 
@@ -2008,11 +2048,18 @@ function renderScanDiff(diff) {
     document.getElementById("diff-badge").textContent = "本次扫描";
     const added = diff.total_added || 0;
     const removed = diff.total_removed || 0;
+    const updated = diff.total_updated || 0;
+    const moved = diff.total_moved || 0;
+    const duplicates = diff.total_duplicates || 0;
     content.innerHTML = `
         <div class="scan-diff-summary">
             <span class="${added ? 'has-change' : ''}">新增 ${added} 项</span>
             <span class="${removed ? 'has-change' : ''}">移除 ${removed} 项</span>
-            <span>${added || removed ? '已有匹配将保留，仅处理变化内容。' : '资料没有变化，无需再次匹配。'}</span>
+            <span class="${updated ? 'has-change' : ''}">内容更新 ${updated} 项</span>
+            <span class="${moved ? 'has-change' : ''}">移动/改名 ${moved} 项</span>
+            <span>重复 ${duplicates} 项</span>
+            <span>${added || removed ? '仅新增或失效资料需要匹配；已有资料的归属保持不变。' :
+                (updated || moved || duplicates ? '已有匹配保持不变，不会自动调用 OCR 或 AI。' : '资料没有变化，无需再次匹配。')}</span>
         </div>`;
 }
 
@@ -2053,9 +2100,12 @@ async function chooseScanFolder() {
     }
 }
 
-function scanFolder() {
+function scanFolder(archivePassword = "") {
     const folderPath = document.getElementById("folder-path").value.trim();
     if (!folderPath) { showToast("请输入文件夹路径", "error"); return; }
+    if (/^https?:\/\//i.test(folderPath)) {
+        return scanCloudFolder(folderPath);
+    }
     const scanBtn = document.getElementById("scan-btn");
     const selectBtn = document.getElementById("select-folder-btn");
     scanBtn.disabled = true;
@@ -2064,7 +2114,7 @@ function scanFolder() {
     return fetch(API.scanFolder, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ folder_path: folderPath }),
+        body: JSON.stringify({ folder_path: folderPath, archive_password: archivePassword }),
     })
     .then(r => r.json())
     .then(data => {
@@ -2076,9 +2126,35 @@ function scanFolder() {
         lastScanDiff = data.diff || null;
         document.getElementById("folder-badge").textContent = `✓ ${data.file_count ?? data.scanned_count} 个文件`;
         renderScanDiff(data.diff);
+        if (Array.isArray(data.archive_statuses) && data.archive_statuses.length) {
+            const extracted = data.archive_statuses.filter(item => item.status === "extracted").length;
+            const password = data.archive_statuses.filter(item => item.status === "password_required").length;
+            const failed = data.archive_statuses.length - extracted - password;
+            document.getElementById("folder-next-action").textContent =
+                `压缩包：已解压 ${extracted}，需密码 ${password}，未读取 ${failed}。` +
+                "压缩包内部文件已参与本次扫描。";
+            folderScanDetail = document.getElementById("folder-next-action").textContent;
+            if (password > 0 && !archivePassword) {
+                const enteredPassword = window.prompt(
+                    `发现 ${password} 个加密压缩包，请输入解压密码。密码只用于本次扫描，不会保存。`,
+                    ""
+                );
+                if (enteredPassword) {
+                    return scanFolder(enteredPassword);
+                }
+            }
+        }
+        if ((!data.archive_statuses || !data.archive_statuses.length) && data.source_count > 1) {
+            document.getElementById("folder-next-action").textContent =
+                `项目已登记 ${data.source_count} 个资料来源，本次扫描结果已合并。`;
+            folderScanDetail = document.getElementById("folder-next-action").textContent;
+        }
         updateWorkflowState();
         if (data.diff?.mode === "incremental" && !data.match_required) {
-            showToast("扫描完成，资料没有变化，无需再次匹配", "success");
+            const changed = (data.diff?.total_updated || 0) + (data.diff?.total_moved || 0);
+            showToast(changed
+                ? `扫描完成，发现 ${changed} 项已有资料变化；原匹配已保留，不会调用 OCR 或 AI`
+                : "扫描完成，资料没有变化，无需再次匹配", "success");
         } else if (data.has_previous_results) {
             showToast(`扫描完成，发现 ${data.diff?.total_added || 0} 项新增、${data.diff?.total_removed || 0} 项移除；下一步请匹配变化资料`, "success");
         } else {
@@ -2088,6 +2164,64 @@ function scanFolder() {
     })
     .catch(err => showToast("扫描失败: " + err.message, "error"))
     .finally(() => updateWorkflowState());
+}
+
+async function loginMicrosoft() {
+    const startResponse = await fetch(API.microsoftAuthStart, { method: "POST" });
+    const start = await startResponse.json();
+    if (!startResponse.ok || start.error) throw new Error(start.error || "无法启动 Microsoft 登录");
+    window.open(start.verification_uri, "_blank", "noopener");
+    window.prompt("请在打开的 Microsoft 页面输入此代码，完成登录后回到这里点击“确定”", start.user_code);
+    const completeResponse = await fetch(API.microsoftAuthComplete, { method: "POST" });
+    const complete = await completeResponse.json();
+    if (!completeResponse.ok || complete.error) throw new Error(complete.error || "Microsoft 登录未完成");
+    showToast(complete.account ? `已登录 ${complete.account}` : "Microsoft 登录成功", "success");
+}
+
+async function scanCloudFolder(folderUrl) {
+    const scanBtn = document.getElementById("scan-btn");
+    const selectBtn = document.getElementById("select-folder-btn");
+    scanBtn.disabled = true;
+    selectBtn.disabled = true;
+    scanBtn.textContent = "连接云端...";
+    try {
+        const statusResponse = await fetch(API.microsoftAuthStatus);
+        const status = await statusResponse.json();
+        if (!statusResponse.ok || status.error) throw new Error(status.error || "无法检查 Microsoft 登录状态");
+        if (!status.configured) {
+            throw new Error("尚未配置 Microsoft 登录，请先按配置说明设置客户端 ID");
+        }
+        if (!status.signed_in) {
+            await loginMicrosoft();
+        }
+        scanBtn.textContent = "扫描中...";
+        const response = await fetch(API.scanCloudFolder, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ folder_url: folderUrl }),
+        });
+        const data = await response.json();
+        if (!response.ok || data.error) throw new Error(data.error || "云端扫描失败");
+        scanRoot = data.root_path;
+        scannedCount = data.scanned_count || 0;
+        scanNeedsMatch = Boolean(data.match_required);
+        pendingMatchIsIncremental = Boolean(data.has_previous_results);
+        lastScanDiff = data.diff || null;
+        document.getElementById("folder-badge").textContent = `云端 ${data.file_count} 个文件`;
+        renderScanDiff(data.diff);
+        document.getElementById("folder-next-action").textContent =
+            `已保留“${data.folder_name || "云端资料"}”的完整目录层级。下一步可进行智能匹配。`;
+        folderScanDetail = document.getElementById("folder-next-action").textContent;
+        showToast(`云端扫描完成：${data.file_count} 个文件，${data.folder_count} 个文件夹`, "success");
+        markProjectDirty();
+        if (typeof updateWorkflowState === "function") updateWorkflowState();
+    } catch (error) {
+        showToast(error.message, "error");
+    } finally {
+        scanBtn.disabled = false;
+        selectBtn.disabled = false;
+        scanBtn.textContent = "扫描";
+    }
 }
 
 // 将匹配结果同步到预览区
@@ -2103,6 +2237,7 @@ function syncMatchToPreview() {
                 // 有公司覆盖信息，只标记有资料的公司
                 companyNames.forEach(cName => {
                     if (!item.company_status) item.company_status = {};
+                    if (item.manual_company_status?.[cName]) return;
                     if (companyCoverage[cName]) {
                         // 该公司有资料
                         if (!item.company_status[cName] || item.company_status[cName] !== "N/A") {
@@ -2119,6 +2254,7 @@ function syncMatchToPreview() {
                 // 没有公司覆盖信息，无法确定公司归属，标记为N
                 companyNames.forEach(cName => {
                     if (!item.company_status) item.company_status = {};
+                    if (item.manual_company_status?.[cName]) return;
                     if (!item.company_status[cName] || item.company_status[cName] === "Y") {
                         item.company_status[cName] = "N";
                     }
@@ -2128,6 +2264,7 @@ function syncMatchToPreview() {
             // 未匹配 → 标记N
             companyNames.forEach(cName => {
                 if (!item.company_status) item.company_status = {};
+                if (item.manual_company_status?.[cName]) return;
                 if (!item.company_status[cName] || item.company_status[cName] === "Y") {
                     item.company_status[cName] = "N";
                 }
@@ -2272,10 +2409,43 @@ async function organizeFiles() {
         }
 
         try {
+            const preflightResponse = await fetch(API.organizeFiles, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    target_path: targetPath,
+                    file_renames: fileRenames,
+                    dry_run: true,
+                }),
+            });
+            const preflight = await preflightResponse.json();
+            if (!preflightResponse.ok || preflight.error) {
+                showToast(preflight.error || "无法检查整理冲突", "error");
+                return;
+            }
+            let conflictPolicy = "keep_both";
+            if (preflight.conflict_count > 0) {
+                const choice = window.prompt(
+                    `发现 ${preflight.conflict_count} 个同名但内容不同的文件。\n\n` +
+                    "输入 1：两个版本都保留，新文件自动命名为 _v2（推荐）\n" +
+                    "输入 2：新文件作为当前文件，原文件改名保留为历史版本\n" +
+                    "输入 3：跳过这些冲突文件\n" +
+                    "输入 0：取消整理",
+                    "1"
+                );
+                if (choice === null || choice === "0") return;
+                conflictPolicy = choice === "2"
+                    ? "replace_keep_history"
+                    : (choice === "3" ? "skip" : "keep_both");
+            }
             const r = await fetch(API.organizeFiles, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ target_path: targetPath, file_renames: fileRenames }),
+                body: JSON.stringify({
+                    target_path: targetPath,
+                    file_renames: fileRenames,
+                    conflict_policy: conflictPolicy,
+                }),
             });
             const data = await r.json();
             if (data.error) {
@@ -2285,6 +2455,20 @@ async function organizeFiles() {
 
             if (data.organized_count > 0) {
                 showToast(`整理完成: ${data.organized_count} 个文件已整理到「${data.target_root}」`, "success");
+                scanRoot = data.target_root;
+                document.getElementById("folder-path").value = data.target_root;
+                const visibleSources = (data.scan_sources || []).filter(
+                    item => item.role !== "archive_cache"
+                ).length;
+                document.getElementById("folder-next-action").textContent =
+                    `整理目录已设为主资料库；项目现有 ${visibleSources} 个资料来源，后续扫描会延续已有资料身份。`;
+                folderScanDetail = document.getElementById("folder-next-action").textContent;
+                if (Array.isArray(data.match_results)) {
+                    matchResults = data.match_results;
+                    syncMatchToPreview();
+                    renderPreviewTable();
+                }
+                markProjectDirty();
             }
             if (data.error_count > 0) {
                 showToast(`${data.error_count} 个文件整理失败`, "error");
@@ -2695,11 +2879,11 @@ function updateWorkflowState() {
         : "开始匹配";
 
     document.getElementById("template-next-action").textContent = hasTemplate
-        ? "清单已准备。下一步：选择并扫描客户资料文件夹。"
+        ? "清单已准备。下一步：输入资料路径并扫描。"
         : "请选择科目创建标准清单，或导入现有 Excel 清单。";
     document.getElementById("folder-next-action").textContent = hasScannedFolder
-        ? (scanNeedsMatch ? "扫描完成。下一步：开始智能匹配。" : "资料已扫描；有新资料时再次点击“扫描”。")
-        : "选择客户资料所在文件夹后扫描。";
+        ? (folderScanDetail || (scanNeedsMatch ? "扫描完成。下一步：开始智能匹配。" : "资料已扫描；有新资料时再次点击“扫描”。"))
+        : "输入本地资料路径或云端文件夹网址后扫描。";
     document.getElementById("match-next-action").textContent = scanNeedsMatch && pendingMatchIsIncremental
         ? `资料发生变化。点击“匹配变化资料”，已有结果和人工调整将保留。`
         : (hasMatchResult ? "匹配已完成，请在下方核对工作台检查结果。" : "扫描完成后开始匹配。");
@@ -4437,6 +4621,7 @@ function collectFrontendState() {
     const previewData = previewItems.map(item => ({
         row_index: item.row_index,
         company_status: item.company_status || {},
+        manual_company_status: item.manual_company_status || {},
     }));
     return {
         file_renames: fileRenames,
@@ -4633,6 +4818,8 @@ async function loadProject(slug) {
         }
         matchResults = data.match_results;
         scanRoot = data.scan_root || "";
+        const scanSource = data.scan_source || "local";
+        const scanDisplayRoot = data.scan_display_root || scanRoot;
         scanNeedsMatch = Boolean(data.scan_needs_match);
         pendingMatchIsIncremental = Boolean(matchResults && matchResults.length);
         lastScanDiff = data.last_scan_diff || null;
@@ -4655,8 +4842,20 @@ async function loadProject(slug) {
             document.getElementById("template-badge").textContent = "✓";
         }
         if (scanRoot) {
-            document.getElementById("folder-path").value = scanRoot;
+            if (scanSource === "microsoft_cloud") {
+                document.getElementById("folder-path").value = data.cloud_source_url || scanDisplayRoot;
+            } else {
+                document.getElementById("folder-path").value = scanDisplayRoot;
+            }
             document.getElementById("folder-badge").textContent = "✓";
+            const visibleSources = (data.scan_sources || []).filter(
+                item => item.role !== "archive_cache"
+            ).length;
+            if (visibleSources > 1) {
+                document.getElementById("folder-next-action").textContent =
+                    `项目已登记 ${visibleSources} 个资料来源。`;
+                folderScanDetail = document.getElementById("folder-next-action").textContent;
+            }
             renderScanDiff(lastScanDiff);
         }
         if (matchResults && matchResults.length > 0) {

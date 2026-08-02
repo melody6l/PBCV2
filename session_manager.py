@@ -25,6 +25,9 @@ def create_fresh_state():
         "scanned_folders": None,
         "match_results": None,
         "scan_root": None,
+        "scan_source": "local",
+        "scan_display_root": None,
+        "cloud_source_url": None,
         "new_items": [],
         "existing_items": [],
         "previous_scanned_files": [],
@@ -40,6 +43,13 @@ def create_fresh_state():
         "content_suggestions": [],
         "content_ignored_files": [],
         "dev_logs": [],
+        "scan_sources": [],
+        "documents": {},
+        "scan_snapshots": {},
+        "source_folders": {},
+        "folder_requirement_mappings": [],
+        "organize_mappings": [],
+        "scan_file_statuses": [],
     }
 
 

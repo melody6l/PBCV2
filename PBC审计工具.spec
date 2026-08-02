@@ -1,12 +1,18 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from PyInstaller.utils.hooks import collect_submodules
+import os
 
+archive_hiddenimports = collect_submodules('py7zr')
+archive_binaries = []
+if os.path.isfile(os.path.join('tools', '7zip', '7zz.exe')):
+    archive_binaries.append((os.path.join('tools', '7zip', '7zz.exe'), os.path.join('tools', '7zip')))
 a = Analysis(
     ['app.py'],
     pathex=[],
-    binaries=[],
+    binaries=archive_binaries,
     datas=[('templates', 'templates'), ('static', 'static'), ('资料表.xlsx', '.')],
-    hiddenimports=[],
+    hiddenimports=['msal', 'rarfile'] + archive_hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

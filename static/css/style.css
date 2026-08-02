@@ -135,10 +135,15 @@ h1 { display: none; }
 }
 
 #workflow-step-1,
+#workflow-step-2,
 #workflow-step-3 {
     height: auto;
     min-height: 140px;
     overflow: visible;
+}
+
+#workflow-step-2 {
+    min-height: 140px;
 }
 
 .workflow-step-card.active {
@@ -331,6 +336,7 @@ h1 { display: none; }
     gap: 10px;
     min-height: 0;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .folder-input-group input,

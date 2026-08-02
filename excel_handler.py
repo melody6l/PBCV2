@@ -339,7 +339,8 @@ def export_results(results, headers, data, name_col_index, scan_root="", scanned
     return output_path
 
 
-def build_browse_items(scanned_files, scanned_folders, scan_root, match_results):
+def build_browse_items(scanned_files, scanned_folders, scan_root, match_results,
+                       relative_paths=None):
     """构建带动态文件夹层级和关联需求的资料列表。"""
     path_requirements = {}
     for result in match_results or []:
@@ -352,6 +353,7 @@ def build_browse_items(scanned_files, scanned_folders, scan_root, match_results)
             if requirement not in requirements:
                 requirements.append(requirement)
 
+    relative_paths = relative_paths or {}
     paths = list(dict.fromkeys((scanned_folders or []) + (scanned_files or [])))
     if scan_root:
         paths.sort(key=lambda path: os.path.relpath(path, scan_root).lower())
@@ -361,7 +363,9 @@ def build_browse_items(scanned_files, scanned_folders, scan_root, match_results)
     items = []
     folder_levels = 0
     for path in paths:
-        relative_path = os.path.relpath(path, scan_root) if scan_root else os.path.basename(path)
+        relative_path = relative_paths.get(path) or (
+            os.path.relpath(path, scan_root) if scan_root else os.path.basename(path)
+        )
         parts = [part for part in relative_path.split(os.sep) if part not in ("", ".")]
         if not parts or parts[0] == "..":
             parts = [os.path.basename(path)]
@@ -382,7 +386,9 @@ def build_browse_items(scanned_files, scanned_folders, scan_root, match_results)
         })
     return items, folder_levels
 
-def export_checklist_two_sheets(items, company_names, match_results, file_renames=None, scanned_files=None, scanned_folders=None, scan_root=""):
+def export_checklist_two_sheets(items, company_names, match_results, file_renames=None,
+                                scanned_files=None, scanned_folders=None, scan_root="",
+                                link_targets=None, relative_paths=None):
     """导出包含核对总览、需求列表和文件浏览三个sheet的Excel文件。
 
     Args:
@@ -397,6 +403,7 @@ def export_checklist_two_sheets(items, company_names, match_results, file_rename
     import os
     if file_renames is None:
         file_renames = {}
+    link_targets = link_targets or {}
     wb = openpyxl.Workbook()
 
     header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
@@ -534,7 +541,7 @@ def export_checklist_two_sheets(items, company_names, match_results, file_rename
                 # 多文件：每个文件独占一行
                 for fi, fp in enumerate(file_paths):
                     fname = file_renames.get(fp, os.path.basename(fp))
-                    link_url = "file:///" + fp.replace("\\", "/")
+                    link_url = link_targets.get(fp) or ("file:///" + fp.replace("\\", "/"))
                     write_context_columns(row_idx)
                     link_cell = ws_list.cell(row=row_idx, column=6, value=fname)
                     link_cell.hyperlink = link_url
@@ -552,7 +559,7 @@ def export_checklist_two_sheets(items, company_names, match_results, file_rename
 
     # ========== Sheet 3: 文件浏览 ==========
     browse_items, folder_levels = build_browse_items(
-        scanned_files, scanned_folders, scan_root, match_results
+        scanned_files, scanned_folders, scan_root, match_results, relative_paths
     )
     ws_browse = wb.create_sheet("文件浏览")
     level_names = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
@@ -590,7 +597,9 @@ def export_checklist_two_sheets(items, company_names, match_results, file_rename
 
         filename_col = folder_levels + 1
         filename_cell = ws_browse.cell(row=row_idx, column=filename_col)
-        filename_cell.hyperlink = "file:///" + browse_item["path"].replace("\\", "/")
+        filename_cell.hyperlink = link_targets.get(browse_item["path"]) or (
+            "file:///" + browse_item["path"].replace("\\", "/")
+        )
         filename_cell.font = Font(color="0563C1", underline="single")
 
     for col_idx in range(1, folder_levels + 1):

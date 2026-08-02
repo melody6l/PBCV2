@@ -18,6 +18,10 @@ from matcher import (
 from excel_handler import normalize_item_name, export_checklist_two_sheets, build_browse_items
 from llm_matcher import llm_match, llm_classify_files_with_content
 from content_reader import extract_contents, get_progress, reset_progress
+from microsoft_cloud import (
+    CloudFolderError, auth_status as microsoft_auth_status,
+    begin_device_login, complete_device_login, mirror_folder,
+)
 from template_handler import (
     read_template, generate_checklist, read_user_checklist,
     generate_checklist_from_memory, get_company_names_from_session,
@@ -26,6 +30,17 @@ from project_manager import (
     list_projects, load_project, save_project, create_project, delete_project,
 )
 from session_manager import get_session_store, create_fresh_state
+from document_registry import (
+    all_available_files, reconcile_source, register_source,
+    record_organized_location, remap_match_paths, resolve_preferred_path,
+    files_have_same_content, next_version_path, move_registered_location,
+    resolve_export_link,
+    document_status_for_path,
+    document_change_detail,
+    record_historical_version,
+    relative_display_paths,
+)
+from archive_scanner import expand_archives
 
 app = Flask(__name__)
 # 模板和静态文件始终从打包资源目录读取（开发环境即项目根目录）
@@ -119,6 +134,143 @@ def scan_all(folder_path):
             if not f.startswith(".") and not f.startswith("~"):
                 scanned_files.append(os.path.join(root, f))
     return scanned_files, scanned_folders
+
+
+def _apply_registered_scan(state, source, scanned_files, scanned_folders, file_metadata=None):
+    """Reconcile one source and expose a combined path view to legacy matching."""
+    changes = reconcile_source(
+        state, source, scanned_files, file_metadata,
+        get_company_names_from_session(state),
+    )
+    state.setdefault("source_folders", {})[source["id"]] = list(scanned_folders)
+    combined_files = all_available_files(state)
+    combined_folders = []
+    for folders in state.get("source_folders", {}).values():
+        for folder in folders or []:
+            if os.path.isdir(folder) and folder not in combined_folders:
+                combined_folders.append(folder)
+
+    moved_mapping = {
+        item["from"]: item["to"]
+        for item in changes.get("moved_files", [])
+        if item.get("from") and item.get("to")
+    }
+    for removed in changes.get("removed_files", []):
+        preferred = resolve_preferred_path(state, removed)
+        if preferred != removed and os.path.exists(preferred):
+            moved_mapping[removed] = preferred
+    remap_match_paths(state, moved_mapping)
+
+    diff = {
+        "mode": "incremental" if state.get("match_results") else "full_scan",
+        "added_files": changes["new_files"],
+        "removed_files": changes["removed_files"],
+        "added_folders": [],
+        "removed_folders": [],
+        "updated_files": changes["updated_files"],
+        "moved_files": changes["moved_files"],
+        "duplicate_files": changes["duplicate_files"],
+        "scan_errors": changes["errors"],
+        "total_added": len(changes["new_files"]),
+        "total_removed": len(changes["removed_files"]),
+        "total_updated": len(changes["updated_files"]),
+        "total_moved": len(changes["moved_files"]),
+        "total_duplicates": len(changes["duplicate_files"]),
+    }
+    return combined_files, combined_folders, changes, diff
+
+
+def _merge_scan_changes(*change_sets):
+    keys = (
+        "new_files", "updated_files", "moved_files", "duplicate_files",
+        "removed_files", "unchanged_files", "errors",
+    )
+    return {
+        key: [item for changes in change_sets for item in changes.get(key, [])]
+        for key in keys
+    }
+
+
+def _changes_to_diff(state, changes):
+    return {
+        "mode": "incremental" if state.get("match_results") else "full_scan",
+        "added_files": changes["new_files"],
+        "removed_files": changes["removed_files"],
+        "added_folders": [],
+        "removed_folders": [],
+        "updated_files": changes["updated_files"],
+        "moved_files": changes["moved_files"],
+        "duplicate_files": changes["duplicate_files"],
+        "scan_errors": changes["errors"],
+        "total_added": len(changes["new_files"]),
+        "total_removed": len(changes["removed_files"]),
+        "total_updated": len(changes["updated_files"]),
+        "total_moved": len(changes["moved_files"]),
+        "total_duplicates": len(changes["duplicate_files"]),
+    }
+
+
+def _inherit_organized_folder_links(state, new_files):
+    """Link files dropped into organized requirement folders without LLM/OCR."""
+    mappings = sorted(
+        state.get("folder_requirement_mappings") or [],
+        key=lambda item: len(item.get("root", "")),
+        reverse=True,
+    )
+    unmatched = []
+    inherited = []
+    for path in new_files:
+        normalized_path = os.path.normcase(os.path.abspath(path))
+        mapping = None
+        for candidate in mappings:
+            root = candidate.get("root", "")
+            if not root:
+                continue
+            normalized_root = os.path.normcase(os.path.abspath(root))
+            try:
+                if os.path.commonpath([normalized_path, normalized_root]) == normalized_root:
+                    mapping = candidate
+                    break
+            except ValueError:
+                continue
+        if not mapping:
+            unmatched.append(path)
+            continue
+        result = next(
+            (item for item in (state.get("match_results") or [])
+             if item.get("index") == mapping.get("requirement_index")),
+            None,
+        )
+        if not result:
+            unmatched.append(path)
+            continue
+        if path not in result.setdefault("matched_files", []):
+            result["matched_files"].append(path)
+            result.setdefault("matched_names", []).append(os.path.basename(path))
+            result.setdefault("matched_types", []).append("文件")
+        company = mapping.get("company")
+        if company:
+            company_info = result.setdefault("company_coverage", {}).setdefault(
+                company, {"files": [], "folders": []}
+            )
+            if path not in company_info["files"]:
+                company_info["files"].append(path)
+        result["status"] = "已获取"
+        result["match_count"] = len(result["matched_files"])
+        result["matched_source"] = "organized_folder"
+        result["needs_confirmation"] = True
+        inherited.append(path)
+    return unmatched, inherited
+
+
+def _refresh_preferred_match_paths(state):
+    mapping = {}
+    for result in state.get("match_results") or []:
+        for path in result.get("matched_files", []):
+            preferred = resolve_preferred_path(state, path)
+            if preferred != path:
+                mapping[path] = preferred
+    remap_match_paths(state, mapping)
 
 
 def select_native_folder(title="选择文件夹", initial_path=""):
@@ -308,6 +460,7 @@ def build_browse_view_items(state):
         state.get("scanned_folders") or [],
         state.get("scan_root") or "",
         state.get("match_results") or [],
+        relative_display_paths(state),
     )
 
 
@@ -348,33 +501,86 @@ def scan_folder():
     if not folder_path or not os.path.isdir(folder_path):
         return jsonify({"error": "文件夹路径无效"}), 400
 
-    previous_root = s.get("scan_root") or ""
-    same_root = bool(previous_root) and os.path.normcase(os.path.abspath(previous_root)) == os.path.normcase(os.path.abspath(folder_path))
-    prev_files = s.get("scanned_files") if same_root else None
-    prev_folders = s.get("scanned_folders") if same_root else None
-    if prev_files is None and prev_folders is None:
-        prev_files = (s.get("previous_scanned_files") or None) if same_root else None
-        prev_folders = (s.get("previous_scanned_folders") or None) if same_root else None
     scanned_files, scanned_folders = scan_all(folder_path)
-    diff = calculate_diff(prev_files, scanned_files, prev_folders, scanned_folders)
+    archive_password = str(data.get("archive_password") or "")
+    archive_passwords = {
+        path: archive_password for path in scanned_files
+        if archive_password and os.path.splitext(path)[1].lower() in (".zip", ".7z", ".rar")
+    }
+    archive_scan = expand_archives(folder_path, scanned_files, archive_passwords)
+    source = register_source(s, folder_path, "local", display_root=folder_path)
+    previous_files = list(s.get("scanned_files") or [])
+    previous_folders = list(s.get("scanned_folders") or [])
+    combined_files, combined_folders, primary_changes, _ = _apply_registered_scan(
+        s, source, scanned_files, scanned_folders
+    )
+    archive_source = register_source(
+        s, archive_scan["cache_root"], "archive_cache", role="archive_cache",
+        display_root=f"{folder_path}（压缩包内容）",
+    )
+    combined_files, combined_folders, archive_changes, _ = _apply_registered_scan(
+        s, archive_source, archive_scan["files"], archive_scan["folders"]
+    )
+    change_sets = [primary_changes, archive_changes]
+    archive_statuses = list(archive_scan["statuses"])
+    requested_identity = os.path.normcase(os.path.abspath(folder_path))
+    other_local_sources = [
+        item for item in list(s.get("scan_sources", []))
+        if item.get("type") == "local"
+        and item.get("role") in ("inbox", "organized")
+        and item.get("active", True)
+        and os.path.normcase(os.path.abspath(item.get("root", ""))) != requested_identity
+        and os.path.isdir(item.get("root", ""))
+    ]
+    for other_source in other_local_sources:
+        other_files, other_folders = scan_all(other_source["root"])
+        combined_files, combined_folders, other_changes, _ = _apply_registered_scan(
+            s, other_source, other_files, other_folders
+        )
+        change_sets.append(other_changes)
+        other_passwords = {
+            path: archive_password for path in other_files
+            if archive_password and os.path.splitext(path)[1].lower() in (".zip", ".7z", ".rar")
+        }
+        other_archives = expand_archives(other_source["root"], other_files, other_passwords)
+        other_archive_source = register_source(
+            s, other_archives["cache_root"], "archive_cache", role="archive_cache",
+            display_root=f"{other_source['display_root']}（压缩包内容）",
+        )
+        combined_files, combined_folders, other_archive_changes, _ = _apply_registered_scan(
+            s, other_archive_source, other_archives["files"], other_archives["folders"]
+        )
+        change_sets.append(other_archive_changes)
+        archive_statuses.extend(other_archives["statuses"])
 
-    s["previous_scanned_files"] = list(prev_files or [])
-    s["previous_scanned_folders"] = list(prev_folders or [])
-    s["scanned_files"] = scanned_files
-    s["scanned_folders"] = scanned_folders
+    changes = _merge_scan_changes(*change_sets)
+    diff = _changes_to_diff(s, changes)
+    s["scan_file_statuses"] = archive_statuses
+    s["previous_scanned_files"] = previous_files
+    s["previous_scanned_folders"] = previous_folders
+    s["scanned_files"] = combined_files
+    s["scanned_folders"] = combined_folders
     s["scan_root"] = folder_path
-    if diff["mode"] == "full_scan":
-        pending_files = scanned_files
-        pending_folders = scanned_folders
-        match_required = True
-    else:
-        pending_files = diff["added_files"]
-        pending_folders = diff["added_folders"]
-        match_required = bool(diff["total_added"] or diff["total_removed"])
+    s["scan_source"] = "local"
+    s["scan_display_root"] = folder_path
+    s["cloud_source_url"] = None
+    pending_files, inherited_files = _inherit_organized_folder_links(
+        s, list(changes["new_files"])
+    )
+    diff["inherited_files"] = inherited_files
+    diff["total_inherited"] = len(inherited_files)
+    pending_folders = []
+    unresolved_removed = [
+        path for path in changes["removed_files"]
+        if resolve_preferred_path(s, path) == path
+        or not os.path.exists(resolve_preferred_path(s, path))
+    ]
+    diff["unresolved_removed_files"] = unresolved_removed
+    match_required = bool(pending_files or unresolved_removed)
     if not s.get("match_results"):
         match_required = True
-        pending_files = scanned_files
-        pending_folders = scanned_folders
+        pending_files = combined_files
+        pending_folders = combined_folders
     s["pending_match_files"] = pending_files
     s["pending_match_folders"] = pending_folders
     s["scan_needs_match"] = match_required
@@ -382,15 +588,121 @@ def scan_folder():
 
     return jsonify({
         "success": True,
-        "scanned_count": len(scanned_files) + len(scanned_folders),
-        "file_count": len(scanned_files),
-        "folder_count": len(scanned_folders),
+        "scanned_count": len(combined_files) + len(combined_folders),
+        "file_count": len(combined_files),
+        "folder_count": len(combined_folders),
         "diff": diff,
         "match_required": match_required,
         "has_previous_results": bool(s.get("match_results")),
         "pending_file_count": len(pending_files),
         "pending_folder_count": len(pending_folders),
         "root_path": folder_path,
+        "display_root": folder_path,
+        "source": "local",
+        "archive_statuses": archive_statuses,
+        "source_count": len([
+            item for item in s.get("scan_sources", [])
+            if item.get("role") != "archive_cache"
+        ]),
+    })
+
+
+@app.route("/api/microsoft/auth/status", methods=["GET"])
+def microsoft_auth_status_api():
+    try:
+        return jsonify({"success": True, **microsoft_auth_status()})
+    except CloudFolderError as exc:
+        return jsonify({"success": False, "error": str(exc)}), 400
+
+
+@app.route("/api/microsoft/auth/start", methods=["POST"])
+def microsoft_auth_start_api():
+    try:
+        return jsonify({"success": True, **begin_device_login()})
+    except CloudFolderError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+
+@app.route("/api/microsoft/auth/complete", methods=["POST"])
+def microsoft_auth_complete_api():
+    try:
+        return jsonify({"success": True, **complete_device_login()})
+    except CloudFolderError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+
+@app.route("/api/scan-cloud-folder", methods=["POST"])
+def scan_cloud_folder():
+    """Mirror and scan a SharePoint/OneDrive folder without changing local scan."""
+    s = _state()
+    data = request.get_json() or {}
+    folder_url = str(data.get("folder_url") or "").strip()
+    if not folder_url:
+        return jsonify({"error": "请输入 SharePoint 或 OneDrive 文件夹网址"}), 400
+    try:
+        mirrored = mirror_folder(folder_url)
+    except CloudFolderError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except Exception as exc:
+        return jsonify({"error": f"云端扫描失败: {exc}"}), 500
+
+    scanned_files = mirrored["files"]
+    scanned_folders = mirrored["folders"]
+    source = register_source(
+        s, mirrored["root_path"], "microsoft_cloud", role="inbox",
+        display_root=folder_url, web_url=folder_url,
+    )
+    previous_files = list(s.get("scanned_files") or [])
+    previous_folders = list(s.get("scanned_folders") or [])
+    combined_files, combined_folders, changes, diff = _apply_registered_scan(
+        s, source, scanned_files, scanned_folders, mirrored.get("file_metadata")
+    )
+    s["previous_scanned_files"] = previous_files
+    s["previous_scanned_folders"] = previous_folders
+    s["scanned_files"] = combined_files
+    s["scanned_folders"] = combined_folders
+    s["scan_root"] = mirrored["root_path"]
+    s["scan_source"] = "microsoft_cloud"
+    s["scan_display_root"] = folder_url
+    s["cloud_source_url"] = folder_url
+    pending_files, inherited_files = _inherit_organized_folder_links(
+        s, list(changes["new_files"])
+    )
+    diff["inherited_files"] = inherited_files
+    diff["total_inherited"] = len(inherited_files)
+    pending_folders = []
+    unresolved_removed = [
+        path for path in changes["removed_files"]
+        if resolve_preferred_path(s, path) == path
+        or not os.path.exists(resolve_preferred_path(s, path))
+    ]
+    diff["unresolved_removed_files"] = unresolved_removed
+    match_required = bool(pending_files or unresolved_removed)
+    if not s.get("match_results"):
+        match_required = True
+        pending_files, pending_folders = combined_files, combined_folders
+    s["pending_match_files"] = pending_files
+    s["pending_match_folders"] = pending_folders
+    s["scan_needs_match"] = match_required
+    s["last_scan_diff"] = diff
+    return jsonify({
+        "success": True,
+        "scanned_count": len(combined_files) + len(combined_folders),
+        "file_count": len(combined_files),
+        "folder_count": len(combined_folders),
+        "diff": diff,
+        "match_required": match_required,
+        "has_previous_results": bool(s.get("match_results")),
+        "pending_file_count": len(pending_files),
+        "pending_folder_count": len(pending_folders),
+        "root_path": mirrored["root_path"],
+        "display_root": folder_url,
+        "folder_name": mirrored["folder_name"],
+        "source": "microsoft_cloud",
+        "source_count": len([
+            item for item in s.get("scan_sources", [])
+            if item.get("role") != "archive_cache"
+        ]),
     })
 
 
@@ -873,6 +1185,7 @@ def api_update_cell_status():
         row_index = int(row_index)
     company_name = data.get("company_name")
     status = data.get("status", "Y")
+    manual = bool(data.get("manual"))
 
     if not s.get("checklist_template"):
         return jsonify({"error": "请先上传或生成清单"}), 400
@@ -883,6 +1196,8 @@ def api_update_cell_status():
     for item in s["checklist_template"]["items"]:
         if item["row_index"] == row_index:
             item["company_status"][company_name] = status
+            if manual:
+                item.setdefault("manual_company_status", {})[company_name] = True
             return jsonify({"success": True})
 
     return jsonify({"error": f"未找到行: {row_index}"}), 404
@@ -1007,6 +1322,7 @@ def export_checklist():
 
     items = tpl_data.get("items", [])
     company_names = tpl_data.get("company_names", [])
+    _refresh_preferred_match_paths(s)
     match_results = s.get("match_results", [])
 
     if not items:
@@ -1024,6 +1340,13 @@ def export_checklist():
                     item["company_status"] = frontend_statuses[ri]
 
     try:
+        link_targets = {
+            path: resolve_export_link(s, path)
+            for path in (s.get("scanned_files") or [])
+        }
+        for result in match_results:
+            for path in result.get("matched_files", []):
+                link_targets[path] = resolve_export_link(s, path)
         output_path = export_checklist_two_sheets(
             items,
             company_names,
@@ -1032,6 +1355,8 @@ def export_checklist():
             s.get("scanned_files") or [],
             s.get("scanned_folders") or [],
             s.get("scan_root") or "",
+            link_targets,
+            relative_display_paths(s),
         )
         return send_file(output_path, as_attachment=True, download_name="PBC需求清单.xlsx")
     except Exception as e:
@@ -1045,6 +1370,13 @@ def browse_view_data():
     """返回所有扫描文件的资料浏览数据。"""
     s = _state()
     items, folder_levels = build_browse_view_items(s)
+    for item in items:
+        item.update(document_status_for_path(s, item.get("path", "")))
+        item["needs_confirmation"] = any(
+            item.get("path") in (result.get("matched_files") or [])
+            and result.get("needs_confirmation")
+            for result in (s.get("match_results") or [])
+        )
     suggestion_paths = {
         os.path.normpath(item.get("file_path", ""))
         for item in (s.get("content_suggestions") or []) if item.get("file_path")
@@ -1066,6 +1398,15 @@ def browse_view_data():
         "suggested_count": suggested_count,
         "unmatched_count": max(0, len(items) - matched_count - suggested_count),
     })
+
+
+@app.route("/api/document-change", methods=["GET"])
+def document_change():
+    s = _state()
+    path = urllib.parse.unquote(request.args.get("path", ""))
+    if not path:
+        return jsonify({"error": "缺少文件路径"}), 400
+    return jsonify({"success": True, **document_change_detail(s, path)})
 
 
 @app.route("/api/content-suggestions", methods=["GET"])
@@ -1353,6 +1694,55 @@ def unmatch_file():
 
 # ====== 文件整理 ======
 
+def _copy_organized_item(source_path, destination, policy, dry_run=False):
+    """Copy without silent overwrite; return file mappings and conflicts."""
+    mappings = []
+    conflicts = []
+    if os.path.isdir(source_path):
+        if not dry_run:
+            os.makedirs(destination, exist_ok=True)
+        for root, dirs, files in os.walk(source_path):
+            relative = os.path.relpath(root, source_path)
+            target_dir = destination if relative == "." else os.path.join(destination, relative)
+            if not dry_run:
+                os.makedirs(target_dir, exist_ok=True)
+            for filename in files:
+                source_file = os.path.join(root, filename)
+                target_file = os.path.join(target_dir, filename)
+                nested_mappings, nested_conflicts = _copy_organized_item(
+                    source_file, target_file, policy, dry_run=dry_run
+                )
+                mappings.extend(nested_mappings)
+                conflicts.extend(nested_conflicts)
+        return mappings, conflicts
+
+    final_destination = destination
+    if os.path.exists(destination):
+        if files_have_same_content(source_path, destination):
+            return [(source_path, destination, "duplicate")], []
+        conflict = {
+            "source": source_path,
+            "destination": destination,
+            "source_name": os.path.basename(source_path),
+        }
+        conflicts.append(conflict)
+        if dry_run:
+            return [], conflicts
+        if policy == "skip":
+            return [], conflicts
+        if policy == "replace_keep_history":
+            history_path = next_version_path(destination)
+            os.replace(destination, history_path)
+            mappings.append((destination, history_path, "history_renamed"))
+        else:
+            final_destination = next_version_path(destination)
+
+    if not dry_run:
+        os.makedirs(os.path.dirname(final_destination), exist_ok=True)
+        shutil.copy2(source_path, final_destination)
+    return [(source_path, final_destination, "copied")], conflicts
+
+
 @app.route("/api/organize-files", methods=["POST"])
 def organize_files():
     """整理已获取的文件：按 科目/需求资料 层级建文件夹，用户指定目标路径"""
@@ -1364,6 +1754,8 @@ def organize_files():
     data = request.get_json() or {}
     target_path = data.get("target_path", "").strip()
     file_renames = data.get("file_renames", {})
+    dry_run = bool(data.get("dry_run"))
+    conflict_policy = data.get("conflict_policy") or "keep_both"
     if not target_path:
         return jsonify({"error": "请提供放置地址"}), 400
     if not os.path.isdir(target_path):
@@ -1378,7 +1770,13 @@ def organize_files():
 
     organized = []
     errors = []
+    conflicts = []
     copied_paths = set()
+    path_mapping = {}
+    organized_source = register_source(
+        s, target_path, "local", role="organized", display_root=target_path
+    )
+    multi_company = len(company_names) > 1
 
     for result in match_results:
         if result["status"] not in ("已获取", "部分获取"):
@@ -1409,8 +1807,6 @@ def organize_files():
                 if not all_paths:
                     continue
 
-                use_subdir = len(all_paths) > 1
-
                 for src_path in all_paths:
                     if src_path in copied_paths or not os.path.exists(src_path):
                         continue
@@ -1424,20 +1820,57 @@ def organize_files():
                     else:
                         dest_name = src_name
 
-                    if use_subdir:
+                    if multi_company:
                         dest_dir = os.path.join(base_dir, cName)
                     else:
                         dest_dir = base_dir
 
-                    os.makedirs(dest_dir, exist_ok=True)
+                    if not dry_run:
+                        os.makedirs(dest_dir, exist_ok=True)
+                        company_mapping = {
+                            "root": dest_dir,
+                            "requirement_index": result.get("index"),
+                            "requirement_key": result.get("row_uid") or result.get("source_key"),
+                            "company": cName if multi_company else (company_names[0] if company_names else cName),
+                        }
+                        mappings_list = s.setdefault("folder_requirement_mappings", [])
+                        if company_mapping not in mappings_list:
+                            mappings_list.append(company_mapping)
                     dest_path = os.path.join(dest_dir, dest_name)
 
                     try:
-                        if os.path.isdir(src_path):
-                            shutil.copytree(src_path, dest_path, dirs_exist_ok=True)
-                        else:
-                            shutil.copy2(src_path, dest_path)
-                        organized.append({"source": src_path, "dest": dest_path})
+                        mappings, found_conflicts = _copy_organized_item(
+                            src_path, dest_path, conflict_policy, dry_run=dry_run
+                        )
+                        conflicts.extend(found_conflicts)
+                        if not dry_run and mappings:
+                            if found_conflicts and conflict_policy != "skip":
+                                history_mapping = next(
+                                    (item for item in mappings if item[2] == "history_renamed"),
+                                    None,
+                                )
+                                history_path = history_mapping[1] if history_mapping else dest_path
+                                record_historical_version(
+                                    s, src_path, history_path, organized_source
+                                )
+                            current_mappings = [item for item in mappings if item[2] != "history_renamed"]
+                            actual_root = (
+                                current_mappings[-1][1] if current_mappings and not os.path.isdir(src_path)
+                                else dest_path
+                            )
+                            path_mapping[src_path] = actual_root
+                            for source_file, destination_file, action in mappings:
+                                if action == "history_renamed":
+                                    move_registered_location(s, source_file, destination_file)
+                                else:
+                                    record_organized_location(
+                                        s, source_file, destination_file, organized_source
+                                    )
+                                organized.append({
+                                    "source": source_file,
+                                    "dest": destination_file,
+                                    "action": action,
+                                })
                     except Exception as e:
                         errors.append({"source": src_path, "error": str(e)})
 
@@ -1448,15 +1881,69 @@ def organize_files():
                 copied_paths.add(src_path)
                 src_name = file_renames.get(src_path, matched_names[i] if i < len(matched_names) else os.path.basename(src_path))
                 dest_path = os.path.join(base_dir, src_name)
-                os.makedirs(base_dir, exist_ok=True)
+                if not dry_run:
+                    os.makedirs(base_dir, exist_ok=True)
                 try:
-                    if os.path.isdir(src_path):
-                        shutil.copytree(src_path, dest_path, dirs_exist_ok=True)
-                    else:
-                        shutil.copy2(src_path, dest_path)
-                    organized.append({"source": src_path, "dest": dest_path})
+                    mappings, found_conflicts = _copy_organized_item(
+                        src_path, dest_path, conflict_policy, dry_run=dry_run
+                    )
+                    conflicts.extend(found_conflicts)
+                    if not dry_run and mappings:
+                        if found_conflicts and conflict_policy != "skip":
+                            history_mapping = next(
+                                (item for item in mappings if item[2] == "history_renamed"),
+                                None,
+                            )
+                            history_path = history_mapping[1] if history_mapping else dest_path
+                            record_historical_version(
+                                s, src_path, history_path, organized_source
+                            )
+                        current_mappings = [item for item in mappings if item[2] != "history_renamed"]
+                        actual_root = (
+                            current_mappings[-1][1] if current_mappings and not os.path.isdir(src_path)
+                            else dest_path
+                        )
+                        path_mapping[src_path] = actual_root
+                        for source_file, destination_file, action in mappings:
+                            if action == "history_renamed":
+                                move_registered_location(s, source_file, destination_file)
+                            else:
+                                record_organized_location(
+                                    s, source_file, destination_file, organized_source
+                                )
+                            organized.append({
+                                "source": source_file,
+                                "dest": destination_file,
+                                "action": action,
+                            })
                 except Exception as e:
                     errors.append({"source": src_path, "error": str(e)})
+
+        mapping_root = base_dir
+        folder_mapping = {
+            "root": mapping_root,
+            "requirement_index": result.get("index"),
+            "requirement_key": result.get("row_uid") or result.get("source_key"),
+            "company": "",
+        }
+        existing_folder_mappings = s.setdefault("folder_requirement_mappings", [])
+        if not dry_run and folder_mapping not in existing_folder_mappings:
+            existing_folder_mappings.append(folder_mapping)
+
+    if dry_run:
+        return jsonify({
+            "success": True,
+            "dry_run": True,
+            "conflict_count": len(conflicts),
+            "conflicts": conflicts[:50],
+        })
+
+    remap_match_paths(s, path_mapping)
+    # Make organized copies immediately visible without requiring another scan.
+    s["scanned_files"] = all_available_files(s)
+    s["scan_root"] = target_path
+    s["scan_source"] = "organized"
+    s["scan_display_root"] = target_path
 
     return jsonify({
         "success": True,
@@ -1464,7 +1951,11 @@ def organize_files():
         "error_count": len(errors),
         "organized": organized[:30],
         "errors": errors[:10],
+        "conflict_count": len(conflicts),
+        "conflicts": conflicts[:20],
         "target_root": target_path,
+        "match_results": s.get("match_results") or [],
+        "scan_sources": s.get("scan_sources") or [],
     })
 
 
@@ -2102,9 +2593,12 @@ def _merge_company_status(session_state, request_data):
     for pi in preview_items:
         ri = pi.get("row_index")
         cs = pi.get("company_status", {})
+        manual_cs = pi.get("manual_company_status", {})
         if ri in item_map and cs:
             # 只合并非空状态值
             item_map[ri]["company_status"] = cs
+        if ri in item_map and manual_cs:
+            item_map[ri]["manual_company_status"] = manual_cs
 
 
 @app.route("/api/project/save", methods=["POST"])
@@ -2185,11 +2679,15 @@ def api_project_load():
         "scanned_files": s.get("scanned_files"),
         "scanned_folders": s.get("scanned_folders"),
         "scan_root": s.get("scan_root"),
+        "scan_source": s.get("scan_source", "local"),
+        "scan_display_root": s.get("scan_display_root"),
+        "cloud_source_url": s.get("cloud_source_url"),
         "scan_needs_match": s.get("scan_needs_match", False),
         "last_scan_diff": s.get("last_scan_diff"),
         "checklist": s.get("checklist"),
         "checklist_file_path": s.get("checklist_file_path"),
         "dev_logs": s.get("dev_logs") or [],
+        "scan_sources": s.get("scan_sources") or [],
         "message": f"已加载项目「{loaded['project_name']}」",
     })
 
