@@ -4093,14 +4093,36 @@ function initContentMatchPanel() {
     const modal = document.getElementById("ocr-config-modal");
     const summary = document.getElementById("ocr-config-summary");
     const tag = document.getElementById("ocr-config-tag");
+    const providerInput = document.getElementById("ocr-provider");
     const apiKeyInput = document.getElementById("ocr-api-key");
     const secretKeyInput = document.getElementById("ocr-secret-key");
+    const apiKeyLabel = document.getElementById("ocr-api-key-label");
+    const secretKeyLabel = document.getElementById("ocr-secret-key-label");
+    const consoleLink = document.getElementById("ocr-console-link");
     const cancelBtn = document.getElementById("ocr-cancel-btn");
     const saveBtn = document.getElementById("ocr-save-btn");
 
+    function providerName(provider) {
+        return provider === "aliyun" ? "阿里云 OCR" : "百度 OCR";
+    }
+
+    function updateProviderFields() {
+        const aliyun = providerInput.value === "aliyun";
+        apiKeyLabel.textContent = aliyun ? "AccessKey ID" : "API Key";
+        secretKeyLabel.textContent = aliyun ? "AccessKey Secret" : "Secret Key";
+        apiKeyInput.placeholder = aliyun ? "输入阿里云 AccessKey ID" : "输入百度OCR API Key";
+        secretKeyInput.placeholder = aliyun ? "输入阿里云 AccessKey Secret" : "输入百度OCR Secret Key";
+        consoleLink.href = aliyun
+            ? "https://ram.console.aliyun.com/manage/ak"
+            : "https://console.bce.baidu.com/ai";
+    }
+
     function loadForm() {
-        apiKeyInput.value = localStorage.getItem("ocr_api_key") || "";
-        secretKeyInput.value = localStorage.getItem("ocr_secret_key") || "";
+        const provider = localStorage.getItem("ocr_provider") || "baidu";
+        providerInput.value = provider;
+        apiKeyInput.value = localStorage.getItem(provider === "aliyun" ? "ocr_aliyun_access_key_id" : "ocr_api_key") || "";
+        secretKeyInput.value = localStorage.getItem(provider === "aliyun" ? "ocr_aliyun_access_key_secret" : "ocr_secret_key") || "";
+        updateProviderFields();
     }
 
     function closeModal() {
@@ -4113,13 +4135,22 @@ function initContentMatchPanel() {
 
     function saveConfig() {
         if (!apiKeyInput.value.trim() || !secretKeyInput.value.trim()) {
-            showToast("请输入百度OCR API Key和Secret Key", "error"); return;
+            showToast(providerInput.value === "aliyun"
+                ? "请输入阿里云 AccessKey ID 和 AccessKey Secret"
+                : "请输入百度 OCR API Key 和 Secret Key", "error"); return;
         }
-        localStorage.setItem("ocr_api_key", apiKeyInput.value.trim());
-        localStorage.setItem("ocr_secret_key", secretKeyInput.value.trim());
+        const provider = providerInput.value;
+        localStorage.setItem("ocr_provider", provider);
+        if (provider === "aliyun") {
+            localStorage.setItem("ocr_aliyun_access_key_id", apiKeyInput.value.trim());
+            localStorage.setItem("ocr_aliyun_access_key_secret", secretKeyInput.value.trim());
+        } else {
+            localStorage.setItem("ocr_api_key", apiKeyInput.value.trim());
+            localStorage.setItem("ocr_secret_key", secretKeyInput.value.trim());
+        }
         localStorage.setItem("ocr_configured", "true");
         summary.classList.remove("hidden");
-        tag.textContent = "OCR已配置";
+        tag.textContent = providerName(provider) + " 已配置";
         tag.style.color = "var(--success)";
         tag.classList.remove("ocr-config-tag");
         enabled.checked = true;
@@ -4133,6 +4164,12 @@ function initContentMatchPanel() {
             modal.classList.remove("hidden");
         }
     });
+    providerInput.addEventListener("change", () => {
+        const provider = providerInput.value;
+        apiKeyInput.value = localStorage.getItem(provider === "aliyun" ? "ocr_aliyun_access_key_id" : "ocr_api_key") || "";
+        secretKeyInput.value = localStorage.getItem(provider === "aliyun" ? "ocr_aliyun_access_key_secret" : "ocr_secret_key") || "";
+        updateProviderFields();
+    });
     tag.addEventListener("click", () => { loadForm(); modal.classList.remove("hidden"); });
     cancelBtn.addEventListener("click", closeModal);
     saveBtn.addEventListener("click", saveConfig);
@@ -4141,7 +4178,7 @@ function initContentMatchPanel() {
     if (localStorage.getItem("ocr_configured") === "true") {
         loadForm();
         summary.classList.remove("hidden");
-        tag.textContent = "OCR已配置";
+        tag.textContent = providerName(localStorage.getItem("ocr_provider") || "baidu") + " 已配置";
         tag.style.color = "var(--success)";
         tag.classList.remove("ocr-config-tag");
         enabled.checked = false;
@@ -4157,8 +4194,11 @@ async function runContentMatch() {
     const provider = localStorage.getItem("llm_provider") || "deepseek";
     const apiKey = localStorage.getItem("llm_api_key") || "";
     const baseUrl = localStorage.getItem("llm_base_url") || "";
+    const ocrProvider = localStorage.getItem("ocr_provider") || "baidu";
     const ocrApiKey = localStorage.getItem("ocr_api_key") || "";
     const ocrSecretKey = localStorage.getItem("ocr_secret_key") || "";
+    const ocrAccessKeyId = localStorage.getItem("ocr_aliyun_access_key_id") || "";
+    const ocrAccessKeySecret = localStorage.getItem("ocr_aliyun_access_key_secret") || "";
 
     const statusEl = document.getElementById("content-status");
     const matchBtn = document.getElementById("match-btn");
@@ -4201,8 +4241,11 @@ async function runContentMatch() {
                 provider,
                 api_key: apiKey,
                 base_url: baseUrl,
+                ocr_provider: ocrProvider,
                 ocr_api_key: ocrApiKey,
                 ocr_secret_key: ocrSecretKey,
+                ocr_access_key_id: ocrAccessKeyId,
+                ocr_access_key_secret: ocrAccessKeySecret,
             }),
         });
         stopPolling();

@@ -305,14 +305,21 @@
     <!-- OCR 识别配置弹窗 -->
     <div class="llm-config-modal hidden" id="ocr-config-modal">
         <div class="llm-modal-content">
-            <h3>百度OCR识别配置</h3>
-            <p style="font-size:13px;color:#666;margin-bottom:12px;">用于识别图片和扫描件中的文字（需联网，<a href="https://console.bce.baidu.com/ai" target="_blank" rel="noopener">获取密钥</a>）</p>
+            <h3>OCR识别配置</h3>
+            <p style="font-size:13px;color:#666;margin-bottom:12px;">用于识别图片和扫描件中的文字（需联网，<a id="ocr-console-link" href="https://console.bce.baidu.com/ai" target="_blank" rel="noopener">获取密钥</a>）</p>
             <div class="llm-form-group">
-                <label>API Key</label>
+                <label>OCR 服务商</label>
+                <select id="ocr-provider">
+                    <option value="baidu">百度 OCR（高精度版）</option>
+                    <option value="aliyun">阿里云 OCR（全文识别高精版）</option>
+                </select>
+            </div>
+            <div class="llm-form-group">
+                <label id="ocr-api-key-label">API Key</label>
                 <input type="password" id="ocr-api-key" placeholder="输入百度OCR API Key">
             </div>
             <div class="llm-form-group">
-                <label>Secret Key</label>
+                <label id="ocr-secret-key-label">Secret Key</label>
                 <input type="password" id="ocr-secret-key" placeholder="输入百度OCR Secret Key">
             </div>
             <div class="llm-modal-actions">

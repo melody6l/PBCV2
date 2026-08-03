@@ -6,7 +6,7 @@
 - Word: .docx → python-docx 解析 → Markdown
 - Excel: .xlsx/.xls → openpyxl 解析 → 结构化摘要
 - PDF: .pdf → pdfplumber 提取文字，失败则 PyMuPDF 转图片走 OCR
-- 图片: .png/.jpg/.jpeg/.bmp/.tiff/.gif/.webp → 百度 OCR
+- 图片: .png/.jpg/.jpeg/.bmp/.tiff/.gif/.webp → 百度或阿里云 OCR
 """
 
 import hashlib
@@ -94,6 +94,7 @@ IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif", ".gif", ".
 # ─── 百度 OCR API ───
 BAIDU_TOKEN_URL = "https://aip.baidubce.com/oauth/2.0/token"
 BAIDU_OCR_URL = "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic"
+ALIYUN_OCR_ENDPOINT = "ocr-api.cn-hangzhou.aliyuncs.com"
 
 
 def _file_md5(file_path):
@@ -119,7 +120,7 @@ def _get_baidu_token(api_key, secret_key):
     raise RuntimeError(f"百度OCR认证失败: {data.get('error_description', data)}")
 
 
-def _ocr_image_bytes(image_bytes, access_token):
+def _ocr_image_bytes_baidu(image_bytes, access_token):
     """对图片字节进行百度 OCR，返回识别文字。"""
     if len(image_bytes) > 4 * 1024 * 1024:
         return ""  # 单张图片超过 4MB 跳过 OCR
@@ -138,6 +139,64 @@ def _ocr_image_bytes(image_bytes, access_token):
     if data.get("error_msg"):
         raise RuntimeError(f"百度OCR识别失败: {data['error_msg']}")
     return ""
+
+
+def _ocr_image_bytes_aliyun(image_bytes, access_key_id, access_key_secret):
+    """调用阿里云全文识别高精版，返回识别文字。"""
+    if len(image_bytes) > 10 * 1024 * 1024:
+        return ""
+    try:
+        from alibabacloud_ocr_api20210707.client import Client as OcrClient
+        from alibabacloud_ocr_api20210707 import models as ocr_models
+        from alibabacloud_tea_openapi import models as open_api_models
+        from alibabacloud_tea_util import models as util_models
+    except ImportError as exc:
+        raise RuntimeError("未安装阿里云OCR SDK，请安装 requirements.txt 中的依赖") from exc
+
+    config = open_api_models.Config(
+        access_key_id=access_key_id,
+        access_key_secret=access_key_secret,
+        endpoint=ALIYUN_OCR_ENDPOINT,
+    )
+    client = OcrClient(config)
+    request = ocr_models.RecognizeAdvancedRequest(
+        body=BytesIO(image_bytes),
+        need_rotate=True,
+        need_sort_page=False,
+        no_stamp=True,
+        paragraph=True,
+        row=True,
+    )
+    response = client.recognize_advanced_with_options(
+        request,
+        util_models.RuntimeOptions(connect_timeout=15000, read_timeout=45000),
+    )
+    body = response.body
+    code = getattr(body, "code", None)
+    if code and str(code) not in {"200", "Success"}:
+        raise RuntimeError(f"阿里云OCR识别失败: {getattr(body, 'message', code)}")
+    raw_data = getattr(body, "data", "")
+    data = json.loads(raw_data) if isinstance(raw_data, str) and raw_data else (raw_data or {})
+    return data.get("content", "") if isinstance(data, dict) else ""
+
+
+def _ocr_image_bytes(image_bytes, ocr_config, baidu_token=None):
+    """按配置的服务商识别图片字节。"""
+    provider = ocr_config.get("provider", "baidu")
+    if provider == "aliyun":
+        return _ocr_image_bytes_aliyun(
+            image_bytes, ocr_config["access_key_id"], ocr_config["access_key_secret"]
+        )
+    token = baidu_token or _get_baidu_token(ocr_config["api_key"], ocr_config["secret_key"])
+    return _ocr_image_bytes_baidu(image_bytes, token)
+
+
+def _ocr_configured(ocr_config):
+    if not ocr_config:
+        return False
+    if ocr_config.get("provider", "baidu") == "aliyun":
+        return bool(ocr_config.get("access_key_id") and ocr_config.get("access_key_secret"))
+    return bool(ocr_config.get("api_key") and ocr_config.get("secret_key"))
 
 
 # ─── 各类型处理器 ───
@@ -288,7 +347,7 @@ def _read_pdf(path, ocr_config=None):
         pass  # pdfplumber 失败，fallback 到 OCR
 
     # Step 2: OCR fallback — 每页单独 try，一张失败不卡死
-    if not ocr_config or not ocr_config.get("api_key") or not ocr_config.get("secret_key"):
+    if not _ocr_configured(ocr_config):
         return {
             "content": "", "content_type": "ocr", "content_label": "PDF(未配置OCR)",
             "truncated": False, "error": "PDF无文字层且未配置OCR",
@@ -297,14 +356,16 @@ def _read_pdf(path, ocr_config=None):
     all_text = []
     errors = []
     try:
-        token = _get_baidu_token(ocr_config["api_key"], ocr_config["secret_key"])
+        token = None
+        if ocr_config.get("provider", "baidu") == "baidu":
+            token = _get_baidu_token(ocr_config["api_key"], ocr_config["secret_key"])
         import fitz  # PyMuPDF
         doc = fitz.open(path)
         for i, page in enumerate(doc):
             try:
                 pix = page.get_pixmap(dpi=150)
                 img_bytes = pix.tobytes("png")
-                page_text = _ocr_image_bytes(img_bytes, token)
+                page_text = _ocr_image_bytes(img_bytes, ocr_config, token)
                 if page_text:
                     all_text.append(page_text)
             except Exception as e:
@@ -327,11 +388,11 @@ def _read_pdf(path, ocr_config=None):
 
 
 def _ocr_image_file(path, ocr_config=None):
-    """对图片文件进行百度 OCR。"""
-    if not ocr_config or not ocr_config.get("api_key") or not ocr_config.get("secret_key"):
+    """使用配置的 OCR 服务商识别图片文件。"""
+    if not _ocr_configured(ocr_config):
         return {
             "content": "", "content_type": "ocr", "content_label": "图片(未配置OCR)",
-            "truncated": False, "error": "未配置百度OCR凭证",
+            "truncated": False, "error": "未配置OCR凭证",
         }
 
     # 校验图片
@@ -343,14 +404,14 @@ def _ocr_image_file(path, ocr_config=None):
                 "truncated": False, "error": f"无法打开图片: {e}"}
 
     try:
-        token = _get_baidu_token(ocr_config["api_key"], ocr_config["secret_key"])
         with open(path, "rb") as f:
             img_bytes = f.read()
-        text = _ocr_image_bytes(img_bytes, token)
+        text = _ocr_image_bytes(img_bytes, ocr_config)
+        provider_label = "阿里云" if ocr_config.get("provider") == "aliyun" else "百度"
         return {
             "content": text,
             "content_type": "ocr",
-            "content_label": "图片(OCR)",
+            "content_label": f"图片({provider_label}OCR)",
             "truncated": False,
             "error": None,
         }
@@ -415,7 +476,7 @@ def extract_contents(file_paths, ocr_config=None, cache=None):
 
     Args:
         file_paths: 文件绝对路径列表
-        ocr_config: 百度 OCR 凭证
+        ocr_config: 百度或阿里云 OCR 凭证
         cache: {md5: ContentResult} 或 None（就地读写）
 
     Returns:
@@ -471,14 +532,19 @@ def extract_contents(file_paths, ocr_config=None, cache=None):
             errors.append(f"{basename}: 读取失败")
             continue
 
+        # OCR 结果按服务商隔离，切换服务商后不会误用另一家的缓存。
+        cache_key = md5
+        if ext in IMAGE_EXTENSIONS or (ext == ".pdf" and ocr_config):
+            cache_key = f"{md5}:ocr:{(ocr_config or {}).get('provider', 'baidu')}"
+
         # 缓存命中
-        if md5 in cache:
-            ct = cache[md5].get("content_type", "")
-            label = cache[md5].get("content_label", ct)
+        if cache_key in cache:
+            ct = cache[cache_key].get("content_type", "")
+            label = cache[cache_key].get("content_label", ct)
             _log(basename, "缓存命中", label)
             update_progress(current_status=f"缓存命中({ct})")
-            results[path] = dict(cache[md5])
-            if cache[md5].get("content"):
+            results[path] = dict(cache[cache_key])
+            if cache[cache_key].get("content"):
                 if ct == "ocr":
                     ocr_count += 1
                 else:
@@ -521,7 +587,7 @@ def extract_contents(file_paths, ocr_config=None, cache=None):
             "cached_at": datetime.now().isoformat(),
             "md5": md5,
         }
-        cache[md5] = cache_entry
+        cache[cache_key] = cache_entry
         results[path] = dict(cache_entry)
 
     update_progress(running=False, done=True,

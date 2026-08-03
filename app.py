@@ -2191,8 +2191,17 @@ def do_content_match():
     if not content_paths:
         return jsonify({"success": True, "matched_count": 0, "message": "候选文件中没有可读取内容的文件类型"})
 
-    # 读取 OCR 配置
-    ocr_config = {"api_key": config.get("ocr_api_key", ""), "secret_key": config.get("ocr_secret_key", "")}
+    # 读取 OCR 配置；旧版请求没有 provider 时继续使用百度，保持兼容。
+    ocr_provider = config.get("ocr_provider", "baidu")
+    if ocr_provider not in {"baidu", "aliyun"}:
+        return jsonify({"error": "不支持的 OCR 服务商"}), 400
+    ocr_config = {
+        "provider": ocr_provider,
+        "api_key": config.get("ocr_api_key", ""),
+        "secret_key": config.get("ocr_secret_key", ""),
+        "access_key_id": config.get("ocr_access_key_id", ""),
+        "access_key_secret": config.get("ocr_access_key_secret", ""),
+    }
 
     # 读取缓存
     content_cache = s.get("file_content_cache", {})
@@ -2207,9 +2216,14 @@ def do_content_match():
     ocr_capable_ext = image_ext | {".pdf"}
     has_image = any(_os.path.splitext(p)[1].lower() in image_ext for p in content_paths)
     has_ocr_candidate = any(_os.path.splitext(p)[1].lower() in ocr_capable_ext for p in content_paths)
-    ocr_configured = bool(ocr_config["api_key"] and ocr_config["secret_key"])
+    if ocr_provider == "aliyun":
+        ocr_configured = bool(ocr_config["access_key_id"] and ocr_config["access_key_secret"])
+        ocr_credentials_name = "阿里云 AccessKey ID 和 AccessKey Secret"
+    else:
+        ocr_configured = bool(ocr_config["api_key"] and ocr_config["secret_key"])
+        ocr_credentials_name = "百度 OCR API Key 和 Secret Key"
     if has_image and not ocr_configured:
-        return jsonify({"error": "存在图片文件需要OCR识别，请输入百度OCR API Key和Secret Key"}), 400
+        return jsonify({"error": f"存在图片文件需要OCR识别，请输入{ocr_credentials_name}"}), 400
 
     content_started = time.perf_counter()
     try:
